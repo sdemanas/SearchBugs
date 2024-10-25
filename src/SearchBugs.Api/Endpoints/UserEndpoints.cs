@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using SearchBugs.Application.Users.AssignRole;
 using SearchBugs.Application.Users.GetUserDetail;
 using SearchBugs.Application.Users.GetUsers;
 using SearchBugs.Application.Users.UpdateUser;
