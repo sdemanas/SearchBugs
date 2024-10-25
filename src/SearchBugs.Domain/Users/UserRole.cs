@@ -14,5 +14,6 @@ public sealed class UserRole
     public UserId UserId { get; private set; }
 
     public int RoleId { get; private set; }
+
 }
 

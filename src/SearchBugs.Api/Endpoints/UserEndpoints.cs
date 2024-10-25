@@ -9,6 +9,7 @@ public static class UserEndpoints
 {
 
     public record UpdateUserRequest(string FirstName, string LastName);
+    public record AssignRoleRequest(Guid UserId, string Role);
 
     public static void MapUserEndpoints(this IEndpointRouteBuilder app)
     {
@@ -16,6 +17,16 @@ public static class UserEndpoints
         users.MapGet("", GetUsers).WithName(nameof(GetUsers));
         users.MapGet("{id}", GetUserDetail).WithName(nameof(GetUserDetail));
         users.MapPut("{id}", UpdateUser).WithName(nameof(UpdateUser));
+        users.MapPost("{id}/assign-role", AssignRole).WithName(nameof(AssignRole));
+    }
+
+    public static async Task<IResult> AssignRole(
+        AssignRoleRequest request,
+        ISender sender)
+    {
+        var command = new AssignRoleCommand(request.UserId, request.Role);
+        var result = await sender.Send(command);
+        return Results.Ok(result);
     }
 
     public static async Task<IResult> UpdateUser(

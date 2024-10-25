@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using SearchBugs.Domain.Git;
 using SearchBugs.Domain.Services;
@@ -22,6 +23,7 @@ public static class DependencyInjection
         //{
         //    options.WaitForJobsToComplete = true;
         //});
+        services.AddAuthorization();
         services.AddHttpContextAccessor();
         services.ConfigureOptions<LoggingBackgroundJobSetup>();
 
@@ -35,7 +37,6 @@ public static class DependencyInjection
         services.AddScoped<IDataEncryptionService, DataEncryptionService>();
         services.AddScoped<IGitHttpService, GitHttpService>();
         services.AddScoped<IGitRepositoryService, GitRepositoryService>();
-
         services.AddCors(options =>
         {
             options.AddPolicy("AllowSpecificOrigin",
@@ -44,6 +45,11 @@ public static class DependencyInjection
                                   .AllowAnyMethod()
                                   .AllowCredentials());
         });
+
+        services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+        services.AddScoped<IPermissionService, PermissionService>();
+
 
     }
 }

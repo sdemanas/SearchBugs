@@ -11,8 +11,9 @@ public sealed class Role : Enumeration<Role>
     public static readonly Role Reporter = new(4, "Reporter");
     public static readonly Role Guest = new(5, "Guest");
 
-    public IReadOnlyCollection<User> Users { get; } = new List<User>();
+    public IReadOnlyCollection<User> Users { get; set; }
 
+    public ICollection<Permission> Permissions { get; set; }
 
     public Role(int id, string name)
         : base(id, name)
