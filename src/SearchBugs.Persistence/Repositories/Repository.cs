@@ -15,7 +15,7 @@ public abstract class Repository<TEntity, TEntityId> : IRepository<TEntity, TEnt
 
     public async Task<Result> Add(TEntity entity) => Result.Create(_context.Set<TEntity>().Add(entity));
 
-    public async Task<Result> Update(TEntity entity) => Result.Create(_context.Set<TEntity>().Update(entity));
+    public async Task<Result> Update(TEntity entity) => Result.Create( _context.Set<TEntity>().Update(entity));
 
     public async Task<Result> Remove(TEntity entity) => Result.Create(_context.Set<TEntity>().Remove(entity));
 

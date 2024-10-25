@@ -17,6 +17,7 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\SearchBugs.Domain\SearchBugs.Domain.csproj" />
+	  <ProjectReference Include="..\SearchBugs.Persistence\SearchBugs.Persistence.csproj" />
 	  <ProjectReference Include="..\Shared\Shared.csproj" />
 	</ItemGroup>
 	<ItemGroup>

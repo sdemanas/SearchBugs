@@ -35,7 +35,7 @@ public partial class Program
 
         // app.UseHttpsRedirection();
         app.UseAuthentication();
-
+        app.UseStaticFiles();
         app.UseMiddleware<ExceptionHandlingMiddleware>();
         app.Run();
     }
