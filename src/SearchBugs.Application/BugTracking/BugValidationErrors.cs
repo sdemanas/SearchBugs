@@ -17,5 +17,11 @@ internal static class BugValidationErrors
     internal static Error InvalidBugStatus => new("Bug.InvalidBugStatus", "The bug status is invalid.");
     internal static Error InvalidBugPriority => new("Bug.InvalidBugPriority", "The bug priority is invalid.");
 
-
+    // Attachment validation errors
+    internal static Error FileRequired => new("Attachment.FileRequired", "A file must be provided.");
+    internal static Error EmptyFile => new("Attachment.EmptyFile", "The file cannot be empty.");
+    internal static Error FileTooLarge => new("Attachment.FileTooLarge", "File size must be less than 10MB.");
+    internal static Error FileNameRequired => new("Attachment.FileNameRequired", "File name is required.");
+    internal static Error FileNameTooLong => new("Attachment.FileNameTooLong", "File name must be less than 255 characters.");
+    internal static Error NoExtension => new("Attachment.NoExtension", "File must have an extension.");
 }

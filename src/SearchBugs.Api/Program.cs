@@ -1,7 +1,9 @@
 using Scalar.AspNetCore;
 using SearchBugs.Api.Endpoints;
 using SearchBugs.Api.Middleware;
+using SearchBugs.Api.Services;
 using SearchBugs.Application;
+using SearchBugs.Application.Common.Interfaces;
 using SearchBugs.Infrastructure;
 using SearchBugs.Persistence;
 
@@ -19,6 +21,18 @@ public partial class Program
         builder.Services.AddApplication();
 
         builder.Services.AddHttpContextAccessor();
+        builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+        // Add CORS
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.AllowAnyOrigin()
+                      .AllowAnyMethod()
+                      .AllowAnyHeader();
+            });
+        });
 
         // Add Cors
         builder.Services.AddCors(options =>
@@ -38,6 +52,10 @@ public partial class Program
             app.MapOpenApi();
             app.MapScalarApiReference();
         }
+
+        // Enable CORS
+        app.UseCors();
+
         app.MapAuthenticationsEndpoints();
         app.MapBugsEndpoints();
         app.MapUserEndpoints();
