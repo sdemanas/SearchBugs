@@ -28,9 +28,15 @@ import {
 import { Project } from "src/models/Project";
 import { useNavigate } from "react-router-dom";
 import { useApi } from "@/hooks/useApi";
+import { useEffect } from "react";
 
 export const ProjectsPage = () => {
-  const { data } = useApi<Project>("projects");
+  const { data, refetch } = useApi<Project>("projects");
+
+  useEffect(() => {
+    refetch();
+  }, []);
+
   const navigate = useNavigate();
   return (
     <div className="flex flex-col gap-3 md:gap-8">

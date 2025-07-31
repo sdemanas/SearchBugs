@@ -2,6 +2,7 @@
 using SearchBugs.Domain.Git;
 using SearchBugs.Domain.Projects;
 using SearchBugs.Domain.Repositories;
+using Shared.Errors;
 using Shared.Messaging;
 using Shared.Results;
 
@@ -29,9 +30,18 @@ public sealed class CreateGitRepoCommandHandler : ICommandHandler<CreateGitRepoC
 
         if (project.IsFailure)
             return Result.Failure(project.Error);
-        //var repo = await _gitRepoService.CreateRepository(repo.Name);
-        await _gitRepository.Add(repo);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return Result.Success();
+        await _gitRepoService.CreateRepository(request.Name, cancellationToken);
+
+        try
+        {
+            await _gitRepository.Add(repo);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            await _gitRepoService.DeleteRepository(request.Name, cancellationToken);
+            return Result.Failure(GitValidationErrors.SomeThingWentWrongWhenCreatingGitRepo(ex.Message));
+        }
     }
 }

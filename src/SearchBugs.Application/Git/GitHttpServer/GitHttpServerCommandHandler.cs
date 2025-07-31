@@ -1,6 +1,9 @@
-﻿using SearchBugs.Domain.Git;
+﻿using Microsoft.AspNetCore.Http;
+using SearchBugs.Domain.Git;
+using Shared.Errors;
 using Shared.Messaging;
 using Shared.Results;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace SearchBugs.Application.Git.GitHttpServer;
 
@@ -10,9 +13,34 @@ internal sealed class GitHttpServerCommandHandler : ICommandHandler<GitHttpServe
 
     public GitHttpServerCommandHandler(IGitHttpService gitService) => _gitService = gitService;
 
-    public async Task<Result> Handle(GitHttpServerCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(GitHttpServerCommand command, CancellationToken cancellationToken)
     {
-        await _gitService.Handle(request.Name, cancellationToken);
-        return Result.Success();
+        try
+        {
+            if (command.HttpContext.Request.Method == "GET" &&
+                command.Path.EndsWith("/info/refs"))
+            {
+                await _gitService.CreateRepository(command.Name, cancellationToken);
+            }
+
+            await _gitService.Handle(
+                command.Name,
+                command.Path,
+                command.HttpContext,
+                cancellationToken);
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            command.HttpContext.Response.StatusCode = ex switch
+            {
+                DirectoryNotFoundException => StatusCodes.Status404NotFound,
+                _ => StatusCodes.Status500InternalServerError
+            };
+
+            await command.HttpContext.Response.WriteAsync(ex.Message);
+            return Result.Failure(Error.ConditionNotMet);
+        }
     }
 }

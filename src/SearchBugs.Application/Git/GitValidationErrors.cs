@@ -10,4 +10,11 @@ internal static class GitValidationErrors
 
     internal static Error GitRepoNotFound => new("Git.GitRepoNotFound", "The git repository was not found.");
 
+    /// create error that can pass exception message
+    /// 
+    internal static Error SomeThingWentWrongWhenCreatingGitRepo(string message)
+    {
+        return new("Git.SomeThingWentWrongWhenCreatingGitRepo", $"Something went wrong when creating git repository: {message}");
+    }
+
 }

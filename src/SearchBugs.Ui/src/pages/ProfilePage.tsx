@@ -4,6 +4,7 @@ import { Profile } from "@/modules/profile/Profile";
 import { Overview } from "@/modules/profile/Overview";
 import { Repositories } from "@/modules/profile/Repositories";
 import { Repository } from "@/modules/profile/Repository";
+import { ProjectsPage } from "./ProjectsPage";
 
 const mockRepositories: Repository[] = [];
 mockRepositories.push({
@@ -69,9 +70,11 @@ export const ProfilePage: React.FC = () => {
               <Overview />
             </TabsContent>
             <TabsContent value="repositories">
-              <Repositories repositories={mockRepositories} />
+              <Repositories/>
             </TabsContent>
-            <TabsContent value="projects">Projects</TabsContent>
+            <TabsContent value="projects">
+              <ProjectsPage />
+            </TabsContent>
             <TabsContent value="packages">Packages</TabsContent>
           </Tabs>
         </div>
