@@ -15,21 +15,15 @@ import {
     SelectTrigger,
     SelectValue,
   } from "@/components/ui/select";
-import { Repository } from "./Repository";
+import { Repo } from "src/models/Repo";
+import { useApi } from "@/hooks/useApi";
 
+export const Repositories : React.FC = () => {
+    const { data, refetch } = useApi<Repo[]>("repo");
 
-
-interface RepositoriesProps {
-    repositories: Repository[];
-}
-
-export const Repositories : React.FC<RepositoriesProps> = ({repositories}) => {
     return (
         <Card>
         <CardHeader>
-            {/* 
-                feltering repositories by name , select type of repository (public or private), sort by stars, forks, and date created, language, and topics
-            */}
             <div className="flex items-center space-x-4">
                 <Input placeholder="Find a repository..." />
                 <Button>Filter</Button>
@@ -69,32 +63,30 @@ export const Repositories : React.FC<RepositoriesProps> = ({repositories}) => {
         </CardHeader>
         <CardContent>
           <ul className="space-y-4">
-            {repositories.map((item, index) => (
-                <div key={index} className="flex items-start space-x-4">
-                    <div>
-                        <h1 className="text-lg font-semibold"></h1>
-                            <a href="#" className="hover:underline">
-                               {item.name}
-                            </a>
-                        <p className="text-sm">
-                            {item.description}
-                        </p>
+            {
+                data?.value?.map((repo) => (
+                    <li key={repo.id} className="flex items-center space-x-4">
+                    <div className="flex-1">
+                        <h3 className="text-lg font-semibold">
+                        <a href="#" className="text-blue-600 hover:underline">
+                            {repo.name}
+                        </a>
+                        </h3>
+                        <p className="text-sm text-gray-500">{repo.description}</p>
                     </div>
-                    <div className="flex space-x-4 text-sm text-gray-500">
-                        <span className="flex items-center">
-                            <Star className="mr-1 h-4 w-4" />
-                            {item.stars}
-                        </span>
-                        <span className="flex items-center">
-                            <GitFork className="mr-1 h-4 w-4" />
-                            {item.forks}
-                        </span>
-                        <Badge>
-                            {item.isPublic ? "Public" : "Private"}
+                    <div className="flex items-center space-x-2">
+                        <Badge variant="outline" className="flex items-center space-x-1">
+                        <Star className="h-4 w-4" />
+                        <span>{repo.stars}</span>
+                        </Badge>
+                        <Badge variant="outline" className="flex items-center space-x-1">
+                        <GitFork className="h-4 w-4" />
+                        <span>{repo.forks}</span>
                         </Badge>
                     </div>
-                </div>
-            ))}
+                    </li>
+                ))
+            }
           </ul>
         </CardContent>
       </Card>

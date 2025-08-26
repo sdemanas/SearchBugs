@@ -1,9 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using SearchBugs.Application.Projects;
 using SearchBugs.Application.Projects.CreateProject;
 using SearchBugs.Application.Projects.GetProjects;
-using SearchBugs.Infrastructure.Authentication;
 
 namespace SearchBugs.Api.Endpoints;
 
@@ -16,7 +14,7 @@ public static class ProjectsEndpoints
     public static void MapProjectsEndpoints(this IEndpointRouteBuilder app)
     {
         var projects = app.MapGroup("api/projects");
-        projects.MapPost("", CreateProject).WithName(nameof(CreateProject)).WithMetadata(new HasPermissionAttribute(ProjectPermission.Create));
+        projects.MapPost("", CreateProject).WithName(nameof(CreateProject));
         projects.MapGet("", GetProjects).WithName(nameof(GetProjects));
     }
 

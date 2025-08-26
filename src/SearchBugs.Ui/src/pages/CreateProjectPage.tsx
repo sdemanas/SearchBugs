@@ -47,45 +47,44 @@ export const CreateProjectPage = () => {
 
   return (
     <div className="flex flex-col gap-3 md:gap-8">
-      <div className="mx-auto grid flex-1 auto-rows-max gap-4">
-        <div className="flex items-center gap-4">
-          <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-            Create Project
-          </h1>
-        </div>
-        <Card className="flex-1 pt-5">
-          <CardContent>
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="flex flex-col gap-4"
-            >
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col gap-1">
-                  <Label htmlFor="name">Name</Label>
-                  <Input id="name" type="text" {...register("name")} />
-                  {errors.name?.message && (
-                    <p className="text-sm text-red-500">
-                      {errors.name?.message.toString()}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea id="description" {...register("description")} />
-                  {errors.description?.message && (
-                    <p className="text-sm text-red-500">
-                      {errors.description?.message.toString()}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="mt-4">
-                <Button type="submit">Create</Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+      <div className="flex items-center">
+        <h5 className="text-lg font-semibold">Create Project</h5>
       </div>
+      <Card className="w-full">
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Project Name</Label>
+              <Input
+                id="name"
+                placeholder="Enter project name"
+                {...register("name")}
+                className={errors.name ? "border-red-500" : ""}
+              />
+              {errors.name && (
+                <p className="text-red-500 text-sm">{errors.name.message}</p>
+              )}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Enter project description"
+                {...register("description")}
+                className={errors.description ? "border-red-500" : ""}
+              />
+              {errors.description && (
+                <p className="text-red-500 text-sm">
+                  {errors.description.message}
+                </p>
+              )}
+            </div>
+            <Button type="submit" disabled={createProjectMutation.isLoading}>
+              Create Project
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 };

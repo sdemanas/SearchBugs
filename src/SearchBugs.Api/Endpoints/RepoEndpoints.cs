@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SearchBugs.Application.Git.CommitChanges;
 using SearchBugs.Application.Git.CreateGitRepo;
@@ -9,6 +10,7 @@ using SearchBugs.Application.Git.GetGitReposDetails;
 using SearchBugs.Application.Git.GetListTree;
 using SearchBugs.Application.Git.GitHttpServer;
 
+
 namespace SearchBugs.Api.Endpoints;
 
 public static class RepoEndpoints
@@ -18,12 +20,18 @@ public static class RepoEndpoints
     public static void MapRepoEndpoints(this WebApplication app)
     {
         app
-            .Map("{name}.git/{**path}", async (
-                    ISender sender,
-                    string name,
-                    CancellationToken cancellationToken) =>
+            .MapMethods("{name}.git/{**path}", new[] { "GET", "POST", "PUT", "LOCK", "UNLOCK" }, [ApiExplorerSettings(IgnoreApi = true)] async (
+        ISender sender,
+            HttpContext httpContext,
+            string name,
+            string? path,
+            CancellationToken cancellationToken) =>
             {
-                var command = new GitHttpServerCommand(name, cancellationToken);
+                var command = new GitHttpServerCommand(
+                 name,
+                 path ?? string.Empty,
+                httpContext
+            );
                 await sender.Send(command, cancellationToken);
             });
 

@@ -20,97 +20,143 @@ internal class GitHttpService : IGitHttpService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task Handle(string repositoryName, CancellationToken cancellationToken = default)
+    public async Task DeleteRepository(string repositoryName, CancellationToken cancellationToken = default)
     {
-        try
+        var gitPath = Path.Combine(_gitOptions.BasePath, repositoryName);
+        if (Directory.Exists(gitPath))
         {
-            var gitPath = Path.Combine(_gitOptions.BasePath, repositoryName);
+            Directory.Delete(gitPath, true);
+        }
+    }
 
+    public async Task CreateRepository(string repositoryName, CancellationToken cancellationToken = default)
+    {
+        var gitPath = Path.Combine(_gitOptions.BasePath, repositoryName);
+        if (!Directory.Exists(gitPath))
+        {
+            Directory.CreateDirectory(gitPath);
             using var process = new Process();
             process.StartInfo = new ProcessStartInfo
             {
                 FileName = "git",
-                Arguments = "http-backend --stateless-rpc --advertise-refs",
-                RedirectStandardInput = true,
+                Arguments = "init --bare",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                WorkingDirectory = gitPath,
-                EnvironmentVariables =
-            {
-                { "GIT_HTTP_EXPORT_ALL", "1" },
-                { "HTTP_GIT_PROTOCOL", _httpContext.Request.Headers["Git-Protocol"] },
-                { "REQUEST_METHOD", _httpContext.Request.Method },
-                { "GIT_PROJECT_ROOT", gitPath },
-                { "PATH_INFO", $"/{_httpContext.Request.RouteValues["path"]}" },
-                { "QUERY_STRING", _httpContext.Request.QueryString.ToUriComponent().TrimStart('?') },
-                { "CONTENT_TYPE", _httpContext.Request.ContentType },
-                { "CONTENT_LENGTH", _httpContext.Request.ContentLength?.ToString() },
-                { "HTTP_CONTENT_ENCODING", _httpContext.Request.Headers.ContentEncoding },
-                { "REMOTE_USER", _httpContext.User.Identity?.Name },
-                { "REMOTE_ADDR", _httpContext.Connection.RemoteIpAddress?.ToString() },
-                { "GIT_COMMITTER_NAME", _httpContext.User.Identity?.Name },
-                { "GIT_COMMITTER_EMAIL", "TODO: some email" },
-            },
+                WorkingDirectory = gitPath
             };
             process.Start();
-
-            var pipeWriter = PipeWriter.Create(process.StandardInput.BaseStream);
-            await _httpContext.Request.BodyReader.CopyToAsync(pipeWriter, cancellationToken);
-
-            var pipeReader = PipeReader.Create(process.StandardOutput.BaseStream);
-            await ReadResponse(pipeReader, cancellationToken);
-
-            await pipeReader.CopyToAsync(_httpContext.Response.BodyWriter, cancellationToken);
-            await pipeReader.CompleteAsync();
-        }
-        catch (Exception ex)
-        {
-            _httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            await _httpContext.Response.WriteAsync(ex.Message);
+            await process.WaitForExitAsync(cancellationToken);
         }
     }
 
-    private async Task ReadResponse(PipeReader pipeReader, CancellationToken cancellationToken)
+    public async Task Handle(string repositoryName, string path, HttpContext httpContext, CancellationToken cancellationToken = default)
     {
+        var gitPath = Path.Combine(_gitOptions.BasePath, $"{repositoryName}");
+        ValidateRepository(gitPath);
+
+        using var process = new Process();
+        ConfigureProcess(repositoryName, process, gitPath, httpContext, path);
+
+        process.Start();
+
+        await HandleRequestPayload(httpContext, process, cancellationToken);
+        await HandleResponse(httpContext, process, cancellationToken);
+    }
+
+    private void ValidateRepository(string gitPath)
+    {
+        if (!Directory.Exists(Path.Combine(gitPath, "objects")))
+        {
+            throw new DirectoryNotFoundException("Not a valid Git repository");
+        }
+    }
+
+    private void ConfigureProcess(string repositoryName, Process process, string gitPath, HttpContext context, string path)
+    {
+        process.StartInfo = new ProcessStartInfo
+        {
+            FileName = "git",
+            Arguments = "http-backend",
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            WorkingDirectory = gitPath,
+            Environment =
+            {
+                ["GIT_HTTP_EXPORT_ALL"] = "1",
+                ["GIT_PROJECT_ROOT"] = _gitOptions.BasePath,
+                ["PATH_INFO"] = $"/{repositoryName}.git/{path.TrimStart('/')}",
+                ["REQUEST_METHOD"] = context.Request.Method,
+                ["QUERY_STRING"] = context.Request.QueryString.Value?.TrimStart('?') ?? "",
+                ["CONTENT_TYPE"] = context.Request.ContentType ?? GetDefaultContentType(path),
+                ["CONTENT_LENGTH"] = GetContentLength(context.Request),
+                ["REMOTE_ADDR"] = context.Connection.RemoteIpAddress?.ToString(),
+                ["GIT_COMMITTER_NAME"] = context.User.Identity?.Name ?? "git-user"
+            }
+        };
+    }
+
+    private string GetDefaultContentType(string path)
+    {
+        return path.Contains("git-upload-pack") ?
+            "application/x-git-upload-pack-request" :
+            "application/x-git-receive-pack-request";
+    }
+
+    private string GetContentLength(HttpRequest request)
+    {
+        return request.ContentLength.HasValue ?
+            request.ContentLength.Value.ToString() :
+            "0";
+    }
+
+    private async Task HandleRequestPayload(HttpContext context, Process process, CancellationToken cancellationToken)
+    {
+        if (context.Request.ContentLength > 0)
+        {
+            await context.Request.Body.CopyToAsync(process.StandardInput.BaseStream, cancellationToken);
+        }
+        process.StandardInput.Close();
+    }
+
+    private async Task HandleResponse(HttpContext context, Process process, CancellationToken cancellationToken)
+    {
+        context.Response.StatusCode = StatusCodes.Status200OK;
+        context.Response.ContentType = process.StartInfo.Environment["CONTENT_TYPE"];
+
+        var outputPipe = PipeWriter.Create(context.Response.Body);
+        var inputPipe = PipeReader.Create(process.StandardOutput.BaseStream);
+
         while (true)
         {
-            var result = await pipeReader.ReadAsync(cancellationToken);
-            var buffer = result.Buffer;
-            var (position, isFinished) = ReadHeaders(_httpContext, buffer);
-            pipeReader.AdvanceTo(position, buffer.End);
+            var readResult = await inputPipe.ReadAsync(cancellationToken);
 
-            if (result.IsCompleted || isFinished)
+            foreach (var segment in readResult.Buffer)
+            {
+                await outputPipe.WriteAsync(segment, cancellationToken);
+            }
+
+            inputPipe.AdvanceTo(readResult.Buffer.End);
+
+            if (readResult.IsCompleted)
+            {
                 break;
+            }
         }
-    }
 
-    private static (SequencePosition Position, bool IsFinished) ReadHeaders(
-        HttpContext httpContext,
-        in ReadOnlySequence<byte> sequence)
-    {
-        var reader = new SequenceReader<byte>(sequence);
-        while (!reader.End)
+        await outputPipe.FlushAsync(cancellationToken);
+        await process.WaitForExitAsync(cancellationToken);
+
+        if (process.ExitCode != 0)
         {
-            if (!reader.TryReadTo(out ReadOnlySpan<byte> line, (byte)'\n'))
-                break;
-
-            if (line.Length == 1)
-                return (reader.Position, true);
-
-            var colon = line.IndexOf((byte)':');
-            if (colon == -1)
-                break;
-
-            var headerName = Encoding.UTF8.GetString(line[..colon]);
-            var headerValue = Encoding.UTF8.GetString(line[(colon + 1)..]).Trim();
-            httpContext.Response.Headers[headerName] = headerValue;
+            var error = await process.StandardError.ReadToEndAsync();
+            throw new InvalidOperationException($"Git error: {error}");
         }
-
-        return (reader.Position, false);
     }
-
 }
 
 

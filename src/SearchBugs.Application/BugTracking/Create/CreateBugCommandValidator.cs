@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Shared.Extensions;
 
 namespace SearchBugs.Application.BugTracking.Create;
 
@@ -8,31 +9,41 @@ internal sealed class CreateBugCommandValidator : AbstractValidator<CreateBugCom
     {
         RuleFor(x => x.Title)
             .NotEmpty()
-            .MaximumLength(200);
+            .WithError(BugValidationErrors.TitleIsRequired)
+            .MaximumLength(200)
+            .WithError(BugValidationErrors.TitleMaxLength);
 
         RuleFor(x => x.Description)
             .NotEmpty()
-            .MaximumLength(2000);
+            .WithError(BugValidationErrors.DescriptionIsRequired)
+            .MaximumLength(2000)
+            .WithError(BugValidationErrors.DescriptionMaxLength);
 
         RuleFor(x => x.Status)
             .NotEmpty()
+            .WithError(BugValidationErrors.InvalidBugStatus)
             .MaximumLength(50);
 
         RuleFor(x => x.Priority)
             .NotEmpty()
+            .WithError(BugValidationErrors.PriorityIsRequired)
             .MaximumLength(50);
 
         RuleFor(x => x.Severity)
             .NotEmpty()
+            .WithError(BugValidationErrors.SeverityIsRequired)
             .MaximumLength(50);
 
         RuleFor(x => x.ProjectId)
-            .NotEmpty();
+            .NotEmpty()
+            .WithError(BugValidationErrors.ProjectIdIsRequired);
 
         RuleFor(x => x.AssigneeId)
-            .NotEmpty();
+            .NotEmpty()
+            .WithError(BugValidationErrors.AssigneeIdIsRequired);
 
         RuleFor(x => x.ReporterId)
-            .NotEmpty();
+            .NotEmpty()
+            .WithError(BugValidationErrors.ReporterIdIsRequired);
     }
 }

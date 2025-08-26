@@ -8,20 +8,17 @@ namespace SearchBugs.Domain.Bugs;
 
 public class Bug : Entity<BugId>, IAuditable
 {
-    public string Title { get; }
-    public string Description { get; }
-    public int StatusId { get; }
-    public int PriorityId { get; }
+    public string Title { get; private set; }
+    public string Description { get; private set; }
+    public int StatusId { get; private set; }
+    public int PriorityId { get; private set; }
     public BugStatus Status { get; private set; }
     public BugPriority Priority { get; private set; }
     public string Severity { get; private set; }
     public ProjectId ProjectId { get; }
-    public UserId AssigneeId { get; }
-
+    public UserId AssigneeId { get; private set; }
     public UserId ReporterId { get; }
-
     public DateTime CreatedOnUtc { get; private set; }
-
     public DateTime? ModifiedOnUtc { get; private set; }
 
     public IReadOnlyCollection<Comment> Comments => _comments.AsReadOnly();
@@ -98,5 +95,40 @@ public class Bug : Entity<BugId>, IAuditable
     public void UpdatePriority(BugPriority priority)
     {
         Priority = priority;
+    }
+
+    public Result Update(
+        string title,
+        string description,
+        BugStatus status,
+        BugPriority priority,
+        string severity,
+        UserId? assigneeId)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            return Result.Failure(BugsErrors.InvalidTitle);
+
+        if (string.IsNullOrWhiteSpace(description))
+            return Result.Failure(BugsErrors.InvalidTitle);
+
+        if (string.IsNullOrWhiteSpace(severity))
+            return Result.Failure(BugsErrors.InvalidBugSeverity);
+
+        Title = title;
+        Description = description;
+        Status = status;
+        StatusId = status.Id;
+        Priority = priority;
+        PriorityId = priority.Id;
+        Severity = severity;
+        
+        if (assigneeId != null)
+        {
+            AssigneeId = assigneeId;
+        }
+
+        ModifiedOnUtc = SystemTime.UtcNow;
+
+        return Result.Success();
     }
 }

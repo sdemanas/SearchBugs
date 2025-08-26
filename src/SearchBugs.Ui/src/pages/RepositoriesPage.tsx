@@ -20,8 +20,9 @@ import {
 } from "lucide-react";
 import { CodeTree } from "@/modules/repository/CodeTree";
 
-export const RepositoryPage: React.FC = () => {
 
+export const RepositoryPage: React.FC = () => {
+  
   return (
     <div className="container mx-auto p-4">
       <div className="mb-4 flex items-center justify-between">
