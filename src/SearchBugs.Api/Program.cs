@@ -4,7 +4,9 @@ using SearchBugs.Application;
 using SearchBugs.Infrastructure;
 using SearchBugs.Persistence;
 
-public partial class Program
+namespace SearchBugs.Api;
+
+public abstract partial class Program
 {
     private static void Main(string[] args)
     {
@@ -41,4 +43,4 @@ public partial class Program
     }
 }
 
-public partial class Program { }
+public abstract partial class Program { }
