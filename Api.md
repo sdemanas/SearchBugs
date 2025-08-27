@@ -1,12 +1,13 @@
-
 Migrate Script
 
 ```
 dotnet ef migrations add InitialCreate -p SearchBugs.Persistence -s SearchBugs.Api
 ```
+
 ### User Management Domain
 
 **Endpoints:**
+
 1. **Create User:**
    - `POST /api/users`
 2. **Get User Details:**
@@ -21,10 +22,26 @@ dotnet ef migrations add InitialCreate -p SearchBugs.Persistence -s SearchBugs.A
    - `POST /api/auth/logout`
 7. **Get All Users:**
    - `GET /api/users`
+8. **Assign Role to User:**
+   - `POST /api/users/{user_id}/assign-role`
+9. **Remove Role from User:**
+   - `POST /api/users/{user_id}/remove-role`
+10. **Change User Password:**
+    - `POST /api/users/{user_id}/change-password`
+
+### Role & Permission Management Domain
+
+**Endpoints:**
+
+1. **Get All Roles:**
+   - `GET /api/roles`
+2. **Get All Permissions:**
+   - `GET /api/roles/permissions`
 
 ### Project Management Domain
 
 **Endpoints:**
+
 1. **Create Project:**
    - `POST /api/projects`
 2. **Get Project Details:**
@@ -39,6 +56,7 @@ dotnet ef migrations add InitialCreate -p SearchBugs.Persistence -s SearchBugs.A
 ### Bug Tracking Domain
 
 **Endpoints:**
+
 1. **Create Bug:**
    - `POST /api/bugs`
 2. **Get Bug Details:**
@@ -71,6 +89,7 @@ dotnet ef migrations add InitialCreate -p SearchBugs.Persistence -s SearchBugs.A
 ### Notification Domain
 
 **Endpoints:**
+
 1. **Get User Notifications:**
    - `GET /api/users/{user_id}/notifications`
 2. **Mark Notification as Read:**
@@ -81,6 +100,7 @@ dotnet ef migrations add InitialCreate -p SearchBugs.Persistence -s SearchBugs.A
 ### Repository Management Domain
 
 **Endpoints:**
+
 1. **Create Repository:**
    - `POST /api/repositories`
 2. **Get Repository Details:**
@@ -99,6 +119,7 @@ dotnet ef migrations add InitialCreate -p SearchBugs.Persistence -s SearchBugs.A
 ### Summary of Endpoints:
 
 #### User Management Domain
+
 - `POST /api/users`
 - `GET /api/users/{user_id}`
 - `PUT /api/users/{user_id}`
@@ -106,8 +127,17 @@ dotnet ef migrations add InitialCreate -p SearchBugs.Persistence -s SearchBugs.A
 - `POST /api/auth/login`
 - `POST /api/auth/logout`
 - `GET /api/users`
+- `POST /api/users/{user_id}/assign-role`
+- `POST /api/users/{user_id}/remove-role`
+- `POST /api/users/{user_id}/change-password`
+
+#### Role & Permission Management Domain
+
+- `GET /api/roles`
+- `GET /api/roles/permissions`
 
 #### Project Management Domain
+
 - `POST /api/projects`
 - `GET /api/projects/{project_id}`
 - `PUT /api/projects/{project_id}`
@@ -115,6 +145,7 @@ dotnet ef migrations add InitialCreate -p SearchBugs.Persistence -s SearchBugs.A
 - `GET /api/projects`
 
 #### Bug Tracking Domain
+
 - `POST /api/bugs`
 - `GET /api/bugs/{bug_id}`
 - `PUT /api/bugs/{bug_id}`
@@ -131,11 +162,13 @@ dotnet ef migrations add InitialCreate -p SearchBugs.Persistence -s SearchBugs.A
 - `GET /api/bugs/{bug_id}/custom-fields`
 
 #### Notification Domain
+
 - `GET /api/users/{user_id}/notifications`
 - `PUT /api/notifications/{notification_id}/read`
 - `DELETE /api/notifications/{notification_id}`
 
 #### Repository Management Domain
+
 - `POST /api/repositories`
 - `GET /api/repositories/{repo_id}`
 - `PUT /api/repositories/{repo_id}`
@@ -145,4 +178,3 @@ dotnet ef migrations add InitialCreate -p SearchBugs.Persistence -s SearchBugs.A
 - `GET /api/bugs/{bug_id}/repositories`
 
 These endpoints cover CRUD operations and specific actions required to manage users, projects, bugs, notifications, and repositories in the bug tracking system.
-

@@ -13,11 +13,29 @@ public abstract class Repository<TEntity, TEntityId> : IRepository<TEntity, TEnt
 
     protected Repository(ApplicationDbContext dbContext) => _context = dbContext;
 
-    public async Task<Result> Add(TEntity entity) => Result.Create(_context.Set<TEntity>().Add(entity));
+    public Task<Result> Add(TEntity entity)
+    {
+        _context.Set<TEntity>().Add(entity);
+        return Task.FromResult(Result.Success());
+    }
 
-    public async Task<Result> Update(TEntity entity) => Result.Create( _context.Set<TEntity>().Update(entity));
+    public async Task<Result> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
+    {
+        await _context.Set<TEntity>().AddAsync(entity, cancellationToken);
+        return Result.Success();
+    }
 
-    public async Task<Result> Remove(TEntity entity) => Result.Create(_context.Set<TEntity>().Remove(entity));
+    public Task<Result> Update(TEntity entity)
+    {
+        _context.Set<TEntity>().Update(entity);
+        return Task.FromResult(Result.Success());
+    }
+
+    public Task<Result> Remove(TEntity entity)
+    {
+        _context.Set<TEntity>().Remove(entity);
+        return Task.FromResult(Result.Success());
+    }
 
     public async Task<Result<TEntity>> GetByIdAsync(IEntityId id, CancellationToken cancellationToken = default, params Expression<Func<TEntity, object>>[] includes)
     {

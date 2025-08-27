@@ -14,4 +14,6 @@ public interface IGitRepositoryService
     Result<string> GetFileContent(string repoPath, string commitSha, string filePath);
     Result<IEnumerable<GitTreeItem>> ListTree(string commitSha, string repoPath);
     Result<MergeResult> MergeBranches(string repoPath, string sourceBranchName, string targetBranchName, string mergerName, string mergerEmail);
+    Result<IEnumerable<string>> GetBranches(string repoPath);
+    Result CloneRepository(string sourceUrl, string targetPath);
 }

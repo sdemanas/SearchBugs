@@ -8,9 +8,9 @@ namespace SearchBugs.Domain.Users;
 
 public class User : Entity<UserId>, IAuditable
 {
-    public Name Name { get; private set; }
-    public Email Email { get; private set; }
-    public string Password { get; private set; }
+    public Name Name { get; private set; } = null!;
+    public Email Email { get; private set; } = null!;
+    public string Password { get; private set; } = string.Empty;
     public IReadOnlyCollection<Role> Roles => _roles.ToList().AsReadOnly();
     private readonly HashSet<Role> _roles = new();
     public DateTime CreatedOnUtc { get; private set; }
@@ -53,6 +53,11 @@ public class User : Entity<UserId>, IAuditable
     public void AddRole(Role role)
     {
         _roles.Add(role);
+    }
+
+    public void RemoveRole(Role role)
+    {
+        _roles.Remove(role);
     }
 
 }

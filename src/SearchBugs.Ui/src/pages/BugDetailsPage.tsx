@@ -9,9 +9,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { Clock, MessageSquare, Paperclip, History, Settings, ArrowLeft, Download } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import {
+  Clock,
+  MessageSquare,
+  Paperclip,
+  History,
+  Settings,
+  ArrowLeft,
+  Download,
+} from "lucide-react";
+import { safeFormatDistance } from "@/lib/date-utils";
 import { useToast } from "@/components/ui/use-toast";
+import { PageLoadingState } from "@/components/ui/loading";
 
 interface Bug {
   id: string;
@@ -75,11 +84,20 @@ export const BugDetailsPage = () => {
   const [customField, setCustomField] = useState({ name: "", value: "" });
 
   const { data: bug, isLoading: isLoadingBug } = useApi<Bug>(`bugs/${bugId}`);
-  const { data: comments, mutate: mutateComments } = useApi<Comment[]>(`bugs/${bugId}/comments`);
-  const { data: attachments, mutate: { mutateAsync: mutateAttachments } } = useApi<Attachment[]>(`bugs/${bugId}/attachments`);
-  const { data: timeEntries, mutate: mutateTimeEntries } = useApi<TimeEntry[]>(`bugs/${bugId}/time-tracking`);
+  const { data: comments, mutate: mutateComments } = useApi<Comment[]>(
+    `bugs/${bugId}/comments`
+  );
+  const {
+    data: attachments,
+    mutate: { mutateAsync: mutateAttachments },
+  } = useApi<Attachment[]>(`bugs/${bugId}/attachments`);
+  const { data: timeEntries, mutate: mutateTimeEntries } = useApi<TimeEntry[]>(
+    `bugs/${bugId}/time-tracking`
+  );
   const { data: history } = useApi<HistoryEntry[]>(`bugs/${bugId}/history`);
-  const { data: customFields, mutate: mutateCustomFields } = useApi<CustomField[]>(`bugs/${bugId}/custom-fields`);
+  const { data: customFields, mutate: mutateCustomFields } = useApi<
+    CustomField[]
+  >(`bugs/${bugId}/custom-fields`);
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
@@ -159,7 +177,9 @@ export const BugDetailsPage = () => {
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -194,7 +214,7 @@ export const BugDetailsPage = () => {
     }
   };
 
-  if (isLoadingBug) return <div>Loading...</div>;
+  if (isLoadingBug) return <PageLoadingState text="Loading bug details..." />;
   if (!bug?.value) return <div>Bug not found</div>;
 
   const bugData = bug.value;
@@ -205,18 +225,46 @@ export const BugDetailsPage = () => {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{bugData.title}</h1>
           <div className="flex gap-2 mt-2">
-            <Badge variant={bugData.status === "Open" ? "default" : bugData.status === "In Progress" ? "secondary" : "outline"}>
+            <Badge
+              variant={
+                bugData.status === "Open"
+                  ? "default"
+                  : bugData.status === "In Progress"
+                  ? "secondary"
+                  : "outline"
+              }
+            >
               {bugData.status}
             </Badge>
-            <Badge variant={bugData.priority === "Critical" ? "destructive" : bugData.priority === "High" ? "default" : "outline"}>
+            <Badge
+              variant={
+                bugData.priority === "Critical"
+                  ? "destructive"
+                  : bugData.priority === "High"
+                  ? "default"
+                  : "outline"
+              }
+            >
               {bugData.priority}
             </Badge>
-            <Badge variant={bugData.severity === "Critical" ? "destructive" : bugData.severity === "High" ? "default" : "outline"}>
+            <Badge
+              variant={
+                bugData.severity === "Critical"
+                  ? "destructive"
+                  : bugData.severity === "High"
+                  ? "default"
+                  : "outline"
+              }
+            >
               {bugData.severity}
             </Badge>
           </div>
         </div>
-        <Button variant="outline" onClick={() => navigate("/bugs")} className="gap-2">
+        <Button
+          variant="outline"
+          onClick={() => navigate("/bugs")}
+          className="gap-2"
+        >
           <ArrowLeft className="h-4 w-4" />
           Back to Bugs
         </Button>
@@ -224,26 +272,44 @@ export const BugDetailsPage = () => {
 
       <Tabs defaultValue="details" className="space-y-4">
         <TabsList className="w-full justify-start h-auto p-1 bg-muted/50">
-          <TabsTrigger value="details" className="data-[state=active]:bg-background">
+          <TabsTrigger
+            value="details"
+            className="data-[state=active]:bg-background"
+          >
             Details
           </TabsTrigger>
-          <TabsTrigger value="comments" className="data-[state=active]:bg-background">
+          <TabsTrigger
+            value="comments"
+            className="data-[state=active]:bg-background"
+          >
             <MessageSquare className="w-4 h-4 mr-2" />
             Comments
           </TabsTrigger>
-          <TabsTrigger value="attachments" className="data-[state=active]:bg-background">
+          <TabsTrigger
+            value="attachments"
+            className="data-[state=active]:bg-background"
+          >
             <Paperclip className="w-4 h-4 mr-2" />
             Attachments
           </TabsTrigger>
-          <TabsTrigger value="time" className="data-[state=active]:bg-background">
+          <TabsTrigger
+            value="time"
+            className="data-[state=active]:bg-background"
+          >
             <Clock className="w-4 h-4 mr-2" />
             Time Tracking
           </TabsTrigger>
-          <TabsTrigger value="history" className="data-[state=active]:bg-background">
+          <TabsTrigger
+            value="history"
+            className="data-[state=active]:bg-background"
+          >
             <History className="w-4 h-4 mr-2" />
             History
           </TabsTrigger>
-          <TabsTrigger value="custom-fields" className="data-[state=active]:bg-background">
+          <TabsTrigger
+            value="custom-fields"
+            className="data-[state=active]:bg-background"
+          >
             <Settings className="w-4 h-4 mr-2" />
             Custom Fields
           </TabsTrigger>
@@ -255,7 +321,9 @@ export const BugDetailsPage = () => {
               <CardTitle className="text-lg">Description</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="whitespace-pre-wrap text-muted-foreground">{bugData.description}</p>
+              <p className="whitespace-pre-wrap text-muted-foreground">
+                {bugData.description}
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -275,10 +343,12 @@ export const BugDetailsPage = () => {
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{comment.userName}</span>
                         <span className="text-sm text-muted-foreground">
-                          {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                          {safeFormatDistance(comment.createdAt)}
                         </span>
                       </div>
-                      <p className="text-sm text-muted-foreground">{comment.content}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {comment.content}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -290,12 +360,12 @@ export const BugDetailsPage = () => {
                   onChange={(e) => setNewComment(e.target.value)}
                   className="min-h-[100px]"
                 />
-                <Button 
+                <Button
                   onClick={handleAddComment}
-                  disabled={mutateComments.isLoading}
+                  disabled={mutateComments.isPending}
                   className="w-full sm:w-auto"
                 >
-                  {mutateComments.isLoading ? "Adding..." : "Add Comment"}
+                  {mutateComments.isPending ? "Adding..." : "Add Comment"}
                 </Button>
               </div>
             </CardContent>
@@ -307,12 +377,15 @@ export const BugDetailsPage = () => {
             <CardContent className="pt-6">
               <div className="space-y-4">
                 {attachments?.value?.map((attachment) => (
-                  <div key={attachment.id} className="flex items-center gap-4 p-4 rounded-lg bg-muted/50">
+                  <div
+                    key={attachment.id}
+                    className="flex items-center gap-4 p-4 rounded-lg bg-muted/50"
+                  >
                     <Paperclip className="w-4 h-4 text-muted-foreground" />
                     <div className="flex-1">
                       <div className="font-medium">{attachment.fileName}</div>
                       <div className="text-sm text-muted-foreground">
-                        {formatDistanceToNow(new Date(attachment.uploadedAt), { addSuffix: true })} by{" "}
+                        {safeFormatDistance(attachment.uploadedAt)} by{" "}
                         {attachment.uploadedBy}
                       </div>
                     </div>
@@ -324,7 +397,9 @@ export const BugDetailsPage = () => {
                 ))}
               </div>
               <div className="mt-6">
-                <Label htmlFor="file" className="text-sm font-medium">Upload Attachment</Label>
+                <Label htmlFor="file" className="text-sm font-medium">
+                  Upload Attachment
+                </Label>
                 <div className="mt-2 flex items-center gap-4">
                   <Input
                     id="file"
@@ -343,14 +418,18 @@ export const BugDetailsPage = () => {
             <CardContent className="pt-6">
               <div className="space-y-4">
                 {timeEntries?.value?.map((entry) => (
-                  <div key={entry.id} className="flex items-center gap-4 p-4 rounded-lg bg-muted/50">
+                  <div
+                    key={entry.id}
+                    className="flex items-center gap-4 p-4 rounded-lg bg-muted/50"
+                  >
                     <Clock className="w-4 h-4 text-muted-foreground" />
                     <div className="flex-1">
                       <div className="font-medium">{entry.duration}</div>
-                      <div className="text-sm text-muted-foreground">{entry.description}</div>
                       <div className="text-sm text-muted-foreground">
-                        {formatDistanceToNow(new Date(entry.loggedAt), { addSuffix: true })} by{" "}
-                        {entry.loggedBy}
+                        {entry.description}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {safeFormatDistance(entry.loggedAt)} by {entry.loggedBy}
                       </div>
                     </div>
                   </div>
@@ -358,31 +437,45 @@ export const BugDetailsPage = () => {
               </div>
               <div className="mt-6 space-y-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="duration" className="text-sm font-medium">Duration (e.g., 2h 30m)</Label>
+                  <Label htmlFor="duration" className="text-sm font-medium">
+                    Duration (e.g., 2h 30m)
+                  </Label>
                   <Input
                     id="duration"
                     value={timeEntry.duration}
-                    onChange={(e) => setTimeEntry({ ...timeEntry, duration: e.target.value })}
+                    onChange={(e) =>
+                      setTimeEntry({ ...timeEntry, duration: e.target.value })
+                    }
                     placeholder="Enter duration"
                     className="max-w-sm"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="timeDescription" className="text-sm font-medium">Description</Label>
+                  <Label
+                    htmlFor="timeDescription"
+                    className="text-sm font-medium"
+                  >
+                    Description
+                  </Label>
                   <Textarea
                     id="timeDescription"
                     value={timeEntry.description}
-                    onChange={(e) => setTimeEntry({ ...timeEntry, description: e.target.value })}
+                    onChange={(e) =>
+                      setTimeEntry({
+                        ...timeEntry,
+                        description: e.target.value,
+                      })
+                    }
                     placeholder="What did you work on?"
                     className="min-h-[100px]"
                   />
                 </div>
-                <Button 
+                <Button
                   onClick={handleTrackTime}
-                  disabled={mutateTimeEntries.isLoading}
+                  disabled={mutateTimeEntries.isPending}
                   className="w-full sm:w-auto"
                 >
-                  {mutateTimeEntries.isLoading ? "Logging..." : "Log Time"}
+                  {mutateTimeEntries.isPending ? "Logging..." : "Log Time"}
                 </Button>
               </div>
             </CardContent>
@@ -394,7 +487,10 @@ export const BugDetailsPage = () => {
             <CardContent className="pt-6">
               <div className="space-y-4">
                 {history?.value?.map((entry) => (
-                  <div key={entry.id} className="flex gap-4 p-4 rounded-lg bg-muted/50">
+                  <div
+                    key={entry.id}
+                    className="flex gap-4 p-4 rounded-lg bg-muted/50"
+                  >
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-primary/10 text-primary">
                         {entry.userName[0]}
@@ -402,9 +498,11 @@ export const BugDetailsPage = () => {
                     </Avatar>
                     <div className="flex-1">
                       <div className="font-medium">{entry.action}</div>
-                      <div className="text-sm text-muted-foreground">{entry.description}</div>
                       <div className="text-sm text-muted-foreground">
-                        {formatDistanceToNow(new Date(entry.timestamp), { addSuffix: true })} by{" "}
+                        {entry.description}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {safeFormatDistance(entry.timestamp)} by{" "}
                         {entry.userName}
                       </div>
                     </div>
@@ -420,7 +518,10 @@ export const BugDetailsPage = () => {
             <CardContent className="pt-6">
               <div className="space-y-4">
                 {customFields?.value?.map((field) => (
-                  <div key={field.id} className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-muted/50">
+                  <div
+                    key={field.id}
+                    className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-muted/50"
+                  >
                     <div className="font-medium">{field.name}</div>
                     <div className="text-muted-foreground">{field.value}</div>
                   </div>
@@ -428,31 +529,41 @@ export const BugDetailsPage = () => {
               </div>
               <div className="mt-6 space-y-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="fieldName" className="text-sm font-medium">Field Name</Label>
+                  <Label htmlFor="fieldName" className="text-sm font-medium">
+                    Field Name
+                  </Label>
                   <Input
                     id="fieldName"
                     value={customField.name}
-                    onChange={(e) => setCustomField({ ...customField, name: e.target.value })}
+                    onChange={(e) =>
+                      setCustomField({ ...customField, name: e.target.value })
+                    }
                     placeholder="Enter field name"
                     className="max-w-sm"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="fieldValue" className="text-sm font-medium">Value</Label>
+                  <Label htmlFor="fieldValue" className="text-sm font-medium">
+                    Value
+                  </Label>
                   <Input
                     id="fieldValue"
                     value={customField.value}
-                    onChange={(e) => setCustomField({ ...customField, value: e.target.value })}
+                    onChange={(e) =>
+                      setCustomField({ ...customField, value: e.target.value })
+                    }
                     placeholder="Enter value"
                     className="max-w-sm"
                   />
                 </div>
-                <Button 
+                <Button
                   onClick={handleAddCustomField}
-                  disabled={mutateCustomFields.isLoading}
+                  disabled={mutateCustomFields.isPending}
                   className="w-full sm:w-auto"
                 >
-                  {mutateCustomFields.isLoading ? "Adding..." : "Add Custom Field"}
+                  {mutateCustomFields.isPending
+                    ? "Adding..."
+                    : "Add Custom Field"}
                 </Button>
               </div>
             </CardContent>

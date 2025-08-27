@@ -13,4 +13,8 @@ public static class GitErrors
     public static Error CommitNotFound = new Error("Git.CommitNotFound", "Commit not found.");
 
     public static Error RepositoryNotFound = new Error("Git.RepositoryNotFound", "Repository not found.");
+
+    public static Error RepositoryAlreadyExists = new Error("Git.RepositoryAlreadyExists", "Repository already exists.");
+
+    public static Error CloneFailure(string message) => new Error("Git.CloneFailure", $"Failed to clone repository: {message}");
 }

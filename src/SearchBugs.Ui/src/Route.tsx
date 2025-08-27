@@ -7,17 +7,18 @@ import {
   DashboardPage,
   LoginPage,
   NotificationsPage,
-  ProfilePage,
   ProjectDetailsPage,
   ProjectsPage,
   RegisterPage,
   RepositoryPage,
-  RepositoryDetailsPage,
   SettingPage,
   UserDetailsPage,
   UsersPage,
 } from "./pages";
+import { RepositoryListPage } from "./modules/repository/RepositoryListPage";
+import { EnhancedProfilePage } from "./pages/EnhancedProfilePage";
 import MainLayout from "./layouts/Main";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const router = createBrowserRouter([
   {
@@ -37,7 +38,11 @@ const router = createBrowserRouter([
     },
   },
   {
-    element: <MainLayout />,
+    element: (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
     handle: {
       title: "SearchBugs",
     },
@@ -85,7 +90,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/profile",
-        element: <ProfilePage />,
+        element: <EnhancedProfilePage />,
         handle: {
           title: "Profile",
           icon: "User",
@@ -101,18 +106,18 @@ const router = createBrowserRouter([
         },
       },
       {
-        path: "/:username/:repository",
-        element: <RepositoryPage />,
+        path: "/repositories",
+        element: <RepositoryListPage />,
         handle: {
-          title: "Repository",
+          title: "Repositories",
           icon: "GitBranch",
         },
       },
       {
         path: "/repositories/:url",
-        element: <RepositoryDetailsPage />,
+        element: <RepositoryPage />,
         handle: {
-          title: "Repository Details",
+          title: "Repository",
           icon: "GitBranch",
         },
       },

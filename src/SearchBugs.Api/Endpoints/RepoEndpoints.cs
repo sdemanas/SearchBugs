@@ -9,6 +9,9 @@ using SearchBugs.Application.Git.GetGitRepo;
 using SearchBugs.Application.Git.GetGitReposDetails;
 using SearchBugs.Application.Git.GetListTree;
 using SearchBugs.Application.Git.GitHttpServer;
+using SearchBugs.Application.Git.GetFileContents;
+using SearchBugs.Application.Git.GetBranches;
+using SearchBugs.Application.Git.CloneRepository;
 
 
 namespace SearchBugs.Api.Endpoints;
@@ -43,6 +46,9 @@ public static class RepoEndpoints
         repo.MapGet("{url}/commit/{commitSha}", GetCommitDiff).WithName(nameof(GetCommitDiff));
         repo.MapPost("{url}/commit/{commitSha}", CommitChanges).WithName(nameof(CommitChanges));
         repo.MapGet("{url}/tree/{commitSha}", GetTree).WithName(nameof(GetTree));
+        repo.MapGet("{url}/file/{commitSha}/{**filePath}", GetFileContent).WithName(nameof(GetFileContent));
+        repo.MapPost("{url}/clone", CloneRepository).WithName(nameof(CloneRepository));
+        repo.MapGet("{url}/branches", GetBranches).WithName(nameof(GetBranches));
     }
 
     public static async Task<IResult> GetCommitDiff(string url, string commitSha, ISender sender)
@@ -96,6 +102,29 @@ public static class RepoEndpoints
         var command = new DeleteGitRepoCommand(url);
         var result = await sender.Send(command);
 
+        return Results.Ok(result);
+    }
+
+    public static async Task<IResult> GetFileContent(string url, string commitSha, string filePath, ISender sender)
+    {
+        var query = new GetFileContentQuery(url, commitSha, filePath);
+        var result = await sender.Send(query);
+        return Results.Ok(result);
+    }
+
+    public record CloneRepositoryRequest(string TargetPath);
+
+    public static async Task<IResult> CloneRepository(string url, [FromBody] CloneRepositoryRequest request, ISender sender)
+    {
+        var command = new CloneRepositoryCommand(url, request.TargetPath);
+        var result = await sender.Send(command);
+        return Results.Ok(result);
+    }
+
+    public static async Task<IResult> GetBranches(string url, ISender sender)
+    {
+        var query = new GetBranchesQuery(url);
+        var result = await sender.Send(query);
         return Results.Ok(result);
     }
 }

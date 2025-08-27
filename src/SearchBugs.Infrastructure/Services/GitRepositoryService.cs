@@ -132,7 +132,7 @@ internal sealed partial class GitRepositoryService : IGitRepositoryService
             return new MergeResult
             {
                 Status = result.Status.ToString(),
-                CommitSha = result.Commit?.Sha
+                CommitSha = result.Commit?.Sha ?? string.Empty
             };
         }
     }
@@ -178,19 +178,53 @@ internal sealed partial class GitRepositoryService : IGitRepositoryService
         using (var repo = new Repository(_repoPath))
         {
             var contributors = repo.Commits
-                .GroupBy(c => new { c.Author.Name, c.Author.Email })
-                .Select(group => new Contributor
+                .Select(c => c.Author)
+                .GroupBy(a => a.Email)
+                .Select(g => new Contributor
                 {
-                    Name = group.Key.Name,
-                    Email = group.Key.Email,
-                    CommitCount = group.Count()
+                    Name = g.First().Name,
+                    Email = g.Key,
+                    CommitCount = g.Count()
                 })
-                .OrderByDescending(c => c.CommitCount)
                 .ToList();
 
             return contributors;
         }
     }
 
+    public Result<IEnumerable<string>> GetBranches(string repoPath)
+    {
+        var _repoPath = Path.Combine(_basePath, repoPath);
+        if (!Directory.Exists(_repoPath)) return Result.Failure<IEnumerable<string>>(GitErrors.RepositoryNotFound);
+
+        using (var repo = new Repository(_repoPath))
+        {
+            var branches = repo.Branches
+                .Where(b => !b.IsRemote)
+                .Select(b => b.FriendlyName)
+                .ToList();
+
+            return Result.Success(branches.AsEnumerable());
+        }
+    }
+
+    public Result CloneRepository(string sourceUrl, string targetPath)
+    {
+        try
+        {
+            var _targetPath = Path.Combine(_basePath, targetPath);
+            if (Directory.Exists(_targetPath))
+            {
+                return Result.Failure(GitErrors.RepositoryAlreadyExists);
+            }
+
+            Repository.Clone(sourceUrl, _targetPath);
+            return Result.Success();
+        }
+        catch (LibGit2SharpException ex)
+        {
+            return Result.Failure(GitErrors.CloneFailure(ex.Message));
+        }
+    }
 }
 

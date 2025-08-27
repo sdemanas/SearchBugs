@@ -2,4 +2,4 @@
 
 namespace SearchBugs.Application.BugTracking.GetBugs;
 
-public record GetBugsQuery(Guid ProjectId) : IQuery<List<BugsResponse>>;
+public record GetBugsQuery(Guid? ProjectId) : IQuery<List<BugsResponse>>;

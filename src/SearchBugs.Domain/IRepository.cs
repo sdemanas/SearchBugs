@@ -9,6 +9,7 @@ public interface IRepository<TEntity, TEntityId>
     where TEntityId : class, IEntityId
 {
     Task<Result> Add(TEntity entity);
+    Task<Result> AddAsync(TEntity entity, CancellationToken cancellationToken = default);
 
     Task<Result<TEntity>> GetByIdAsync(IEntityId id, CancellationToken cancellationToken = default, params Expression<Func<TEntity, object>>[] includes);
 

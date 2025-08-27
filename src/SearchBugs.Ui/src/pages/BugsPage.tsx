@@ -1,10 +1,13 @@
-import { ListFilter, MoreHorizontal, PlusCircle, Trash2, Pencil, Eye } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
+  ListFilter,
+  MoreHorizontal,
+  PlusCircle,
+  Trash2,
+  Pencil,
+  Eye,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +40,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Bug } from "lucide-react";
+import { ListLoadingSkeleton } from "@/components/ui/loading";
 
 interface Bug {
   id: string;
@@ -51,19 +55,18 @@ interface Bug {
 }
 
 const statuses = ["Open", "In Progress", "Resolved", "Closed"];
-const priorities = ["Low", "Medium", "High", "Critical"];
-const severities = ["Low", "Medium", "High", "Critical"];
 
 export const BugsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const projectId = searchParams.get("projectId");
   const status = searchParams.get("status");
-  const { data, isLoading } = useApi<Bug[]>(`bugs${projectId ? `?projectId=${projectId}` : ""}`);
+  const { data, isLoading } = useApi<Bug[]>(
+    `bugs${projectId ? `?projectId=${projectId}` : ""}`
+  );
   const { mutate: mutateDelete } = useApi<Bug>(`bugs`);
   const navigate = useNavigate();
   const { toast } = useToast();
   const [selectedBug, setSelectedBug] = useState<Bug | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleStatusFilter = (newStatus: string | null) => {
@@ -105,7 +108,40 @@ export const BugsPage = () => {
     return true;
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-6 space-y-6 max-w-7xl">
+        <div className="flex items-center justify-between bg-card p-4 rounded-lg shadow-sm">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Bugs</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Manage and track bugs across your projects
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="h-9 gap-1" disabled>
+              <ListFilter className="h-4 w-4" />
+              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                Filter
+              </span>
+            </Button>
+            <Button size="sm" className="h-9 gap-1" disabled>
+              <PlusCircle className="h-4 w-4" />
+              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                Add Bug
+              </span>
+            </Button>
+          </div>
+        </div>
+
+        <Card className="border-none shadow-sm">
+          <CardContent className="p-6">
+            <ListLoadingSkeleton items={8} />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-6 space-y-6 max-w-7xl">
@@ -161,12 +197,22 @@ export const BugsPage = () => {
               <TableHeader>
                 <TableRow className="hover:bg-muted/50">
                   <TableHead className="w-[300px]">Title</TableHead>
-                  <TableHead className="hidden md:table-cell">Description</TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Description
+                  </TableHead>
                   <TableHead className="w-[100px]">Status</TableHead>
-                  <TableHead className="hidden md:table-cell w-[100px]">Priority</TableHead>
-                  <TableHead className="hidden md:table-cell w-[100px]">Severity</TableHead>
-                  <TableHead className="hidden md:table-cell w-[150px]">Reporter</TableHead>
-                  <TableHead className="hidden md:table-cell w-[150px]">Assignee</TableHead>
+                  <TableHead className="hidden md:table-cell w-[100px]">
+                    Priority
+                  </TableHead>
+                  <TableHead className="hidden md:table-cell w-[100px]">
+                    Severity
+                  </TableHead>
+                  <TableHead className="hidden md:table-cell w-[150px]">
+                    Reporter
+                  </TableHead>
+                  <TableHead className="hidden md:table-cell w-[150px]">
+                    Assignee
+                  </TableHead>
                   <TableHead className="w-[50px]">
                     <span className="sr-only">Actions</span>
                   </TableHead>
@@ -177,7 +223,9 @@ export const BugsPage = () => {
                   <TableRow key={bug.id} className="hover:bg-muted/50">
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
-                        <span className="truncate max-w-[250px]">{bug.title}</span>
+                        <span className="truncate max-w-[250px]">
+                          {bug.title}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
@@ -269,7 +317,7 @@ export const BugsPage = () => {
                           <DropdownMenuItem
                             onClick={() => {
                               setSelectedBug(bug);
-                              setIsEditDialogOpen(true);
+                              // TODO: Implement edit functionality
                             }}
                             className="cursor-pointer"
                           >
@@ -311,7 +359,8 @@ export const BugsPage = () => {
         <CardFooter className="border-t bg-muted/50 px-6 py-3">
           <div className="flex items-center justify-between w-full">
             <span className="text-sm text-muted-foreground">
-              {filteredBugs?.length} {filteredBugs?.length === 1 ? "bug" : "bugs"}
+              {filteredBugs?.length}{" "}
+              {filteredBugs?.length === 1 ? "bug" : "bugs"}
             </span>
             {status && (
               <Button
@@ -332,7 +381,8 @@ export const BugsPage = () => {
           <DialogHeader>
             <DialogTitle>Delete Bug</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this bug? This action cannot be undone.
+              Are you sure you want to delete this bug? This action cannot be
+              undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -345,9 +395,9 @@ export const BugsPage = () => {
             <Button
               variant="destructive"
               onClick={() => selectedBug && handleDeleteBug(selectedBug.id)}
-              disabled={mutateDelete.isLoading}
+              disabled={mutateDelete.isPending}
             >
-              {mutateDelete.isLoading ? "Deleting..." : "Delete"}
+              {mutateDelete.isPending ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>

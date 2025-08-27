@@ -28,7 +28,7 @@ internal sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand>
                 Email.Create(request.Email),
                 passwordHashingService.HashPassword(request.Password));
         var emailIsUnique = await CheckIfEmailIsUniqueAsync(user.Value.Email, cancellationToken);
-        if (!emailIsUnique.IsSuccess)
+        if (emailIsUnique.IsSuccess)
         {
             return Result.Failure(AuthValidationErrors.EmailAlreadyExists);
         }

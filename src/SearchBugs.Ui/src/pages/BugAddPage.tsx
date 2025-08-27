@@ -1,54 +1,300 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { apiClient } from "@/lib/api";
+import { LoaderIcon, ArrowLeft } from "lucide-react";
+
+interface Project {
+  id: string;
+  name: string;
+  description: string;
+}
+
+interface User {
+  id: string;
+  email: string;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+}
 
 export const BugAddPage = () => {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [status, setStatus] = useState("New");
+  const [priority, setPriority] = useState("Medium");
+  const [severity, setSeverity] = useState("Medium");
+  const [projectId, setProjectId] = useState<string>("");
+  const [assigneeId, setAssigneeId] = useState<string>("");
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoadingData(true);
+        const [projectsResponse, usersResponse] = await Promise.all([
+          apiClient.projects.getAll(),
+          apiClient.users.getAll(),
+        ]);
+
+        if (projectsResponse.data) {
+          setProjects(projectsResponse.data);
+        }
+        if (usersResponse.data) {
+          setUsers(usersResponse.data);
+        }
+      } catch (error) {
+        toast({
+          title: "Error loading data",
+          description: "Failed to load projects and users.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    loadData();
+  }, [toast]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    if (!projectId) {
+      toast({
+        title: "Project required",
+        description: "Please select a project for this bug.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await apiClient.bugs.create({
+        title,
+        description,
+        status,
+        priority,
+        severity,
+        projectId,
+        assigneeId: assigneeId || user.id,
+        reporterId: user.id,
+      });
+
+      toast({
+        title: "Bug created successfully",
+        description: "The bug has been reported and added to the system.",
+      });
+
+      navigate("/bugs");
+    } catch (error) {
+      toast({
+        title: "Error creating bug",
+        description: "Failed to create the bug. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoadingData) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <LoaderIcon className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-3 md:gap-8">
-      <div className="mx-auto grid flex-1 auto-rows-max gap-4">
-        <div className="flex items-center gap-4">
-          <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-            Report a Bug
-          </h1>
-          <div className="hidden items-center gap-2 md:ml-auto md:flex">
-            <Button variant="outline" size="sm">
-              Discard
-            </Button>
-            <Button size="sm">Create Bug</Button>
-          </div>
-        </div>
+    <div className="container mx-auto py-6 max-w-4xl">
+      <div className="flex items-center gap-4 mb-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="gap-1"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+        <h1 className="text-2xl font-bold">Report a Bug</h1>
+      </div>
+
+      <form onSubmit={handleSubmit}>
         <Card>
-          <CardContent>
-            <div className="grid gap-6">
-              <div className="grid gap-3">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  className="w-full"
-                  defaultValue="Gamer Gear Pro Controller"
-                />
+          <CardHeader>
+            <CardTitle>Bug Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid gap-2">
+              <Label htmlFor="title">Title *</Label>
+              <Input
+                id="title"
+                type="text"
+                placeholder="Brief description of the bug"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="description">Description *</Label>
+              <Textarea
+                id="description"
+                placeholder="Detailed description of the bug, including steps to reproduce, expected behavior, and actual behavior"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="min-h-32"
+                required
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="project">Project *</Label>
+                <Select
+                  value={projectId}
+                  onValueChange={setProjectId}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="grid gap-3">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  defaultValue="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl nec ultricies ultricies, nunc nisl ultricies nunc, nec ultricies nunc nisl nec nunc."
-                  className="min-h-32"
-                />
+
+              <div className="grid gap-2">
+                <Label htmlFor="assignee">Assignee</Label>
+                <Select
+                  value={assigneeId}
+                  onValueChange={setAssigneeId}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select assignee (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.firstName || user.username} {user.lastName} (
+                        {user.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={status}
+                  onValueChange={setStatus}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="New">New</SelectItem>
+                    <SelectItem value="InProgress">In Progress</SelectItem>
+                    <SelectItem value="Resolved">Resolved</SelectItem>
+                    <SelectItem value="Closed">Closed</SelectItem>
+                    <SelectItem value="Reopened">Reopened</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="priority">Priority</Label>
+                <Select
+                  value={priority}
+                  onValueChange={setPriority}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Low">Low</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="High">High</SelectItem>
+                    <SelectItem value="Critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="severity">Severity</Label>
+                <Select
+                  value={severity}
+                  onValueChange={setSeverity}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Low">Low</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="High">High</SelectItem>
+                    <SelectItem value="Critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </CardContent>
         </Card>
-        <div className="flex items-center justify-center gap-2 md:hidden">
-          <Button variant="outline" size="sm">
-            Discard
+
+        <div className="flex items-center gap-2 mt-6">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate(-1)}
+            disabled={isLoading}
+          >
+            Cancel
           </Button>
-          <Button size="sm">Save Product</Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading && <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />}
+            Create Bug
+          </Button>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

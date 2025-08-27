@@ -17,7 +17,7 @@ namespace SearchBugs.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.7")
+                .HasAnnotation("ProductVersion", "9.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -560,7 +560,7 @@ namespace SearchBugs.Persistence.Migrations
                     b.ToTable("project_role_user", (string)null);
                 });
 
-            modelBuilder.Entity("SearchBugs.Domain.Repositories.BugRepository", b =>
+            modelBuilder.Entity("SearchBugs.Domain.Repositories.BugRepo", b =>
                 {
                     b.Property<Guid>("BugId")
                         .HasColumnType("uuid")
@@ -649,8 +649,15 @@ namespace SearchBugs.Persistence.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
 
+                    b.Property<int?>("RoleId")
+                        .HasColumnType("integer")
+                        .HasColumnName("role_id");
+
                     b.HasKey("Id")
                         .HasName("pk_permission");
+
+                    b.HasIndex("RoleId")
+                        .HasDatabaseName("ix_permission_role_id");
 
                     b.ToTable("permission", (string)null);
 
@@ -1677,7 +1684,7 @@ namespace SearchBugs.Persistence.Migrations
                         .HasConstraintName("fk_project_role_user_user_user_id");
                 });
 
-            modelBuilder.Entity("SearchBugs.Domain.Repositories.BugRepository", b =>
+            modelBuilder.Entity("SearchBugs.Domain.Repositories.BugRepo", b =>
                 {
                     b.HasOne("SearchBugs.Domain.Bugs.Bug", null)
                         .WithMany()
@@ -1702,6 +1709,14 @@ namespace SearchBugs.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_repository_project_project_id");
+                });
+
+            modelBuilder.Entity("SearchBugs.Domain.Roles.Permission", b =>
+                {
+                    b.HasOne("SearchBugs.Domain.Roles.Role", null)
+                        .WithMany("Permissions")
+                        .HasForeignKey("RoleId")
+                        .HasConstraintName("fk_permission_roles_role_id");
                 });
 
             modelBuilder.Entity("SearchBugs.Domain.Roles.RolePermission", b =>
@@ -1818,6 +1833,11 @@ namespace SearchBugs.Persistence.Migrations
                     b.Navigation("Bugs");
 
                     b.Navigation("CustomsFields");
+                });
+
+            modelBuilder.Entity("SearchBugs.Domain.Roles.Role", b =>
+                {
+                    b.Navigation("Permissions");
                 });
 #pragma warning restore 612, 618
         }

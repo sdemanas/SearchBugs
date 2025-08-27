@@ -75,7 +75,7 @@ public static class BugsEndpoints
         bugs.MapGet("{bugId:guid}/custom-fields", GetCustomFields).WithName(nameof(GetCustomFields));
     }
 
-    public static async Task<IResult> GetBugs([FromQuery] Guid projectId, ISender sender)
+    public static async Task<IResult> GetBugs([FromQuery] Guid? projectId, ISender sender)
     {
         var query = new GetBugsQuery(projectId);
         var result = await sender.Send(query);

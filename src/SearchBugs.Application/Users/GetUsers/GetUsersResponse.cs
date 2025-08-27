@@ -1,9 +1,8 @@
 ﻿namespace SearchBugs.Application.Users.GetUsers;
 
-public record GetUsersResponse(string UserId,
+public record GetUsersResponse(Guid Id,
     string FirstName,
     string LastName,
     string Email,
-    string[] Role,
     DateTime CreatedOnUtc,
     DateTime? ModifiedOnUtc);

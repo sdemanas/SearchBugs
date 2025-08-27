@@ -1,90 +1,116 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { FieldValues, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useMutation } from "react-query";
-import { api } from "@/lib/api";
+import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { apiClient } from "@/lib/api";
+import { LoaderIcon, ArrowLeft } from "lucide-react";
 
 export const CreateProjectPage = () => {
-  const CreateProjectSchema = z.object({
-    name: z
-      .string()
-      .min(3, "Name must be at least 3 characters long")
-      .max(50, "Name must be at most 50 characters long"),
-    description: z
-      .string()
-      .max(500, "Description must be at most 500 characters long"),
-  });
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(CreateProjectSchema),
-  });
 
-  const createProjectMutation = useMutation((data: FieldValues) => {
-    return api.post("/projects", data).then(() =>
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!name.trim()) {
       toast({
-        title: "Project created",
-        description: "The project has been created successfully",
-      })
-    );
-  });
+        title: "Name required",
+        description: "Please enter a project name.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const onSubmit = (data: FieldValues) => {
-    createProjectMutation.mutate(data);
-    navigate("/projects");
+    setIsLoading(true);
+    try {
+      const response = await apiClient.projects.create({ name, description });
+
+      if (response.data) {
+        toast({
+          title: "Project created",
+          description: "The project has been created successfully.",
+        });
+        navigate("/projects");
+      }
+    } catch (error) {
+      toast({
+        title: "Error creating project",
+        description: "Failed to create the project. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="flex flex-col gap-3 md:gap-8">
-      <div className="flex items-center">
-        <h5 className="text-lg font-semibold">Create Project</h5>
+    <div className="container mx-auto py-6 max-w-2xl">
+      <div className="flex items-center gap-4 mb-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="gap-1"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+        <h1 className="text-2xl font-bold">Create Project</h1>
       </div>
-      <Card className="w-full">
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+      <form onSubmit={handleSubmit}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Project Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Project Name</Label>
+              <Label htmlFor="name">Project Name *</Label>
               <Input
                 id="name"
                 placeholder="Enter project name"
-                {...register("name")}
-                className={errors.name ? "border-red-500" : ""}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                disabled={isLoading}
               />
-              {errors.name && (
-                <p className="text-red-500 text-sm">{errors.name.message}</p>
-              )}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                placeholder="Enter project description"
-                {...register("description")}
-                className={errors.description ? "border-red-500" : ""}
+                placeholder="Enter project description (optional)"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="min-h-[100px]"
+                disabled={isLoading}
               />
-              {errors.description && (
-                <p className="text-red-500 text-sm">
-                  {errors.description.message}
-                </p>
-              )}
             </div>
-            <Button type="submit" disabled={createProjectMutation.isLoading}>
-              Create Project
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <div className="flex items-center gap-2 mt-6">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate(-1)}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading && <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />}
+            Create Project
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };

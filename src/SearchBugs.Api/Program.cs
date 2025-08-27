@@ -61,8 +61,9 @@ public abstract partial class Program
         app.MapAuthenticationsEndpoints();
         app.MapBugsEndpoints();
         app.MapUserEndpoints();
+        app.MapRoleEndpoints();
         app.MapProjectsEndpoints();
-        //app.MapRepoEndpoints();
+        app.MapRepoEndpoints();
 
         // app.UseHttpsRedirection();
 

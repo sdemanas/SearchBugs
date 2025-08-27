@@ -21,5 +21,6 @@ internal sealed class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, List<G
                 u.email_value as Email,
                 u.created_on_utc as CreatedOnUtc,
                 u.modified_on_utc as ModifiedOnUtc
-            FROM ""user"" u");
+            FROM ""user"" u
+            ORDER BY u.created_on_utc DESC");
 }

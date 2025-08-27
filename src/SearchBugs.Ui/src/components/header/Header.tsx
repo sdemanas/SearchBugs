@@ -1,45 +1,155 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Bell, Plus } from "lucide-react";
+import { Bell, Plus, Search, LogOut } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/components/ui/use-toast";
 
 export const Header = () => {
-    const navigate = useNavigate();
-    return (
-        <header className="bg-gray-900 text-white">
-        <div className="container mx-auto flex items-center justify-between p-4">
-          <div className="flex items-center space-x-4">
-            <svg
-              viewBox="0 0 16 16"
-              className="h-8 w-8 fill-current"
-              aria-hidden="true"
-            >
-              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
-            </svg>
-            <Input className="w-64" placeholder="Search or jump to..." />
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const { toast } = useToast();
+
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out.",
+    });
+    navigate("/login");
+  };
+
+  return (
+    <header className="bg-card border-b shadow-sm">
+      <div className="container mx-auto flex items-center justify-between p-4">
+        {/* Logo and Search */}
+        <div className="flex items-center space-x-4">
+          <div
+            className="flex items-center space-x-2 cursor-pointer"
+            onClick={() => navigate("/")}
+          >
+            <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">
+                SB
+              </span>
+            </div>
+            <span className="font-semibold text-lg hidden sm:block">
+              SearchBugs
+            </span>
           </div>
-          <nav className="hidden md:flex md:items-center md:space-x-4">
-            <Button variant="ghost">Pull requests</Button>
-            <Button variant="ghost">Issues</Button>
-            <Button variant="ghost">Marketplace</Button>
-            <Button variant="ghost">Explore</Button>
-          </nav>
-          <div className="flex items-center space-x-4">
-            <Button size="icon" variant="ghost">
-              <Bell className="h-5 w-5" />
-              <span className="sr-only">Notifications</span>
-            </Button>
-            <Button size="icon" variant="ghost">
-              <Plus className="h-5 w-5" />
-              <span className="sr-only">New</span>
-            </Button>
-            <Avatar className="h-8 w-8" onClick={() => navigate("/profile")}>
-              <AvatarImage alt="@username" src="https://avatars.githubusercontent.com/u/48352653" />
-              <AvatarFallback>UN</AvatarFallback>
-            </Avatar>
+          <div className="relative hidden md:block">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              className="w-64 pl-8"
+              placeholder="Search bugs, projects..."
+            />
           </div>
         </div>
-      </header>
-    );
-}
+
+        {/* Navigation */}
+        <nav className="hidden lg:flex lg:items-center lg:space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/projects")}
+          >
+            Projects
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/repositories")}
+          >
+            Repositories
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => navigate("/bugs")}>
+            Bugs
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => navigate("/users")}>
+            Users
+          </Button>
+        </nav>
+
+        {/* User Actions */}
+        <div className="flex items-center space-x-2">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => navigate("/notifications")}
+            className="relative"
+          >
+            <Bell className="h-4 w-4" />
+            <span className="sr-only">Notifications</span>
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="icon" variant="ghost">
+                <Plus className="h-4 w-4" />
+                <span className="sr-only">Create</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => navigate("/projects/create")}>
+                New Project
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => navigate("/repositories/create")}
+              >
+                New Repository
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/add-bug")}>
+                Report Bug
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* User Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Avatar className="h-8 w-8 cursor-pointer">
+                <AvatarFallback className="bg-primary text-primary-foreground">
+                  {user?.firstName?.[0] || user?.email?.[0] || "U"}
+                </AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium">
+                    {user?.firstName} {user?.lastName}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate("/profile")}>
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/settings")}>
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="text-destructive"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    </header>
+  );
+};

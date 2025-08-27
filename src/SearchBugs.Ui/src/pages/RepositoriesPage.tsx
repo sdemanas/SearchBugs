@@ -1,11 +1,5 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -18,24 +12,25 @@ import {
   Play,
   Star,
 } from "lucide-react";
-import { CodeTree } from "@/modules/repository/CodeTree";
-
+import { RepositoryBrowser } from "@/modules/repository/RepositoryBrowser";
+import { useParams } from "react-router-dom";
 
 export const RepositoryPage: React.FC = () => {
-  
+  const { url } = useParams<{ url: string }>();
+
+  if (!url) {
+    return <div>Repository URL not found</div>;
+  }
+
+  const decodedUrl = decodeURIComponent(url);
+
   return (
     <div className="container mx-auto p-4">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Book className="h-5 w-5" />
           <h1 className="text-xl font-semibold">
-            <a href="#" className="text-blue-600 hover:underline">
-              username
-            </a>{" "}
-            /{" "}
-            <a href="#" className="text-blue-600 hover:underline">
-              repository-name
-            </a>
+            <span className="text-blue-600">{decodedUrl}</span>
           </h1>
           <Badge variant="outline">Public</Badge>
         </div>
@@ -94,7 +89,7 @@ export const RepositoryPage: React.FC = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="code" className="mt-4">
-            <CodeTree />
+          <RepositoryBrowser repoUrl={decodedUrl} />
         </TabsContent>
       </Tabs>
     </div>
