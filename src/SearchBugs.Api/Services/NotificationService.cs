@@ -51,7 +51,7 @@ public class NotificationService : INotificationService
             Message = notification.Message,
             BugId = notification.BugId.Value,
             IsRead = notification.IsRead,
-            CreatedAt = notification.CreatedAt,
+            CreatedAt = notification.CreatedOnUtc,
             Timestamp = DateTime.UtcNow
         };
 

@@ -6,44 +6,53 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { FormInput } from "@/components/ui/form";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/use-toast";
 import { LoaderIcon } from "lucide-react";
+import { registerSchema, type RegisterFormData } from "@/lib/validations";
 
 export const RegisterPage = () => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+    },
+  });
 
+  const onSubmit = async (data: RegisterFormData) => {
     try {
-      await register(email, password, firstName, lastName);
+      await register(data.firstName, data.lastName, data.email, data.password);
       toast({
         title: "Account created successfully!",
-        description:
-          "Welcome to SearchBugs. You can now start using the platform.",
+        description: "Welcome to SearchBugs. You can now login.",
       });
-      navigate("/");
-    } catch (error) {
+      navigate("/login");
+    } catch (error: unknown) {
+      console.error("Registration error:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Registration failed. Please try again.";
       toast({
         title: "Registration failed",
-        description: "Please check your information and try again.",
+        description: errorMessage,
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -51,62 +60,54 @@ export const RegisterPage = () => {
     <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-background to-muted">
       <Card className="mx-auto max-w-sm w-full m-4 shadow-lg">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Create Account</CardTitle>
+          <CardTitle className="text-xl">Sign Up</CardTitle>
           <CardDescription>
             Enter your information to create an account
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="grid gap-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
             <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="first-name">First name</Label>
-                <Input
-                  id="first-name"
-                  placeholder="Search"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="last-name">Last name</Label>
-                <Input
-                  id="last-name"
-                  placeholder="Bugs"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="example@searchbugs.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+              <FormInput
+                control={control}
+                name="firstName"
+                label="First name"
+                placeholder="Search"
                 required
-                disabled={isLoading}
+                disabled={isSubmitting}
+                error={errors.firstName}
+              />
+              <FormInput
+                control={control}
+                name="lastName"
+                label="Last name"
+                placeholder="Bugs"
+                required
+                disabled={isSubmitting}
+                error={errors.lastName}
               />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && (
+            <FormInput
+              control={control}
+              name="email"
+              label="Email"
+              type="email"
+              placeholder="example@searchbugs.com"
+              required
+              disabled={isSubmitting}
+              error={errors.email}
+            />
+            <FormInput
+              control={control}
+              name="password"
+              label="Password"
+              type="password"
+              required
+              disabled={isSubmitting}
+              error={errors.password}
+            />
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting && (
                 <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
               )}
               Create an account
@@ -115,7 +116,7 @@ export const RegisterPage = () => {
               variant="outline"
               className="w-full"
               type="button"
-              disabled={isLoading}
+              disabled={isSubmitting}
             >
               Sign up with GitHub
             </Button>

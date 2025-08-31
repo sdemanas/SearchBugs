@@ -16,7 +16,7 @@ internal sealed class CreateBugCommandValidator : AbstractValidator<CreateBugCom
         RuleFor(x => x.Description)
             .NotEmpty()
             .WithError(BugValidationErrors.DescriptionIsRequired)
-            .MaximumLength(2000)
+            .MaximumLength(10000)
             .WithError(BugValidationErrors.DescriptionMaxLength);
 
         RuleFor(x => x.Status)

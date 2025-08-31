@@ -3,6 +3,7 @@ using Shared.Primitives;
 using Shared.Time;
 
 namespace SearchBugs.Domain.Bugs;
+
 public class BugHistory : Entity<HistoryId>
 {
     public BugId BugId { get; set; }
@@ -12,9 +13,16 @@ public class BugHistory : Entity<HistoryId>
     public string NewValue { get; set; }
     public DateTime ChangedAtUtc { get; set; }
 
+    // Navigation property
+    public User? User { get; set; }
+
     private BugHistory()
     {
-
+        BugId = null!;
+        ChangedBy = null!;
+        FieldChanged = string.Empty;
+        OldValue = string.Empty;
+        NewValue = string.Empty;
     }
 
     private BugHistory(HistoryId id, BugId bugId, UserId changedBy, string fieldChanged, string oldValue, string newValue, DateTime changedAt) : base(id)

@@ -4,29 +4,32 @@ using Shared.Time;
 
 namespace SearchBugs.Domain.Repositories;
 
-public class Repository : Entity<RepositoryId>
+public class Repository : Entity<RepositoryId>, IAuditable
 {
     public string Name { get; private set; }
     public string Description { get; private set; }
     public string Url { get; private set; }
     public ProjectId ProjectId { get; private set; }
 
-    public DateTime CreatedAt { get; private set; }
+    public DateTime CreatedOnUtc { get; private set; }
 
-    public DateTime UpdatedAt { get; private set; }
+    public DateTime? ModifiedOnUtc { get; private set; }
 
-    private Repository(RepositoryId id, string name, string description, string url, ProjectId projectId, DateTime createdAt) : base(id)
+    private Repository(RepositoryId id, string name, string description, string url, ProjectId projectId, DateTime createdOnUtc) : base(id)
     {
         Name = name;
         Description = description;
         Url = url;
         ProjectId = projectId;
-        CreatedAt = createdAt;
+        CreatedOnUtc = createdOnUtc;
     }
 
     private Repository()
     {
-
+        Name = string.Empty;
+        Description = string.Empty;
+        Url = string.Empty;
+        ProjectId = null!;
     }
 
     public static Repository Create(string name, string description, string url, ProjectId projectId)

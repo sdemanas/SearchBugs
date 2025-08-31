@@ -26,7 +26,7 @@ import { useNavigate } from "react-router-dom";
 import { useApi } from "@/hooks/useApi";
 import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";
-import { safeFormatDistance } from "@/lib/date-utils";
+import { useTimezone } from "@/hooks/useTimezone";
 import {
   Dialog,
   DialogContent,
@@ -49,6 +49,7 @@ export const ProjectsPage = () => {
   const { data, isLoading, mutateDelete } = useApi<Project[]>("projects");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { formatDistanceToNow } = useTimezone();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -163,10 +164,10 @@ export const ProjectsPage = () => {
                       </span>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {safeFormatDistance(project.createdOnUtc)}
+                      {formatDistanceToNow(project.createdOnUtc)}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {safeFormatDistance(project.updatedOnUtc)}
+                      {formatDistanceToNow(project.updatedOnUtc)}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>

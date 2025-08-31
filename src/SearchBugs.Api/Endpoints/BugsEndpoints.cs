@@ -145,7 +145,7 @@ public static class BugsEndpoints
 
     public static async Task<IResult> GetComments(Guid bugId, ISender sender)
     {
-        var query = new GetBugCommentsQuery(bugId);
+        var query = new GetBugCommentsWithUserQuery(bugId);
         var result = await sender.Send(query);
         return result!.ToHttpResult();
     }

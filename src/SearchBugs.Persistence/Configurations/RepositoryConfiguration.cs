@@ -32,8 +32,11 @@ internal sealed class RepositoryConfiguration : IEntityTypeConfiguration<Reposit
             .IsRequired();
         builder.Property(r => r.Description)
             .HasMaxLength(500);
-        builder.Property(r => r.CreatedAt)
-            .IsRequired();
+        builder.Property(r => r.CreatedOnUtc)
+            .IsRequired()
+            .HasColumnName("created_on_utc");
+        builder.Property(r => r.ModifiedOnUtc)
+            .HasColumnName("modified_on_utc");
     }
 
     private static void ConfigureRelationships(EntityTypeBuilder<Repository> builder)

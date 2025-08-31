@@ -1,21 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { FormInput, FormSelect } from "@/components/ui/form";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiClient } from "@/lib/api";
 import { LoaderIcon, ArrowLeft } from "lucide-react";
+import { createBugSchema, type CreateBugFormData } from "@/lib/validations";
 
 interface Project {
   id: string;
@@ -32,21 +27,33 @@ interface User {
 }
 
 export const BugAddPage = () => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [status, setStatus] = useState("Open");
-  const [priority, setPriority] = useState("Medium");
-  const [severity, setSeverity] = useState("Medium");
-  const [projectId, setProjectId] = useState<string>("");
-  const [assigneeId, setAssigneeId] = useState<string>("");
   const [projects, setProjects] = useState<Project[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const navigate = useNavigate();
+  const { projectId: urlProjectId } = useParams<{ projectId: string }>();
   const { toast } = useToast();
   const { user } = useAuth();
+
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateBugFormData>({
+    resolver: zodResolver(createBugSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      status: "Open",
+      priority: "Medium",
+      severity: "Medium",
+      projectId: urlProjectId || "",
+      assigneeId: "",
+    },
+  });
 
   useEffect(() => {
     const loadData = async () => {
@@ -64,6 +71,17 @@ export const BugAddPage = () => {
         if (usersResponse.data?.value) {
           setUsers(usersResponse.data.value);
         }
+
+        // Auto-select project if projectId is in URL
+        if (urlProjectId && projectsResponse.data?.value) {
+          const project = projectsResponse.data.value.find(
+            (p) => p.id === urlProjectId
+          );
+          if (project) {
+            setValue("projectId", urlProjectId);
+            setSelectedProject(project);
+          }
+        }
       } catch (error) {
         console.error("Error loading data:", error);
         toast({
@@ -77,31 +95,52 @@ export const BugAddPage = () => {
     };
 
     loadData();
-  }, [toast]);
+  }, [toast, urlProjectId, setValue]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Prepare options for selects
+  const projectOptions = projects.map((project) => ({
+    value: project.id,
+    label: project.name,
+  }));
+
+  const userOptions = users.map((user) => ({
+    value: user.id,
+    label: `${user.firstName || user.username} ${user.lastName} (${
+      user.email
+    })`,
+  }));
+
+  const statusOptions = [
+    { value: "Open", label: "Open" },
+    { value: "In Progress", label: "In Progress" },
+    { value: "Resolved", label: "Resolved" },
+    { value: "Closed", label: "Closed" },
+  ];
+
+  const priorityOptions = [
+    { value: "Low", label: "Low" },
+    { value: "Medium", label: "Medium" },
+    { value: "High", label: "High" },
+  ];
+
+  const severityOptions = [
+    { value: "Low", label: "Low" },
+    { value: "Medium", label: "Medium" },
+    { value: "High", label: "High" },
+  ];
+
+  const onSubmit = async (data: CreateBugFormData) => {
     if (!user) return;
 
-    if (!projectId) {
-      toast({
-        title: "Project required",
-        description: "Please select a project for this bug.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
     try {
       const response = await apiClient.bugs.create({
-        title,
-        description,
-        status,
-        priority,
-        severity,
-        projectId,
-        assigneeId: assigneeId || user.id,
+        title: data.title,
+        description: data.description,
+        status: data.status,
+        priority: data.priority,
+        severity: data.severity,
+        projectId: data.projectId,
+        assigneeId: data.assigneeId || user.id,
         reporterId: user.id,
       });
 
@@ -127,8 +166,6 @@ export const BugAddPage = () => {
         description: errorMessage,
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -152,139 +189,110 @@ export const BugAddPage = () => {
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
-        <h1 className="text-2xl font-bold">Report a Bug</h1>
+        <h1 className="text-2xl font-bold">
+          {selectedProject
+            ? `Report Bug for ${selectedProject.name}`
+            : "Report a Bug"}
+        </h1>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <Card>
           <CardHeader>
             <CardTitle>Bug Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid gap-2">
-              <Label htmlFor="title">Title *</Label>
-              <Input
-                id="title"
-                type="text"
-                placeholder="Brief description of the bug"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-            </div>
+            <FormInput
+              control={control}
+              name="title"
+              label="Title"
+              placeholder="Brief description of the bug"
+              required
+              disabled={isSubmitting}
+              error={errors.title}
+            />
 
-            <div className="grid gap-2">
-              <Label htmlFor="description">Description *</Label>
-              <Textarea
-                id="description"
-                placeholder="Detailed description of the bug, including steps to reproduce, expected behavior, and actual behavior"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="min-h-32"
-                required
-                disabled={isLoading}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Description <span className="text-red-500">*</span>
+              </label>
+              <Controller
+                name="description"
+                control={control}
+                render={({ field }) => (
+                  <RichTextEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Detailed description of the bug, including steps to reproduce, expected behavior, and actual behavior"
+                    disabled={isSubmitting}
+                    maxLength={10000}
+                  />
+                )}
               />
+              {errors.description && (
+                <p className="text-sm text-red-500">
+                  {errors.description.message}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="project">Project *</Label>
-                <Select
-                  value={projectId}
-                  onValueChange={setProjectId}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a project" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {projects.map((project) => (
-                      <SelectItem key={project.id} value={project.id}>
-                        {project.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="space-y-1">
+                <FormSelect
+                  control={control}
+                  name="projectId"
+                  label="Project"
+                  placeholder="Select a project"
+                  options={projectOptions}
+                  required
+                  disabled={isSubmitting || !!urlProjectId}
+                  error={errors.projectId}
+                />
+                {urlProjectId && selectedProject && (
+                  <p className="text-xs text-muted-foreground">
+                    Project automatically selected from {selectedProject.name}
+                  </p>
+                )}
               </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="assignee">Assignee</Label>
-                <Select
-                  value={assigneeId}
-                  onValueChange={setAssigneeId}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select assignee (optional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {users.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.firstName || user.username} {user.lastName} (
-                        {user.email})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <FormSelect
+                control={control}
+                name="assigneeId"
+                label="Assignee"
+                placeholder="Select assignee (optional)"
+                options={userOptions}
+                disabled={isSubmitting}
+                error={errors.assigneeId}
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="status">Status</Label>
-                <Select
-                  value={status}
-                  onValueChange={setStatus}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Open">Open</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Resolved">Resolved</SelectItem>
-                    <SelectItem value="Closed">Closed</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <FormSelect
+                control={control}
+                name="status"
+                label="Status"
+                options={statusOptions}
+                disabled={isSubmitting}
+                error={errors.status}
+              />
 
-              <div className="grid gap-2">
-                <Label htmlFor="priority">Priority</Label>
-                <Select
-                  value={priority}
-                  onValueChange={setPriority}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Low">Low</SelectItem>
-                    <SelectItem value="Medium">Medium</SelectItem>
-                    <SelectItem value="High">High</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <FormSelect
+                control={control}
+                name="priority"
+                label="Priority"
+                options={priorityOptions}
+                disabled={isSubmitting}
+                error={errors.priority}
+              />
 
-              <div className="grid gap-2">
-                <Label htmlFor="severity">Severity</Label>
-                <Select
-                  value={severity}
-                  onValueChange={setSeverity}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Low">Low</SelectItem>
-                    <SelectItem value="Medium">Medium</SelectItem>
-                    <SelectItem value="High">High</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <FormSelect
+                control={control}
+                name="severity"
+                label="Severity"
+                options={severityOptions}
+                disabled={isSubmitting}
+                error={errors.severity}
+              />
             </div>
           </CardContent>
         </Card>
@@ -294,12 +302,14 @@ export const BugAddPage = () => {
             type="button"
             variant="outline"
             onClick={() => navigate(-1)}
-            disabled={isLoading}
+            disabled={isSubmitting}
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading && <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />}
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting && (
+              <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
+            )}
             Create Bug
           </Button>
         </div>

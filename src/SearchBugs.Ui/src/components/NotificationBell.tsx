@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNotifications } from "../hooks/useNotifications";
 import { NotificationData } from "../services/notificationService";
+import { Bell } from "lucide-react";
 
 interface NotificationBellProps {}
 
@@ -59,20 +60,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = () => {
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 text-gray-600 hover:text-gray-800 transition-colors"
       >
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 17h5l-5-5V9.09c0-2.05-1.48-3.76-3.41-4.03a4.006 4.006 0 00-8.58 4.03v2.98L8 17h5m2 2a2 2 0 01-4 0"
-          />
-        </svg>
-
+        <Bell className="h-6 w-6" />
         {/* Notification Badge */}
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">

@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text.Json;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SearchBugs.Application.Common.Attributes;
 using SearchBugs.Application.Common.Interfaces;
@@ -22,6 +23,7 @@ public sealed class AuditLoggingPipelineBehavior<TRequest, TResponse> : IPipelin
     private readonly IAuditLogRepository _auditLogRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<AuditLoggingPipelineBehavior<TRequest, TResponse>> _logger;
 
     // Maximum lengths for JSON data to prevent database issues
@@ -32,11 +34,13 @@ public sealed class AuditLoggingPipelineBehavior<TRequest, TResponse> : IPipelin
         IAuditLogRepository auditLogRepository,
         ICurrentUserService currentUserService,
         IHttpContextAccessor httpContextAccessor,
+        IServiceProvider serviceProvider,
         ILogger<AuditLoggingPipelineBehavior<TRequest, TResponse>> logger)
     {
         _auditLogRepository = auditLogRepository;
         _currentUserService = currentUserService;
         _httpContextAccessor = httpContextAccessor;
+        _serviceProvider = serviceProvider;
         _logger = logger;
     }
 
@@ -103,7 +107,10 @@ public sealed class AuditLoggingPipelineBehavior<TRequest, TResponse> : IPipelin
 
             try
             {
-                await _auditLogRepository.AddAsync(auditLog, cancellationToken);
+                // Use a separate scope for audit logging to avoid DbContext tracking conflicts
+                using var scope = _serviceProvider.CreateScope();
+                var auditLogRepository = scope.ServiceProvider.GetRequiredService<IAuditLogRepository>();
+                await auditLogRepository.AddAsync(auditLog, cancellationToken);
             }
             catch (Exception ex)
             {

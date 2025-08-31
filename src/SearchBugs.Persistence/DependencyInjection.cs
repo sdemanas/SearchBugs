@@ -41,6 +41,7 @@ public static class DependencyInjection
         services.AddScoped<IGitRepository, GitRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+        services.AddScoped<ICustomFieldRepository, CustomFieldRepository>();
 
         services.AddMemoryCache()
             .ConfigureOptions<ConnectionStringSetup>();

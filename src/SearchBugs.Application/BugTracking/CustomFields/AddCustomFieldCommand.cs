@@ -18,17 +18,20 @@ public class AddCustomFieldCommandHandler : ICommandHandler<AddCustomFieldComman
     private readonly IProjectRepository _projectRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICustomFieldRepository _customFieldRepository;
 
     public AddCustomFieldCommandHandler(
         IBugRepository bugRepository,
         IProjectRepository projectRepository,
         ICurrentUserService currentUserService,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ICustomFieldRepository customFieldRepository)
     {
         _bugRepository = bugRepository;
         _projectRepository = projectRepository;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
+        _customFieldRepository = customFieldRepository;
     }
 
     public async Task<Result<CustomFieldDto>> Handle(AddCustomFieldCommand command, CancellationToken cancellationToken)
@@ -58,18 +61,20 @@ public class AddCustomFieldCommandHandler : ICommandHandler<AddCustomFieldComman
             "text", // Default field type for now
             bug.ProjectId);
 
-        // Create the bug custom field link with the value
+        // Add the custom field to the context and save it first
+        await _customFieldRepository.AddAsync(customField, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // Now create the bug custom field link with the value
         var bugCustomField = BugCustomField.Create(
             bug.Id,
             customField.Id,
             command.Value);
 
-        // Set the navigation property so EF can track the relationship
-        bugCustomField.CustomField = customField;
-
-        // Add the bug custom field to the bug
+        // Add the bug custom field to the bug's collection
         bug.AddBugCustomField(bugCustomField);
 
+        // Save the bug custom field
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success(CustomFieldDto.FromCustomField(customField, command.Value));

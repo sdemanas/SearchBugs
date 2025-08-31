@@ -26,8 +26,12 @@ public class GetBugHistoryQueryHandler : IQueryHandler<GetBugHistoryQuery, IEnum
         }
 
         var bug = bugResult.Value;
-        var historyEntries = bug.BugHistories.Select(entry => HistoryEntryDto.FromHistoryEntry(entry));
-        return Result.Success(historyEntries);
+        var historyEntries = bug.BugHistories
+            .Select(entry => HistoryEntryDto.FromHistoryEntry(entry))
+            .OrderByDescending(x => x.ChangedAtUtc)
+            .ToList();
+        
+        return Result.Success(historyEntries.AsEnumerable());
     }
 }
 
@@ -37,7 +41,8 @@ public record HistoryEntryDto(
     string OldValue,
     string NewValue,
     Guid ChangedById,
-    DateTime ChangedAtUtc)
+    DateTime ChangedAtUtc,
+    string UserName)
 {
     public static HistoryEntryDto FromHistoryEntry(BugHistory entry) => new(
         entry.Id.Value,
@@ -45,5 +50,6 @@ public record HistoryEntryDto(
         entry.OldValue,
         entry.NewValue,
         entry.ChangedBy.Value,
-        entry.ChangedAtUtc);
-} 
+        entry.ChangedAtUtc,
+        entry.User != null ? $"{entry.User.Name.FirstName} {entry.User.Name.LastName}".Trim() : "Unknown User");
+}

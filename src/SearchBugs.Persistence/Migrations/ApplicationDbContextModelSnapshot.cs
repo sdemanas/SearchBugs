@@ -499,9 +499,9 @@ namespace SearchBugs.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("bug_id");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime>("CreatedOnUtc")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("created_on_utc");
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("boolean")
@@ -512,6 +512,10 @@ namespace SearchBugs.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("message");
+
+                    b.Property<DateTime?>("ModifiedOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_on_utc");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -667,15 +671,19 @@ namespace SearchBugs.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime>("CreatedOnUtc")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("created_on_utc");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("description");
+
+                    b.Property<DateTime?>("ModifiedOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_on_utc");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -686,10 +694,6 @@ namespace SearchBugs.Persistence.Migrations
                     b.Property<Guid>("ProjectId")
                         .HasColumnType("uuid")
                         .HasColumnName("project_id");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
 
                     b.Property<string>("Url")
                         .IsRequired()
@@ -1668,12 +1672,14 @@ namespace SearchBugs.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_bug_history_bug_bug_id");
 
-                    b.HasOne("SearchBugs.Domain.Users.User", null)
+                    b.HasOne("SearchBugs.Domain.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("ChangedBy")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_bug_history_user_changed_by");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SearchBugs.Domain.Bugs.Comment", b =>
@@ -1685,12 +1691,14 @@ namespace SearchBugs.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_comment_bug_bug_id");
 
-                    b.HasOne("SearchBugs.Domain.Users.User", null)
+                    b.HasOne("SearchBugs.Domain.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_comment_user_user_id");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SearchBugs.Domain.Bugs.CustomField", b =>

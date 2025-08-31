@@ -16,6 +16,12 @@ internal sealed class BugRepository : Repository<Bug, BugId>, IBugRepository
           Result.Create(await _context.Set<Bug>()
               .Include(b => b.Status)
               .Include(b => b.Priority)
+              .Include(b => b.Comments)
+                  .ThenInclude(c => c.User)
+              .Include(b => b.BugHistories)
+                  .ThenInclude(h => h.User)
+              .Include(b => b.BugCustomFields)
+                  .ThenInclude(bcf => bcf.CustomField)
               .FirstOrDefaultAsync(b => b.Id == (BugId)id, cancellationToken));
 
     public async Task<Result<BugStatus>> GetBugStatusByName(string name, CancellationToken cancellationToken = default) =>

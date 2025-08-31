@@ -6,28 +6,35 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { FormInput } from "@/components/ui/form";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/use-toast";
 import { LoaderIcon } from "lucide-react";
+import { loginSchema, type LoginFormData } from "@/lib/validations";
 
 export const LoginPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
+  const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(email, password);
+      await login(data.email, data.password);
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
@@ -39,8 +46,6 @@ export const LoginPage = () => {
         description: "Please check your credentials and try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -54,40 +59,38 @@ export const LoginPage = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="grid gap-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+            <FormInput
+              control={control}
+              name="email"
+              label="Email"
+              type="email"
+              placeholder="m@example.com"
+              required
+              disabled={isSubmitting}
+              error={errors.email}
+            />
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-            </div>
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Password *</span>
                 <NavLink
                   to={"/forgot-password"}
-                  className="ml-auto inline-block text-sm underline hover:no-underline"
+                  className="text-sm underline hover:no-underline"
                 >
                   Forgot your password?
                 </NavLink>
               </div>
-              <Input
-                id="password"
+              <FormInput
+                control={control}
+                name="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 required
-                disabled={isLoading}
+                disabled={isSubmitting}
+                error={errors.password}
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && (
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting && (
                 <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
               )}
               Login
@@ -96,7 +99,7 @@ export const LoginPage = () => {
               variant="outline"
               className="w-full"
               type="button"
-              disabled={isLoading}
+              disabled={isSubmitting}
             >
               Login with Google
             </Button>

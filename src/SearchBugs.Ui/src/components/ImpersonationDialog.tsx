@@ -9,17 +9,35 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { FormInput } from "@/components/ui/form";
 import { Card, CardContent } from "@/components/ui/card";
 import { User, Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { searchSchema, type SearchFormData } from "@/lib/validations";
 
 export const ImpersonationDialog: React.FC = () => {
   const { user, impersonate } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   const [isImpersonating, setIsImpersonating] = useState(false);
+
+  const {
+    control,
+    watch,
+    formState: { errors },
+  } = useForm<SearchFormData>({
+    resolver: zodResolver(
+      searchSchema.omit({ query: true }).extend({
+        query: searchSchema.shape.query.optional().default(""),
+      })
+    ),
+    defaultValues: {
+      query: "",
+    },
+  });
+
+  const searchTerm = watch("query") || "";
 
   const { data: usersResponse, isLoading } = useQuery({
     queryKey: ["users"],
@@ -42,7 +60,6 @@ export const ImpersonationDialog: React.FC = () => {
       setIsImpersonating(true);
       await impersonate(userId);
       setIsOpen(false);
-      setSearchTerm("");
     } catch (error) {
       console.error("Failed to impersonate user:", error);
       // You might want to show a toast notification here
@@ -69,16 +86,15 @@ export const ImpersonationDialog: React.FC = () => {
           <DialogTitle>Impersonate User</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <div>
-            <Label htmlFor="search">Search Users</Label>
+          <div className="space-y-2">
             <div className="relative">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-              <Input
-                id="search"
+              <FormInput
+                control={control}
+                name="query"
                 placeholder="Search by name or email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
+                error={errors.query}
               />
             </div>
           </div>

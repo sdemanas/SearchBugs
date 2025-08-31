@@ -94,6 +94,8 @@ export interface Comment {
   userId: string;
   createdOnUtc: string;
   modifiedOnUtc?: string;
+  userName?: string;
+  userEmail?: string;
 }
 
 export interface Attachment {
@@ -119,12 +121,12 @@ export interface TimeEntry {
 
 export interface HistoryEntry {
   id: string;
-  bugId: string;
-  userId: string;
-  field: string;
+  fieldChanged: string;
   oldValue: string;
   newValue: string;
-  changedOnUtc: string;
+  changedById: string;
+  changedAtUtc: string;
+  userName: string;
 }
 
 export interface CustomField {
@@ -344,10 +346,15 @@ export const apiClient = {
   comments: {
     getByBugId: (bugId: string) =>
       api.get<ApiResponse<Comment[]>>(`/bugs/${bugId}/comments`),
-    create: (data: CreateCommentDto) =>
-      api.post<ApiResponse<Comment>>(`/bugs/${data.bugId}/comments`, {
-        content: data.content,
-      }),
+    create: (data: CreateCommentDto) => {
+      console.log("API Client - Creating comment with data:", data);
+      const payload = { Content: data.content };
+      console.log("API Client - Sending payload:", payload);
+      return api.post<ApiResponse<Comment>>(
+        `/bugs/${data.bugId}/comments`,
+        payload
+      );
+    },
   },
 
   // Bugs
@@ -366,7 +373,9 @@ export const apiClient = {
     getComments: (bugId: string) =>
       api.get<ApiResponse<Comment[]>>(`/bugs/${bugId}/comments`),
     addComment: (data: CreateCommentDto) =>
-      api.post<ApiResponse<Comment>>(`/bugs/${data.bugId}/comments`, data),
+      api.post<ApiResponse<Comment>>(`/bugs/${data.bugId}/comments`, {
+        Content: data.content,
+      }),
 
     // Attachments
     getAttachments: (bugId: string) =>

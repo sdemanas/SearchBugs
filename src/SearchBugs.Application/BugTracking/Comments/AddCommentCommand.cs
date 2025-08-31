@@ -44,6 +44,15 @@ public class AddCommentCommandHandler : ICommandHandler<AddCommentCommand, Comme
             command.Content);
 
         bug.AddComment(comment);
+
+        // Add to history
+        bug.AddBugHistory(BugHistory.Create(
+            bug.Id,
+            _currentUserService.UserId,
+            "Comment",
+            string.Empty,
+            "Added comment"));
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success(CommentDto.FromComment(comment));

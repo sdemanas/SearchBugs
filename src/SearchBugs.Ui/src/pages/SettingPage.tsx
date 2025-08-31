@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { TimezoneSettings } from "@/components/ui/timezone-settings";
 import { NavLink } from "react-router-dom";
 
 export const SettingPage = () => {
@@ -32,6 +33,9 @@ export const SettingPage = () => {
           <NavLink to="#">Advanced</NavLink>
         </nav>
         <div className="grid gap-6">
+          {/* Timezone Settings */}
+          <TimezoneSettings />
+
           <Card x-chunk="dashboard-04-chunk-1">
             <CardHeader>
               <CardTitle>Store Name</CardTitle>

@@ -35,8 +35,11 @@ internal sealed class NotificationConfiguration : IEntityTypeConfiguration<Notif
             .HasConversion(id => id.Value, value => new BugId(value));
         builder.Property(n => n.IsRead)
             .IsRequired();
-        builder.Property(n => n.CreatedAt)
-            .IsRequired();
+        builder.Property(n => n.CreatedOnUtc)
+            .IsRequired()
+            .HasColumnName("created_on_utc");
+        builder.Property(n => n.ModifiedOnUtc)
+            .HasColumnName("modified_on_utc");
     }
     private static void ConfigureRelationships(EntityTypeBuilder<Notification> builder)
     {

@@ -44,9 +44,9 @@ public class DeleteBugCommandHandler : ICommandHandler<DeleteBugCommand>
         bug.AddBugHistory(BugHistory.Create(
             bug.Id,
             _currentUserService.UserId,
-            "Bug deleted",
-            "Bug details",
-            $"Bug deleted by {_currentUserService.UserId.Value}"));
+            "Status",
+            bug.Status?.Name ?? "Unknown",
+            "Deleted"));
 
         await _bugRepository.Remove(bug);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -64,4 +64,4 @@ internal sealed class DeleteBugCommandValidator : AbstractValidator<DeleteBugCom
             .WithErrorCode("Bug.NotFound")
             .WithMessage("The bug ID is required.");
     }
-} 
+}

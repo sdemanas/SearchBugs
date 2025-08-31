@@ -1,36 +1,39 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+import { FormInput, FormTextarea } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { apiClient } from "@/lib/api";
 import { LoaderIcon, ArrowLeft } from "lucide-react";
+import {
+  createProjectSchema,
+  type CreateProjectFormData,
+} from "@/lib/validations";
 
 export const CreateProjectPage = () => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateProjectFormData>({
+    resolver: zodResolver(createProjectSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+    },
+  });
 
-    if (!name.trim()) {
-      toast({
-        title: "Name required",
-        description: "Please enter a project name.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
+  const onSubmit = async (data: CreateProjectFormData) => {
     try {
-      const response = await apiClient.projects.create({ name, description });
+      const response = await apiClient.projects.create({
+        name: data.name,
+        description: data.description || "",
+      });
 
       if (response.data) {
         toast({
@@ -45,8 +48,6 @@ export const CreateProjectPage = () => {
         description: "Failed to create the project. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -65,34 +66,30 @@ export const CreateProjectPage = () => {
         <h1 className="text-2xl font-bold">Create Project</h1>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <Card>
           <CardHeader>
             <CardTitle>Project Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Project Name *</Label>
-              <Input
-                id="name"
-                placeholder="Enter project name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Enter project description (optional)"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="min-h-[100px]"
-                disabled={isLoading}
-              />
-            </div>
+            <FormInput
+              control={control}
+              name="name"
+              label="Project Name"
+              placeholder="Enter project name"
+              required
+              disabled={isSubmitting}
+              error={errors.name}
+            />
+            <FormTextarea
+              control={control}
+              name="description"
+              label="Description"
+              placeholder="Enter project description (optional)"
+              className="min-h-[100px]"
+              disabled={isSubmitting}
+              error={errors.description}
+            />
           </CardContent>
         </Card>
 
@@ -101,12 +98,14 @@ export const CreateProjectPage = () => {
             type="button"
             variant="outline"
             onClick={() => navigate(-1)}
-            disabled={isLoading}
+            disabled={isSubmitting}
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading && <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />}
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting && (
+              <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
+            )}
             Create Project
           </Button>
         </div>

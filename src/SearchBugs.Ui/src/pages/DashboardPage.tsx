@@ -13,7 +13,8 @@ import {
 import { useApi } from "@/hooks/useApi";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { safeFormatDistance, safeParseDateForSort } from "@/lib/date-utils";
+import { safeParseDateForSort } from "@/lib/date-utils";
+import { useTimezone } from "@/hooks/useTimezone";
 
 interface Project {
   id: string;
@@ -35,6 +36,7 @@ interface Bug {
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { formatDistanceToNow } = useTimezone();
   const { data: projects, isLoading: projectsLoading } =
     useApi<Project[]>("projects");
   const { data: bugs, isLoading: bugsLoading } = useApi<Bug[]>("bugs");
@@ -216,7 +218,7 @@ export const DashboardPage: React.FC = () => {
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {safeFormatDistance(bug.createdOnUtc)}
+                        {formatDistanceToNow(bug.createdOnUtc)}
                       </p>
                     </div>
                   </li>
@@ -279,7 +281,7 @@ export const DashboardPage: React.FC = () => {
                         </div>
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        {safeFormatDistance(project.updatedOnUtc)}
+                        {formatDistanceToNow(project.updatedOnUtc)}
                       </span>
                     </div>
                   </li>

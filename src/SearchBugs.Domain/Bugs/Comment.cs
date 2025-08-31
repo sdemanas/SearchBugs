@@ -14,9 +14,14 @@ public class Comment : Entity<CommentId>, IAuditable
 
     public DateTime? ModifiedOnUtc { get; set; }
 
+    // Navigation property
+    public User? User { get; set; }
+
     private Comment()
     {
-
+        BugId = null!;
+        UserId = null!;
+        CommentText = string.Empty;
     }
 
     private Comment(CommentId id, BugId bugId, UserId userId, string commentText, DateTime createdOnUtc) : base(id)

@@ -40,7 +40,7 @@ internal sealed class CommentConfiguration : IEntityTypeConfiguration<Comment>
         builder.HasOne<Bug>()
             .WithMany(b => b.Comments)
             .HasForeignKey(c => c.BugId);
-        builder.HasOne<User>()
+        builder.HasOne(c => c.User)
             .WithMany()
             .HasForeignKey(c => c.UserId);
     }

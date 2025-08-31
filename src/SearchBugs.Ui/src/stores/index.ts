@@ -1,6 +1,7 @@
 // Global stores
 export { useAuthStore } from "./global/authStore";
 export { useUIStore } from "./global/uiStore";
+export { useTimezoneStore } from "./global/timezoneStore";
 
 // Feature stores
 export { useProjectsStore } from "./features/projectsStore";

@@ -16,6 +16,7 @@ public class AddCustomFieldCommandHandlerTest_Fixed
     private readonly Mock<IProjectRepository> _projectRepository;
     private readonly Mock<ICurrentUserService> _currentUserService;
     private readonly Mock<IUnitOfWork> _unitOfWork;
+    private readonly Mock<ICustomFieldRepository> _customFieldRepository;
     private readonly AddCustomFieldCommandHandler _sut;
 
     public AddCustomFieldCommandHandlerTest_Fixed()
@@ -24,7 +25,8 @@ public class AddCustomFieldCommandHandlerTest_Fixed
         _projectRepository = new();
         _currentUserService = new();
         _unitOfWork = new();
-        _sut = new AddCustomFieldCommandHandler(_bugRepository.Object, _projectRepository.Object, _currentUserService.Object, _unitOfWork.Object);
+        _customFieldRepository = new();
+        _sut = new AddCustomFieldCommandHandler(_bugRepository.Object, _projectRepository.Object, _currentUserService.Object, _unitOfWork.Object, _customFieldRepository.Object);
     }
 
     [Fact]

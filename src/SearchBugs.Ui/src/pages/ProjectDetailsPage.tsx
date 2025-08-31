@@ -15,7 +15,7 @@ import {
   Plus,
   FolderKanban,
 } from "lucide-react";
-import { safeFormatDistance } from "@/lib/date-utils";
+import { useTimezone } from "@/hooks/useTimezone";
 import { PageLoadingState } from "@/components/ui/loading";
 import {
   Table,
@@ -69,6 +69,7 @@ interface Repository {
 export const ProjectDetailsPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+  const { formatDistanceToNow } = useTimezone();
 
   const { data: projectData, isLoading: projectLoading } = useApi<Project>(
     `projects/${projectId}`
@@ -197,12 +198,12 @@ export const ProjectDetailsPage = () => {
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              <span>Created {safeFormatDistance(project.createdOnUtc)}</span>
+              <span>Created {formatDistanceToNow(project.createdOnUtc)}</span>
             </div>
             {project.updatedOnUtc && (
               <div className="flex items-center gap-2">
                 <Activity className="h-4 w-4" />
-                <span>Updated {safeFormatDistance(project.updatedOnUtc)}</span>
+                <span>Updated {formatDistanceToNow(project.updatedOnUtc)}</span>
               </div>
             )}
           </div>
@@ -295,7 +296,7 @@ export const ProjectDetailsPage = () => {
             <h3 className="text-lg font-semibold">Project Bugs</h3>
             <Button
               size="sm"
-              onClick={() => navigate("/add-bug")}
+              onClick={() => navigate(`/projects/${projectId}/add-bug`)}
               className="gap-2"
             >
               <Plus className="h-4 w-4" />
@@ -358,7 +359,7 @@ export const ProjectDetailsPage = () => {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {safeFormatDistance(bug.createdOnUtc)}
+                          {formatDistanceToNow(bug.createdOnUtc)}
                         </TableCell>
                         <TableCell>
                           <DropdownMenu>
@@ -448,7 +449,7 @@ export const ProjectDetailsPage = () => {
                           {repo.url}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {safeFormatDistance(repo.createdOnUtc)}
+                          {formatDistanceToNow(repo.createdOnUtc)}
                         </TableCell>
                         <TableCell>
                           <DropdownMenu>

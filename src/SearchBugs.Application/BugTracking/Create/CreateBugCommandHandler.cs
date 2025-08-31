@@ -51,6 +51,14 @@ public class CreateBugCommandHandler : ICommandHandler<CreateBugCommand, BugsRes
             return Result.Failure<BugsResponse>(bug.Error);
         }
 
+        // Add creation history entry
+        bug.Value.AddBugHistory(BugHistory.Create(
+            bug.Value.Id,
+            new UserId(request.ReporterId),
+            "Status",
+            string.Empty,
+            bugStatus.Name));
+
         await _bugRepository.Add(bug.Value);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

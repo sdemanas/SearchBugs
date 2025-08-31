@@ -50,19 +50,28 @@ public class UpdateBugCommandHandler : ICommandHandler<UpdateBugCommand, BugDto>
 
         var bug = bugResult.Value;
 
-        // Validate status
-        var bugStatus = BugStatus.FromName(command.Status);
-        if (bugStatus is null)
+        // Capture original values before changes
+        var originalTitle = bug.Title;
+        var originalDescription = bug.Description;
+        var originalStatus = bug.Status?.Name;
+        var originalPriority = bug.Priority?.Name;
+        var originalSeverity = bug.Severity;
+        var originalAssigneeId = bug.AssigneeId?.Value;
+
+        // Get status and priority from the repository to avoid tracking conflicts
+        var bugStatusResult = await _bugRepository.GetBugStatusByName(command.Status, cancellationToken);
+        if (bugStatusResult.IsFailure)
         {
             return Result.Failure<BugDto>(BugValidationErrors.InvalidBugStatus);
         }
+        var bugStatus = bugStatusResult.Value;
 
-        // Validate priority
-        var bugPriority = BugPriority.FromName(command.Priority);
-        if (bugPriority is null)
+        var bugPriorityResult = await _bugRepository.GetBugPriorityByName(command.Priority, cancellationToken);
+        if (bugPriorityResult.IsFailure)
         {
             return Result.Failure<BugDto>(BugValidationErrors.InvalidBugPriority);
         }
+        var bugPriority = bugPriorityResult.Value;
 
         // Validate severity
         var bugSeverity = BugSeverity.FromName(command.Severity);
@@ -86,13 +95,15 @@ public class UpdateBugCommandHandler : ICommandHandler<UpdateBugCommand, BugDto>
             return Result.Failure<BugDto>(updateResult.Error);
         }
 
-        // Add to history
-        bug.AddBugHistory(BugHistory.Create(
-            bug.Id,
-            _currentUserService.UserId,
-            "Bug updated",
-            "Bug details updated",
-            $"Updated by {_currentUserService.UserId}"));
+        // Log specific field changes
+        LogFieldChange(bug, "Title", originalTitle, bug.Title);
+        LogFieldChange(bug, "Description", originalDescription, bug.Description);
+        LogFieldChange(bug, "Status", originalStatus, bug.Status?.Name);
+        LogFieldChange(bug, "Priority", originalPriority, bug.Priority?.Name);
+        LogFieldChange(bug, "Severity", originalSeverity, bug.Severity);
+        LogFieldChange(bug, "Assignee",
+            originalAssigneeId?.ToString() ?? "Unassigned",
+            bug.AssigneeId?.Value.ToString() ?? "Unassigned");
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -100,14 +111,27 @@ public class UpdateBugCommandHandler : ICommandHandler<UpdateBugCommand, BugDto>
             bug.Id.Value,
             bug.Title,
             bug.Description,
-            bug.Status.Name,
-            bug.Priority.Name,
+            bug.Status?.Name ?? string.Empty,
+            bug.Priority?.Name ?? string.Empty,
             bug.Severity,
             bug.ProjectId.Value,
-            bug.AssigneeId.Value,
+            bug.AssigneeId?.Value,
             bug.ReporterId.Value,
             bug.CreatedOnUtc,
             bug.ModifiedOnUtc));
+    }
+
+    private void LogFieldChange(Bug bug, string fieldName, string? oldValue, string? newValue)
+    {
+        if (oldValue != newValue)
+        {
+            bug.AddBugHistory(BugHistory.Create(
+                bug.Id,
+                _currentUserService.UserId,
+                fieldName,
+                oldValue ?? string.Empty,
+                newValue ?? string.Empty));
+        }
     }
 }
 

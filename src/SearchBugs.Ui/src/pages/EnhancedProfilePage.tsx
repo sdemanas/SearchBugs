@@ -4,9 +4,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { FormInput, FormTextarea } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   MapPin,
   Calendar,
@@ -21,6 +21,10 @@ import {
   Settings,
 } from "lucide-react";
 import { CardLoadingSkeleton } from "@/components/ui/loading";
+import {
+  profileSettingsSchema,
+  type ProfileSettingsFormData,
+} from "@/lib/validations";
 
 interface UserProfile {
   id: string;
@@ -145,17 +149,42 @@ const ProfileHeader: React.FC<{
 };
 
 const ProfileSettings: React.FC<{ profile: UserProfile }> = ({ profile }) => {
-  const [formData, setFormData] = React.useState({
-    firstName: profile.firstName,
-    lastName: profile.lastName,
-    email: profile.email,
-    bio: profile.bio || "",
-    location: profile.location || "",
-    website: profile.website || "",
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ProfileSettingsFormData>({
+    resolver: zodResolver(profileSettingsSchema),
+    defaultValues: {
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      email: profile.email,
+      bio: profile.bio || "",
+      location: profile.location || "",
+      website: profile.website || "",
+    },
   });
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const onSubmit = async (data: ProfileSettingsFormData) => {
+    try {
+      // TODO: Implement the API call to update profile
+      console.log("Profile update data:", data);
+      // After successful update, you might want to refetch the profile data
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+    }
+  };
+
+  const handleCancel = () => {
+    reset({
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      email: profile.email,
+      bio: profile.bio || "",
+      location: profile.location || "",
+      website: profile.website || "",
+    });
   };
 
   return (
@@ -165,71 +194,79 @@ const ProfileSettings: React.FC<{ profile: UserProfile }> = ({ profile }) => {
           <h3 className="text-lg font-semibold">Personal Information</h3>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input
-                id="firstName"
-                value={formData.firstName}
-                onChange={(e) => handleInputChange("firstName", e.target.value)}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormInput
+                control={control}
+                name="firstName"
+                label="First Name"
+                required
+                disabled={isSubmitting}
+                error={errors.firstName}
+              />
+              <FormInput
+                control={control}
+                name="lastName"
+                label="Last Name"
+                required
+                disabled={isSubmitting}
+                error={errors.lastName}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                value={formData.lastName}
-                onChange={(e) => handleInputChange("lastName", e.target.value)}
-              />
-            </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
+            <FormInput
+              control={control}
+              name="email"
+              label="Email"
               type="email"
-              value={formData.email}
-              onChange={(e) => handleInputChange("email", e.target.value)}
+              required
+              disabled={isSubmitting}
+              error={errors.email}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="bio">Bio</Label>
-            <Textarea
-              id="bio"
+            <FormTextarea
+              control={control}
+              name="bio"
+              label="Bio"
               placeholder="Tell us about yourself..."
-              value={formData.bio}
-              onChange={(e) => handleInputChange("bio", e.target.value)}
               rows={3}
+              disabled={isSubmitting}
+              error={errors.bio}
             />
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <Input
-                id="location"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormInput
+                control={control}
+                name="location"
+                label="Location"
                 placeholder="City, Country"
-                value={formData.location}
-                onChange={(e) => handleInputChange("location", e.target.value)}
+                disabled={isSubmitting}
+                error={errors.location}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="website">Website</Label>
-              <Input
-                id="website"
+              <FormInput
+                control={control}
+                name="website"
+                label="Website"
                 placeholder="https://yourwebsite.com"
-                value={formData.website}
-                onChange={(e) => handleInputChange("website", e.target.value)}
+                disabled={isSubmitting}
+                error={errors.website}
               />
             </div>
-          </div>
 
-          <div className="flex justify-end gap-2">
-            <Button variant="outline">Cancel</Button>
-            <Button>Save Changes</Button>
-          </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>

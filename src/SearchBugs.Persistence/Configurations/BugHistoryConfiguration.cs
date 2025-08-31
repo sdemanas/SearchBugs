@@ -41,7 +41,7 @@ internal sealed class BugHistoryConfiguration : IEntityTypeConfiguration<BugHist
             .WithMany(b => b.BugHistories)
             .HasForeignKey(h => h.BugId)
             .OnDelete(DeleteBehavior.Cascade);
-        builder.HasOne<User>()
+        builder.HasOne(h => h.User)
             .WithMany()
             .HasForeignKey(h => h.ChangedBy);
     }

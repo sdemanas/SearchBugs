@@ -5,27 +5,32 @@ using Shared.Time;
 
 namespace SearchBugs.Domain.Notifications;
 
-public class Notification : Entity<NotificationId>
+public class Notification : Entity<NotificationId>, IAuditable
 {
     public UserId UserId { get; }
     public string Type { get; }
     public string Message { get; }
     public BugId BugId { get; }
     public bool IsRead { get; private set; }
-    public DateTime CreatedAt { get; }
+    public DateTime CreatedOnUtc { get; }
+    public DateTime? ModifiedOnUtc { get; private set; }
 
     private Notification()
     {
+        Type = string.Empty;
+        Message = string.Empty;
+        UserId = null!;
+        BugId = null!;
     }
 
-    private Notification(NotificationId id, UserId userId, string type, string message, BugId bugId, bool isRead, DateTime createdAt) : base(id)
+    private Notification(NotificationId id, UserId userId, string type, string message, BugId bugId, bool isRead, DateTime createdOnUtc) : base(id)
     {
         UserId = userId;
         Type = type;
         Message = message;
         BugId = bugId;
         IsRead = isRead;
-        CreatedAt = createdAt;
+        CreatedOnUtc = createdOnUtc;
     }
 
     public static Notification Create(UserId userId, string type, string message, BugId bugId, bool isRead)

@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/use-toast";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ImpersonationDialog } from "@/components/ImpersonationDialog";
+import { TimezoneIndicator } from "@/components/ui/timezone-indicator";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -83,10 +84,11 @@ export const Header = () => {
 
         {/* User Actions */}
         <div className="flex items-center space-x-2">
+          <TimezoneIndicator />
           <NotificationBell />
 
           {/* Show impersonation dialog for admin users - TODO: Add proper permission check */}
-          {user?.role === "Admin" && <ImpersonationDialog />}
+          {user?.roles?.includes("Admin") && <ImpersonationDialog />}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

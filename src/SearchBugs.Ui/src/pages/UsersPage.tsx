@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { FormInput } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -62,6 +62,9 @@ import {
 import { apiClient, User, UserRole, Role } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createUserSchema, type CreateUserFormData } from "@/lib/validations";
 
 const roleColors: Record<string, string> = {
   Admin: "bg-red-100 text-red-800 hover:bg-red-200",
@@ -235,26 +238,34 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({
   onCreate,
   availableRoles,
 }) => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
 
-  const handleCreate = () => {
-    onCreate({
-      firstName,
-      lastName,
-      email,
-      password,
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateUserFormData>({
+    resolver: zodResolver(createUserSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      roles: [],
+    },
+  });
+
+  const onSubmit = async (data: CreateUserFormData) => {
+    const userData = {
+      ...data,
       roles: selectedRoles.length > 0 ? selectedRoles : undefined,
-    });
+    };
+
+    onCreate(userData);
 
     // Reset form
-    setFirstName("");
-    setLastName("");
-    setEmail("");
-    setPassword("");
+    reset();
     setSelectedRoles([]);
     onClose();
   };
@@ -274,59 +285,63 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({
             Add a new user to the system with basic information and roles.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="firstName" className="text-right">
-              First Name
-            </Label>
-            <Input
-              id="firstName"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className="col-span-3"
-              placeholder="Enter first name"
-            />
+            <label className="text-right text-sm font-medium">
+              First Name *
+            </label>
+            <div className="col-span-3">
+              <FormInput
+                control={control}
+                name="firstName"
+                placeholder="Enter first name"
+                disabled={isSubmitting}
+                error={errors.firstName}
+              />
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="lastName" className="text-right">
-              Last Name
-            </Label>
-            <Input
-              id="lastName"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              className="col-span-3"
-              placeholder="Enter last name"
-            />
+            <label className="text-right text-sm font-medium">
+              Last Name *
+            </label>
+            <div className="col-span-3">
+              <FormInput
+                control={control}
+                name="lastName"
+                placeholder="Enter last name"
+                disabled={isSubmitting}
+                error={errors.lastName}
+              />
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="email" className="text-right">
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="col-span-3"
-              placeholder="Enter email address"
-            />
+            <label className="text-right text-sm font-medium">Email *</label>
+            <div className="col-span-3">
+              <FormInput
+                control={control}
+                name="email"
+                type="email"
+                placeholder="Enter email address"
+                disabled={isSubmitting}
+                error={errors.email}
+              />
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="password" className="text-right">
-              Password
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="col-span-3"
-              placeholder="Enter password"
-            />
+            <label className="text-right text-sm font-medium">Password *</label>
+            <div className="col-span-3">
+              <FormInput
+                control={control}
+                name="password"
+                type="password"
+                placeholder="Enter password"
+                disabled={isSubmitting}
+                error={errors.password}
+              />
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Roles</Label>
+            <label className="text-right text-sm font-medium">Roles</label>
             <div className="col-span-3 flex gap-2 flex-wrap">
               {availableRoles.map((role) => (
                 <Button
@@ -337,24 +352,27 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({
                   }
                   size="sm"
                   onClick={() => toggleRole(role.name)}
+                  disabled={isSubmitting}
                 >
                   {role.name}
                 </Button>
               ))}
             </div>
           </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleCreate}
-            disabled={!firstName || !lastName || !email || !password}
-          >
-            Create User
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create User"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

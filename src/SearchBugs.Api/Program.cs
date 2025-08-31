@@ -23,6 +23,13 @@ public abstract partial class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddOpenApi();
 
+        // Configure JSON serialization for UTC dates
+        builder.Services.ConfigureHttpJsonOptions(options =>
+        {
+            options.SerializerOptions.Converters.Add(new UtcDateTimeConverter());
+            options.SerializerOptions.Converters.Add(new UtcNullableDateTimeConverter());
+        });
+
         builder.Services.AddInfrastructure();
         builder.Services.AddPersistence(builder.Configuration);
         builder.Services.AddApplication();

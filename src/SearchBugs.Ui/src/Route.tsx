@@ -168,6 +168,14 @@ const router = createBrowserRouter([
         },
       },
       {
+        path: "/projects/:projectId/add-bug",
+        element: <BugAddPage />,
+        handle: {
+          title: "Add Bug",
+          icon: "PlusCircle",
+        },
+      },
+      {
         path: "/bugs/:bugId",
         element: <BugDetailsPage />,
         handle: {

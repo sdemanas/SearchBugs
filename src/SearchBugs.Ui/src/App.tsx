@@ -5,8 +5,19 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { NotificationContainer } from "./components/NotificationContainer";
 import { Toaster } from "@/components/ui/toaster";
+import { useEffect } from "react";
+import { useTimezoneStore } from "./stores/global/timezoneStore";
 
 function App() {
+  const initializeTimezone = useTimezoneStore(
+    (state) => state.initializeTimezone
+  );
+
+  // Initialize timezone on app startup
+  useEffect(() => {
+    initializeTimezone();
+  }, [initializeTimezone]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

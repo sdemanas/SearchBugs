@@ -66,6 +66,27 @@ internal sealed class BugConfiguration : IEntityTypeConfiguration<Bug>
         builder.HasOne<User>()
             .WithMany()
             .HasForeignKey(b => b.ReporterId);
+
+        // Configure navigation properties to use backing fields
+        builder.Navigation(b => b.Comments)
+            .HasField("_comments")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(b => b.BugHistories)
+            .HasField("_bugHistories")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(b => b.BugCustomFields)
+            .HasField("_bugCustomFields")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(b => b.Attachments)
+            .HasField("_attachments")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(b => b.TimeTracking)
+            .HasField("_timeTracking")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 
     private static void ConfigureIndexes(EntityTypeBuilder<Bug> builder)

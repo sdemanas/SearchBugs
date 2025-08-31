@@ -1,15 +1,19 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/lib/api";
+import type { UpdateBugDto } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   Clock,
   MessageSquare,
@@ -18,10 +22,21 @@ import {
   Settings,
   ArrowLeft,
   Download,
+  Edit,
+  Check,
+  X,
 } from "lucide-react";
-import { safeFormatDistance } from "@/lib/date-utils";
+import { useTimezone } from "@/hooks/useTimezone";
 import { useToast } from "@/components/ui/use-toast";
 import { PageLoadingState } from "@/components/ui/loading";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { queryClient } from "@/lib/queryClient";
 
 interface Bug {
   id: string;
@@ -64,10 +79,11 @@ interface TimeEntry {
 
 interface HistoryEntry {
   id: string;
-  action: string;
-  description: string;
-  timestamp: string;
-  userId: string;
+  fieldChanged: string;
+  oldValue: string;
+  newValue: string;
+  changedById: string;
+  changedAtUtc: string;
   userName: string;
 }
 
@@ -81,10 +97,20 @@ export const BugDetailsPage = () => {
   const { bugId } = useParams<{ bugId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { formatDistanceToNow } = useTimezone();
   const [newComment, setNewComment] = useState("");
   const [isAddingComment, setIsAddingComment] = useState(false);
   const [timeEntry, setTimeEntry] = useState({ duration: "", description: "" });
   const [customField, setCustomField] = useState({ name: "", value: "" });
+
+  // Inline editing states
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editedTitle, setEditedTitle] = useState("");
+  const [editedDescription, setEditedDescription] = useState("");
+  const [editedStatus, setEditedStatus] = useState("");
+  const [editedPriority, setEditedPriority] = useState("");
+  const [editedSeverity, setEditedSeverity] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const { data: bug, isLoading: isLoadingBug } = useApi<Bug>(`bugs/${bugId}`);
   const { data: comments, mutate: mutateComments } = useApi<Comment[]>(
@@ -102,14 +128,120 @@ export const BugDetailsPage = () => {
     CustomField[]
   >(`bugs/${bugId}/custom-fields`);
 
+  // Available options for dropdowns
+  const statusOptions = ["Open", "In Progress", "Resolved", "Closed"];
+  const priorityOptions = ["Low", "Medium", "High"];
+  const severityOptions = ["Low", "Medium", "High"];
+
+  // Function to render markdown in the preview
+  const renderMarkdown = (text: string) => {
+    return (
+      <div className="prose prose-sm max-w-none">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
+      </div>
+    );
+  };
+
+  // Handle starting inline edit
+  const startEdit = (field: string, currentValue: string) => {
+    setEditingField(field);
+    switch (field) {
+      case "title":
+        setEditedTitle(currentValue);
+        break;
+      case "description":
+        setEditedDescription(currentValue);
+        break;
+      case "status":
+        setEditedStatus(currentValue);
+        break;
+      case "priority":
+        setEditedPriority(currentValue);
+        break;
+      case "severity":
+        setEditedSeverity(currentValue);
+        break;
+    }
+  };
+
+  // Handle canceling edit
+  const cancelEdit = () => {
+    setEditingField(null);
+    setEditedTitle("");
+    setEditedDescription("");
+    setEditedStatus("");
+    setEditedPriority("");
+    setEditedSeverity("");
+  };
+
+  // Handle saving field update
+  const saveFieldUpdate = async () => {
+    if (!bugId || !bug?.value) return;
+
+    setIsUpdating(true);
+    try {
+      const updateData = {
+        title: editingField === "title" ? editedTitle : bug.value.title,
+        description:
+          editingField === "description"
+            ? editedDescription
+            : bug.value.description,
+        status: editingField === "status" ? editedStatus : bug.value.status,
+        priority:
+          editingField === "priority" ? editedPriority : bug.value.priority,
+        severity:
+          editingField === "severity" ? editedSeverity : bug.value.severity,
+        assigneeId: bug.value.assigneeId,
+      } as UpdateBugDto;
+
+      const response = await apiClient.bugs.update(bugId, updateData);
+
+      if (response.data.isSuccess) {
+        queryClient.invalidateQueries({ queryKey: [`bugs/${bugId}`] });
+        setEditingField(null);
+        toast({
+          title: "Success",
+          description: "Bug updated successfully",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: response.data.error?.message || "Failed to update bug",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error updating bug:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update bug. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const handleAddComment = async () => {
     if (!newComment.trim() || !bugId) return;
+
+    if (newComment.length > 10000) {
+      toast({
+        title: "Comment too long",
+        description: "Comment must be less than 10000 characters.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsAddingComment(true);
     try {
+      console.log("Adding comment with data:", { bugId, content: newComment });
       const response = await apiClient.comments.create({
         bugId: bugId,
         content: newComment,
       });
+      console.log("API response:", response);
 
       if (response.data.isSuccess) {
         setNewComment("");
@@ -122,13 +254,26 @@ export const BugDetailsPage = () => {
           description: "Your comment has been added successfully.",
         });
       } else {
-        toast({
-          title: "Error",
-          description: response.data.error?.message || "Failed to add comment",
-          variant: "destructive",
-        });
+        // Handle validation errors specifically
+        if (response.data.error?.code === "ValidationError") {
+          const errorMessage =
+            response.data.error?.message || "Validation failed";
+          toast({
+            title: "Validation Error",
+            description: errorMessage,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description:
+              response.data.error?.message || "Failed to add comment",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
+      console.error("Error adding comment:", error);
       toast({
         title: "Error",
         description: "Failed to add comment. Please try again.",
@@ -236,42 +381,217 @@ export const BugDetailsPage = () => {
   return (
     <div className="container mx-auto py-6 space-y-6 max-w-7xl">
       <div className="flex items-center justify-between bg-card p-4 rounded-lg shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">{bugData.title}</h1>
-          <div className="flex gap-2 mt-2">
-            <Badge
-              variant={
-                bugData.status === "Open"
-                  ? "default"
-                  : bugData.status === "In Progress"
-                  ? "secondary"
-                  : "outline"
-              }
+        <div className="flex-1">
+          {/* Editable Title */}
+          {editingField === "title" ? (
+            <div className="flex items-center gap-2 mb-2">
+              <Input
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="text-xl font-bold"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") saveFieldUpdate();
+                  if (e.key === "Escape") cancelEdit();
+                }}
+              />
+              <Button
+                size="sm"
+                onClick={saveFieldUpdate}
+                disabled={isUpdating}
+                className="h-8 w-8 p-0"
+              >
+                <Check className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={cancelEdit}
+                className="h-8 w-8 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <div
+              className="group cursor-pointer"
+              onClick={() => startEdit("title", bugData.title)}
             >
-              {bugData.status}
-            </Badge>
-            <Badge
-              variant={
-                bugData.priority === "Critical"
-                  ? "destructive"
-                  : bugData.priority === "High"
-                  ? "default"
-                  : "outline"
-              }
-            >
-              {bugData.priority}
-            </Badge>
-            <Badge
-              variant={
-                bugData.severity === "Critical"
-                  ? "destructive"
-                  : bugData.severity === "High"
-                  ? "default"
-                  : "outline"
-              }
-            >
-              {bugData.severity}
-            </Badge>
+              <div className="flex items-center gap-2 mb-2">
+                <h1 className="text-2xl font-bold tracking-tight group-hover:bg-muted/50 rounded px-1 -mx-1 transition-colors">
+                  {bugData.title}
+                </h1>
+                <Edit className="h-4 w-4 opacity-0 group-hover:opacity-50 transition-opacity" />
+              </div>
+            </div>
+          )}
+
+          {/* Editable Status, Priority, Severity Badges */}
+          <div className="flex gap-2">
+            {/* Status Badge */}
+            {editingField === "status" ? (
+              <div className="flex items-center gap-1">
+                <Select value={editedStatus} onValueChange={setEditedStatus}>
+                  <SelectTrigger className="h-8 w-auto min-w-20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statusOptions.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {status}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  size="sm"
+                  onClick={saveFieldUpdate}
+                  disabled={isUpdating}
+                  className="h-6 w-6 p-0"
+                >
+                  <Check className="h-3 w-3" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={cancelEdit}
+                  className="h-6 w-6 p-0"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
+              <div
+                className="group cursor-pointer"
+                onClick={() => startEdit("status", bugData.status)}
+              >
+                <Badge
+                  variant={
+                    bugData.status === "Open"
+                      ? "default"
+                      : bugData.status === "In Progress"
+                      ? "secondary"
+                      : "outline"
+                  }
+                  className="group-hover:ring-1 group-hover:ring-muted-foreground/20 transition-all"
+                >
+                  {bugData.status}
+                  <Edit className="h-3 w-3 ml-1 opacity-0 group-hover:opacity-50 transition-opacity" />
+                </Badge>
+              </div>
+            )}
+
+            {/* Priority Badge */}
+            {editingField === "priority" ? (
+              <div className="flex items-center gap-1">
+                <Select
+                  value={editedPriority}
+                  onValueChange={setEditedPriority}
+                >
+                  <SelectTrigger className="h-8 w-auto min-w-20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {priorityOptions.map((priority) => (
+                      <SelectItem key={priority} value={priority}>
+                        {priority}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  size="sm"
+                  onClick={saveFieldUpdate}
+                  disabled={isUpdating}
+                  className="h-6 w-6 p-0"
+                >
+                  <Check className="h-3 w-3" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={cancelEdit}
+                  className="h-6 w-6 p-0"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
+              <div
+                className="group cursor-pointer"
+                onClick={() => startEdit("priority", bugData.priority)}
+              >
+                <Badge
+                  variant={
+                    bugData.priority === "Critical"
+                      ? "destructive"
+                      : bugData.priority === "High"
+                      ? "default"
+                      : "outline"
+                  }
+                  className="group-hover:ring-1 group-hover:ring-muted-foreground/20 transition-all"
+                >
+                  {bugData.priority}
+                  <Edit className="h-3 w-3 ml-1 opacity-0 group-hover:opacity-50 transition-opacity" />
+                </Badge>
+              </div>
+            )}
+
+            {/* Severity Badge */}
+            {editingField === "severity" ? (
+              <div className="flex items-center gap-1">
+                <Select
+                  value={editedSeverity}
+                  onValueChange={setEditedSeverity}
+                >
+                  <SelectTrigger className="h-8 w-auto min-w-20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {severityOptions.map((severity) => (
+                      <SelectItem key={severity} value={severity}>
+                        {severity}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  size="sm"
+                  onClick={saveFieldUpdate}
+                  disabled={isUpdating}
+                  className="h-6 w-6 p-0"
+                >
+                  <Check className="h-3 w-3" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={cancelEdit}
+                  className="h-6 w-6 p-0"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
+              <div
+                className="group cursor-pointer"
+                onClick={() => startEdit("severity", bugData.severity)}
+              >
+                <Badge
+                  variant={
+                    bugData.severity === "Critical"
+                      ? "destructive"
+                      : bugData.severity === "High"
+                      ? "default"
+                      : "outline"
+                  }
+                  className="group-hover:ring-1 group-hover:ring-muted-foreground/20 transition-all"
+                >
+                  {bugData.severity}
+                  <Edit className="h-3 w-3 ml-1 opacity-0 group-hover:opacity-50 transition-opacity" />
+                </Badge>
+              </div>
+            )}
           </div>
         </div>
         <Button
@@ -335,9 +655,50 @@ export const BugDetailsPage = () => {
               <CardTitle className="text-lg">Description</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="whitespace-pre-wrap text-muted-foreground">
-                {bugData.description}
-              </p>
+              {/* Editable Description */}
+              {editingField === "description" ? (
+                <div className="space-y-2">
+                  <RichTextEditor
+                    value={editedDescription}
+                    onChange={setEditedDescription}
+                    placeholder="Describe the bug in detail..."
+                    maxLength={10000}
+                    className="min-h-[300px]"
+                  />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      onClick={saveFieldUpdate}
+                      disabled={isUpdating}
+                    >
+                      <Check className="h-4 w-4 mr-2" />
+                      Save
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={cancelEdit}>
+                      <X className="h-4 w-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  className="group cursor-pointer p-2 -m-2 rounded-md hover:bg-muted/50 transition-colors"
+                  onClick={() => startEdit("description", bugData.description)}
+                >
+                  <div className="flex items-start gap-2">
+                    <div className="whitespace-pre-wrap text-muted-foreground flex-1">
+                      {bugData.description ? (
+                        renderMarkdown(bugData.description)
+                      ) : (
+                        <span className="text-muted-foreground">
+                          Click to add a description...
+                        </span>
+                      )}
+                    </div>
+                    <Edit className="h-4 w-4 opacity-0 group-hover:opacity-50 transition-opacity mt-0.5" />
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -359,30 +720,40 @@ export const BugDetailsPage = () => {
                           {comment.userName || "Unknown User"}
                         </span>
                         <span className="text-sm text-muted-foreground">
-                          {safeFormatDistance(comment.createdOnUtc)}
+                          {formatDistanceToNow(comment.createdOnUtc)}
                         </span>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {comment.commentText}
-                      </p>
+                      <div className="text-sm text-muted-foreground">
+                        {renderMarkdown(comment.commentText)}
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
               <div className="mt-6 space-y-4">
-                <Textarea
-                  placeholder="Add a comment..."
+                <RichTextEditor
                   value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  className="min-h-[100px]"
+                  onChange={setNewComment}
+                  placeholder="Add a comment... Supports **bold**, _italic_, `code`, lists, and more!"
+                  maxLength={10000}
+                  className="min-h-[150px]"
                 />
-                <Button
-                  onClick={handleAddComment}
-                  disabled={isAddingComment}
-                  className="w-full sm:w-auto"
-                >
-                  {isAddingComment ? "Adding..." : "Add Comment"}
-                </Button>
+                <div className="flex justify-between items-center">
+                  <div className="text-sm text-muted-foreground">
+                    💡 Use Markdown formatting for rich text
+                  </div>
+                  <Button
+                    onClick={handleAddComment}
+                    disabled={
+                      isAddingComment ||
+                      !newComment.trim() ||
+                      newComment.length > 10000
+                    }
+                    className="w-auto"
+                  >
+                    {isAddingComment ? "Adding..." : "Add Comment"}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -401,7 +772,7 @@ export const BugDetailsPage = () => {
                     <div className="flex-1">
                       <div className="font-medium">{attachment.fileName}</div>
                       <div className="text-sm text-muted-foreground">
-                        {safeFormatDistance(attachment.uploadedAt)} by{" "}
+                        {formatDistanceToNow(attachment.uploadedAt)} by{" "}
                         {attachment.uploadedBy}
                       </div>
                     </div>
@@ -445,7 +816,8 @@ export const BugDetailsPage = () => {
                         {entry.description}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {safeFormatDistance(entry.loggedAt)} by {entry.loggedBy}
+                        {formatDistanceToNow(entry.loggedAt)} by{" "}
+                        {entry.loggedBy}
                       </div>
                     </div>
                   </div>
@@ -509,16 +881,36 @@ export const BugDetailsPage = () => {
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-primary/10 text-primary">
-                        {entry.userName[0]}
+                        {entry.userName?.[0] || "U"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <div className="font-medium">{entry.action}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {entry.description}
+                      <div className="font-medium">
+                        {entry.fieldChanged} changed
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {safeFormatDistance(entry.timestamp)} by{" "}
+                        {entry.oldValue && entry.oldValue !== "" ? (
+                          <>
+                            From{" "}
+                            <span className="font-mono bg-red-100 px-1 rounded">
+                              {entry.oldValue}
+                            </span>{" "}
+                            to{" "}
+                            <span className="font-mono bg-green-100 px-1 rounded">
+                              {entry.newValue}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            Set to{" "}
+                            <span className="font-mono bg-green-100 px-1 rounded">
+                              {entry.newValue}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {formatDistanceToNow(entry.changedAtUtc)} by{" "}
                         {entry.userName}
                       </div>
                     </div>
