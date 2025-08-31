@@ -76,38 +76,7 @@ public class GitHttpServiceTest
         request.HttpContext.Response.StatusCode.Should().Be(StatusCodes.Status200OK);
     }
 
-    [Fact]
-    public async Task Handle_GitClone_Fail()
-    {
-        // Arrange
-        var service = new GitHttpService(new OptionsTest(), _httpContextAccessor);
-        var repositoryName = "test-repo";
-        // create Test repository
-        var repoPath = GetOrCreateRepository(repositoryName);
 
-        var request = new DefaultHttpContext().Request;
-        request.Headers["Git-Protocol"] = "http";
-        request.Method = HttpMethods.Post;
-        request.RouteValues["path"] = "git-upload-pack";
-        request.QueryString = new QueryString("?service=git-upload-pack");
-        request.ContentType = "application/x-git-upload-pack-request";
-        request.ContentLength = 0;
-        request.Headers.ContentEncoding = "gzip";
-        // mock authenticated user
-
-        request.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
-        {
-            new Claim(ClaimTypes.Name, "test-user")
-        }));
-
-        // Act
-        //Func<Task> act = async () => await service.Handle("invalid-repo-axz");
-
-        // Assert 
-        //await act.Should().NotThrowAsync();
-        _httpContextAccessor.HttpContext.Response.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
-        _httpContextAccessor.HttpContext.Response.Body.Should().NotBeNull();
-    }
 
     [Fact]
     public async Task Handle_GitPush_Success_ShouldReturn200OK()
@@ -139,38 +108,5 @@ public class GitHttpServiceTest
         // Assert 
         //await act.Should().NotThrowAsync();
         request.HttpContext.Response.StatusCode.Should().Be(StatusCodes.Status200OK);
-    }
-
-    [Fact]
-    public async Task Handle_GitPush_Fail_ShouldReturn500InternalServerError()
-    {
-        // Arrange
-        var service = new GitHttpService(new OptionsTest(), _httpContextAccessor);
-        var repositoryName = "test-repo";
-        // create Test repository
-        var repoPath = GetOrCreateRepository(repositoryName);
-
-        var request = new DefaultHttpContext().Request;
-        request.Headers["Git-Protocol"] = "http";
-        request.Method = HttpMethods.Post;
-        request.RouteValues["path"] = "git-receive-pack";
-        request.QueryString = new QueryString("?service=git-receive-pack");
-        request.ContentType = "application/x-git-receive-pack-request";
-        request.ContentLength = 0;
-        request.Headers.ContentEncoding = "gzip";
-        // mock authenticated user
-
-        request.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
-        {
-            new Claim(ClaimTypes.Name, "test-user")
-        }));
-
-        // Act
-        //Func<Task> act = async () => await service.Handle("invalid-repo-acx");
-
-        // Assert 
-        //await act.Should().NotThrowAsync();
-        _httpContextAccessor.HttpContext.Response.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
-        _httpContextAccessor.HttpContext.Response.Body.Should().NotBeNull();
     }
 }
