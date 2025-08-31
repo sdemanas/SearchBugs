@@ -21,7 +21,7 @@ public class GitRepositoryServiceTest
     {
         // Arrange
         var service = new GitRepositoryService(new OptionsTest());
-        var repositoryName = "test-repo";
+        var repositoryName = $"test-repo-{Guid.NewGuid():N}"; // Use unique name for each test
         var repoPath = Path.Combine(_gitOptions.BasePath, repositoryName);
         Repository.Init(repoPath);
         var repo = new Repository(repoPath);
@@ -49,12 +49,12 @@ public class GitRepositoryServiceTest
     }
 
     //[Fact]
-    public void ListTree_WhenCalledWithInvalidRepositoryName_ReturnError()
+    private void ListTree_WhenCalledWithInvalidRepositoryName_ReturnError()
     {
         // Arrange
         var service = new GitRepositoryService(new OptionsTest());
 
-        var repositoryName = "invalid-repo";
+        var repositoryName = $"invalid-repo-{Guid.NewGuid():N}";
         var commitSha = "invalid-commit-sha";
         var repoPath = Path.Combine(_gitOptions.BasePath, repositoryName);
         Repository.Init(repoPath);
@@ -83,7 +83,7 @@ public class GitRepositoryServiceTest
     {
         // Arrange
         var service = new GitRepositoryService(new OptionsTest());
-        var repositoryName = "test-repo";
+        var repositoryName = $"test-repo-{Guid.NewGuid():N}"; // Use unique name for each test
         var repoPath = Path.Combine(_gitOptions.BasePath, repositoryName);
         Repository.Init(repoPath);
         var repo = new Repository(repoPath);

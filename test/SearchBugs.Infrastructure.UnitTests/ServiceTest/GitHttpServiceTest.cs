@@ -45,11 +45,11 @@ public class GitHttpServiceTest
     }
 
     [Fact]
-    public async Task Handle_GitClone_Success()
+    public void Handle_GitClone_Success()
     {
         // Arrange
         var service = new GitHttpService(new OptionsTest(), _httpContextAccessor);
-        var repositoryName = "test-repo";
+        var repositoryName = $"test-repo-{Guid.NewGuid():N}"; // Use unique name for each test
         // create Test repository
         var repoPath = GetOrCreateRepository(repositoryName);
 
