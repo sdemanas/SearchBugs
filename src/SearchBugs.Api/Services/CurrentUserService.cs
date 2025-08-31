@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using SearchBugs.Application.Common.Interfaces;
 using SearchBugs.Domain.Users;
 using Shared.Primitives;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace SearchBugs.Api.Services;
 
@@ -19,7 +20,10 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
-            var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier);
+            // Try different claim types for user ID
+            var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier) ??
+                             _httpContextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Sub);
+
             if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
             {
                 throw new UnauthorizedAccessException("User is not authenticated");
@@ -28,7 +32,8 @@ public class CurrentUserService : ICurrentUserService
         }
     }
 
-    public string? Email => _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Email)?.Value;
+    public string? Email => _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Email)?.Value ??
+                           _httpContextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
 
     public string? Username => _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Name)?.Value;
 
@@ -43,4 +48,4 @@ public class CurrentUserService : ICurrentUserService
     {
         return _httpContextAccessor.HttpContext?.User.HasClaim("Permission", permission) ?? false;
     }
-} 
+}

@@ -12,6 +12,7 @@ using SearchBugs.Application.Git.GitHttpServer;
 using SearchBugs.Application.Git.GetFileContents;
 using SearchBugs.Application.Git.GetBranches;
 using SearchBugs.Application.Git.CloneRepository;
+using SearchBugs.Api.Extensions;
 using Shared.Results;
 
 
@@ -24,7 +25,7 @@ public static class RepoEndpoints
     public static void MapRepoEndpoints(this WebApplication app)
     {
         app
-            .MapMethods("{name}.git/{**path}", new[] { "GET", "POST", "PUT", "LOCK", "UNLOCK" }, [ApiExplorerSettings(IgnoreApi = true)] async (
+            .MapMethods("{name}.git/{**path}", new[] { "GET", "POST", "PUT" }, [ApiExplorerSettings(IgnoreApi = true)] async (
         ISender sender,
             HttpContext httpContext,
             string name,
@@ -37,7 +38,7 @@ public static class RepoEndpoints
                 httpContext
             );
                 await sender.Send(command, cancellationToken);
-            });
+            }).ExcludeFromDescription();
 
         var repo = app.MapGroup("api/repo");
         repo.MapGet("", GetRepositories).WithName(nameof(GetRepositories));
@@ -55,8 +56,8 @@ public static class RepoEndpoints
     public static async Task<IResult> GetCommitDiff(string url, string commitSha, ISender sender)
     {
         var query = new GetCommitDiffQuery(url, commitSha);
-        dynamic result = await sender.Send(query);
-        return Results.Ok(result.Value!);
+        var result = await sender.Send(query);
+        return result!.ToHttpResult();
     }
 
     public record CommitChangeRequest(string Author, string Email, string Message, string Content);
@@ -65,49 +66,49 @@ public static class RepoEndpoints
     {
         var command = new CommitChangeCommand(url, request.Author, request.Email, request.Message, request.Content);
         var result = await sender.Send(command);
-        return Results.Ok();
+        return result!.ToHttpResult();
     }
 
     public static async Task<IResult> GetTree(string url, string commitSha, ISender sender)
     {
         var query = new GetListTreeQuery(url, commitSha);
-        dynamic result = await sender.Send(query);
-        return Results.Ok(result.Value!);
+        var result = await sender.Send(query);
+        return result!.ToHttpResult();
     }
 
     public static async Task<IResult> GetRepositoryDetails(string url, string path, ISender sender)
     {
         var query = new GetGitReposDetailsQuery(url, path);
-        dynamic result = await sender.Send(query);
-        return Results.Ok(result.Value!);
+        var result = await sender.Send(query);
+        return result!.ToHttpResult();
     }
 
     public static async Task<IResult> GetRepositories(ISender sender)
     {
         var query = new GetGitRepoQuery();
-        dynamic result = await sender.Send(query);
-        return Results.Ok(result.Value!);
+        var result = await sender.Send(query);
+        return result!.ToHttpResult();
     }
 
     public static async Task<IResult> CreateRepository([FromBody] CreateGitRepositoryRequest request, ISender sender)
     {
         var command = new CreateGitRepoCommand(request.Name, request.Description, request.Url, request.ProjectId);
         var result = await sender.Send(command);
-        return Results.Ok();
+        return result!.ToHttpResult();
     }
 
     public static async Task<IResult> DeleteRepository(string url, ISender sender)
     {
         var command = new DeleteGitRepoCommand(url);
         var result = await sender.Send(command);
-        return Results.Ok();
+        return result!.ToHttpResult();
     }
 
     public static async Task<IResult> GetFileContent(string url, string commitSha, string filePath, ISender sender)
     {
         var query = new GetFileContentQuery(url, commitSha, filePath);
-        dynamic result = await sender.Send(query);
-        return Results.Ok(result.Value!);
+        var result = await sender.Send(query);
+        return result!.ToHttpResult();
     }
 
     public record CloneRepositoryRequest(string TargetPath);
@@ -116,13 +117,13 @@ public static class RepoEndpoints
     {
         var command = new CloneRepositoryCommand(url, request.TargetPath);
         var result = await sender.Send(command);
-        return Results.Ok();
+        return result!.ToHttpResult();
     }
 
     public static async Task<IResult> GetBranches(string url, ISender sender)
     {
         var query = new GetBranchesQuery(url);
-        dynamic result = await sender.Send(query);
-        return Results.Ok(result.Value!);
+        var result = await sender.Send(query);
+        return result!.ToHttpResult();
     }
 }

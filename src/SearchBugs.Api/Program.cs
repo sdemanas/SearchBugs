@@ -64,6 +64,14 @@ public abstract partial class Program
         // Enable CORS
         app.UseCors("AllowAll");
 
+        // Add authentication and authorization middleware in correct order
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        // Add custom middleware
+        app.UseStaticFiles();
+        app.UseMiddleware<ExceptionHandlingMiddleware>();
+
         app.MapAuthenticationsEndpoints();
         app.MapBugsEndpoints();
         app.MapUserEndpoints();
@@ -72,15 +80,12 @@ public abstract partial class Program
         app.MapRepoEndpoints();
         app.MapNotificationEndpoints();
         app.MapTestNotificationEndpoints();
+        app.MapAuditLogEndpoints();
 
         // Map SignalR hub
         app.MapHub<NotificationHub>("/hubs/notifications");
 
         // app.UseHttpsRedirection();
-
-        app.UseAuthentication();
-        app.UseStaticFiles();
-        app.UseMiddleware<ExceptionHandlingMiddleware>();
         app.Run();
     }
 }

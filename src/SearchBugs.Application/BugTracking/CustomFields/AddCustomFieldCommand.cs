@@ -43,19 +43,33 @@ public class AddCustomFieldCommandHandler : ICommandHandler<AddCustomFieldComman
 
         var bug = bugResult.Value;
 
+        // Check if the project exists
+        var projectResult = await _projectRepository.GetByIdAsync(bug.ProjectId, cancellationToken);
+        if (projectResult.IsFailure)
+        {
+            return Result.Failure<CustomFieldDto>(new NotFoundError(
+                "Project.NotFound",
+                $"Project with ID {bug.ProjectId} not found"));
+        }
+
         // Create the custom field first
         var customField = CustomField.Create(
             command.Name,
             "text", // Default field type for now
             bug.ProjectId);
 
-        // Create the bug custom field link
+        // Create the bug custom field link with the value
         var bugCustomField = BugCustomField.Create(
             bug.Id,
             customField.Id,
             command.Value);
 
+        // Set the navigation property so EF can track the relationship
+        bugCustomField.CustomField = customField;
+
+        // Add the bug custom field to the bug
         bug.AddBugCustomField(bugCustomField);
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success(CustomFieldDto.FromCustomField(customField, command.Value));
@@ -84,4 +98,4 @@ internal sealed class AddCustomFieldCommandValidator : AbstractValidator<AddCust
             .MaximumLength(2000)
             .WithError(new Error("CustomField.ValueMaxLength", "The custom field value must not exceed 2000 characters."));
     }
-} 
+}

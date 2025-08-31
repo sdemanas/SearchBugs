@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SearchBugs.Domain.Bugs;
+using Shared.Primitives;
 using Shared.Results;
+using System.Linq.Expressions;
 
 namespace SearchBugs.Persistence.Repositories;
 
@@ -10,8 +12,11 @@ internal sealed class BugRepository : Repository<Bug, BugId>, IBugRepository
     {
     }
 
-    public async Task<Result<Bug>> GetByIdAsync(BugId id, CancellationToken cancellationToken = default) =>
-          Result.Create(await _context.Set<Bug>().FirstOrDefaultAsync(b => b.Id == id, cancellationToken));
+    public override async Task<Result<Bug>> GetByIdAsync(IEntityId id, CancellationToken cancellationToken = default, params Expression<Func<Bug, object>>[] includes) =>
+          Result.Create(await _context.Set<Bug>()
+              .Include(b => b.Status)
+              .Include(b => b.Priority)
+              .FirstOrDefaultAsync(b => b.Id == (BugId)id, cancellationToken));
 
     public async Task<Result<BugStatus>> GetBugStatusByName(string name, CancellationToken cancellationToken = default) =>
         Result.Create(await _context.Set<BugStatus>().FirstOrDefaultAsync(s => s.Name == name, cancellationToken));

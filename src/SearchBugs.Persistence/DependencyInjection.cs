@@ -6,6 +6,7 @@ using SearchBugs.Domain;
 using SearchBugs.Domain.Bugs;
 using SearchBugs.Domain.Git;
 using SearchBugs.Domain.Projects;
+using SearchBugs.Domain.Repositories;
 using SearchBugs.Domain.Roles;
 using SearchBugs.Domain.Users;
 using SearchBugs.Persistence.Repositories;
@@ -39,6 +40,7 @@ public static class DependencyInjection
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IGitRepository, GitRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 
         services.AddMemoryCache()
             .ConfigureOptions<ConnectionStringSetup>();

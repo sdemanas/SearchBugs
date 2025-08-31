@@ -28,12 +28,17 @@ public class GetBugByIdQueryHandler : IQueryHandler<GetBugByIdQuery, BugDto>
         }
 
         var bug = bugResult.Value;
+
+        // Use default values if navigation properties are null
+        string statusName = bug.Status?.Name ?? "Unknown Status";
+        string priorityName = bug.Priority?.Name ?? "Unknown Priority";
+
         return Result.Success(new BugDto(
             bug.Id.Value,
             bug.Title,
             bug.Description,
-            bug.Status.Name,
-            bug.Priority.Name,
+            statusName,
+            priorityName,
             bug.Severity,
             bug.ProjectId.Value,
             bug.AssigneeId?.Value,
@@ -54,4 +59,4 @@ public record BugDto(
     Guid? AssigneeId,
     Guid ReporterId,
     DateTime CreatedAt,
-    DateTime? UpdatedAt); 
+    DateTime? UpdatedAt);
