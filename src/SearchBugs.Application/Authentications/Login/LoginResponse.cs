@@ -1,3 +1,5 @@
-﻿namespace SearchBugs.Application.Authentications.Login;
+﻿using SearchBugs.Application.Common.Attributes;
 
-internal sealed record LoginResponse(string Token);
+namespace SearchBugs.Application.Authentications.Login;
+
+internal sealed record LoginResponse([property: AuditIgnore] string Token);

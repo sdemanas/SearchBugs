@@ -1,12 +1,15 @@
 using System.Diagnostics;
+using System.Reflection;
 using System.Text.Json;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using SearchBugs.Application.Common.Attributes;
 using SearchBugs.Application.Common.Interfaces;
 using SearchBugs.Domain.AuditLogs;
 using SearchBugs.Domain.Repositories;
 using SearchBugs.Domain.Users;
+using Shared.Messaging;
 using Shared.Results;
 using Shared.Time;
 
@@ -39,6 +42,12 @@ public sealed class AuditLoggingPipelineBehavior<TRequest, TResponse> : IPipelin
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
+        // Skip logging for queries - only log commands/actions
+        if (IsQuery(request))
+        {
+            return await next();
+        }
+
         var stopwatch = Stopwatch.StartNew();
         var requestName = typeof(TRequest).Name;
         var requestData = SerializeAndTruncate(request, MaxRequestDataLength);
@@ -131,7 +140,9 @@ public sealed class AuditLoggingPipelineBehavior<TRequest, TResponse> : IPipelin
     {
         try
         {
-            var json = JsonSerializer.Serialize(obj, new JsonSerializerOptions
+            var sanitizedObj = RedactSensitiveProperties(obj);
+
+            var json = JsonSerializer.Serialize(sanitizedObj, new JsonSerializerOptions
             {
                 WriteIndented = false,
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -150,5 +161,79 @@ public sealed class AuditLoggingPipelineBehavior<TRequest, TResponse> : IPipelin
         {
             return "[SERIALIZATION_ERROR]";
         }
+    }
+
+    /// <summary>
+    /// Determines if the request is a query by checking if it implements IQuery interface
+    /// </summary>
+    private static bool IsQuery<T>(T request)
+    {
+        if (request == null) return false;
+
+        var requestType = request.GetType();
+        var interfaces = requestType.GetInterfaces();
+
+        return interfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IQuery<>));
+    }
+
+    /// <summary>
+    /// Creates a copy of the object with sensitive properties redacted based on AuditIgnore attribute
+    /// </summary>
+    private static object RedactSensitiveProperties<T>(T obj)
+    {
+        if (obj == null) return obj!;
+
+        var type = obj.GetType();
+
+        // For primitive types and strings, return as-is
+        if (type.IsPrimitive || type == typeof(string) || type == typeof(DateTime) ||
+            type == typeof(Guid) || type == typeof(decimal) || type.IsEnum)
+        {
+            return obj;
+        }
+
+        // For collections, process each item
+        if (obj is System.Collections.IEnumerable enumerable && type != typeof(string))
+        {
+            var items = new List<object>();
+            foreach (var item in enumerable)
+            {
+                items.Add(RedactSensitiveProperties(item));
+            }
+            return items;
+        }
+
+        // Create anonymous object with redacted properties
+        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        var redactedProperties = new Dictionary<string, object?>();
+
+        foreach (var property in properties)
+        {
+            try
+            {
+                var hasAuditIgnore = property.GetCustomAttribute<AuditIgnoreAttribute>() != null;
+                var value = property.GetValue(obj);
+
+                if (hasAuditIgnore)
+                {
+                    redactedProperties[property.Name] = "****";
+                }
+                else if (value != null)
+                {
+                    redactedProperties[property.Name] = RedactSensitiveProperties(value);
+                }
+                else
+                {
+                    redactedProperties[property.Name] = null;
+                }
+            }
+            catch
+            {
+                // If we can't access the property, mark it as redacted
+                redactedProperties[property.Name] = "****";
+            }
+        }
+
+        return redactedProperties;
     }
 }
