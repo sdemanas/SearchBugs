@@ -1,4 +1,5 @@
 using SearchBugs.Application.Common.Interfaces;
+using SearchBugs.Domain.Roles;
 using SearchBugs.Domain.Users;
 using Shared.Messaging;
 using Shared.Results;
@@ -32,6 +33,15 @@ internal sealed class ImpersonateCommandHandler : ICommandHandler<ImpersonateCom
             return Result.Failure<ImpersonateResponse>(UserErrors.NotFound(currentUserId));
         }
 
+        // Check if the current user has admin role
+        var currentUser = currentUserResult.Value;
+        bool isAdmin = currentUser.Roles.Any(role => role.Name == Role.Admin.Name);
+
+        if (!isAdmin)
+        {
+            return Result.Failure<ImpersonateResponse>(UserErrors.InsufficientPermissions);
+        }
+
         // Get the user to impersonate
         var userToImpersonateResult = await _userRepository.GetByIdAsync(new UserId(request.UserIdToImpersonate), cancellationToken);
 
@@ -39,12 +49,6 @@ internal sealed class ImpersonateCommandHandler : ICommandHandler<ImpersonateCom
         {
             return Result.Failure<ImpersonateResponse>(UserErrors.NotFound(new UserId(request.UserIdToImpersonate)));
         }
-
-        // TODO: Add permission check here - only admins or users with specific permissions should be able to impersonate
-        // if (!_currentUserService.HasPermission("CanImpersonate"))
-        // {
-        //     return Result.Failure<ImpersonateResponse>(UserErrors.InsufficientPermissions);
-        // }
 
         // Generate impersonation token
         string token = _jwtProvider.GenerateImpersonationJwtToken(currentUserResult.Value, userToImpersonateResult.Value);

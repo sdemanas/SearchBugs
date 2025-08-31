@@ -111,9 +111,14 @@ public static class UserEndpoints
         return result!.ToHttpResult();
     }
 
-    public static async Task<IResult> GetUsers(ISender sender)
+    public static async Task<IResult> GetUsers(
+        ISender sender,
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] string? roleFilter = null,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 50)
     {
-        var query = new GetUsersQuery();
+        var query = new GetUsersQuery(searchTerm, roleFilter, pageNumber, pageSize);
         var result = await sender.Send(query);
         return result!.ToHttpResult();
     }

@@ -35,6 +35,13 @@ internal sealed class JwtProvider : IJwtProvider
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.Value.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email.Value),
         };
+
+        // Add role claims
+        foreach (var role in user.Roles)
+        {
+            claims.Add(new Claim("role", role.Name));
+        }
+
         var token = new JwtSecurityToken(
             issuer: _jwtOptions.Issuer,
             audience: _jwtOptions.Audience,
@@ -64,6 +71,12 @@ internal sealed class JwtProvider : IJwtProvider
             new Claim(ImpersonatedUserIdClaimType, impersonatedUser.Id.Value.ToString()),
             new Claim(ImpersonatedEmailClaimType, impersonatedUser.Email.Value),
         };
+
+        // Add role claims for the impersonated user (these are the active roles during impersonation)
+        foreach (var role in impersonatedUser.Roles)
+        {
+            claims.Add(new Claim("role", role.Name));
+        }
 
         var token = new JwtSecurityToken(
             issuer: _jwtOptions.Issuer,

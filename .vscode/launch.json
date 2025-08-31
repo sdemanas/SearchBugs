@@ -27,9 +27,20 @@
             }
         },
         {
-            "name": ".NET Core Attach",
+            "name": "Watch",
             "type": "coreclr",
-            "request": "attach"
+            "request": "launch",
+            "preLaunchTask": "watch",
+            "program": "${workspaceFolder}/src/SearchBugs.Api/bin/Debug/net9.0/SearchBugs.Api.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/SearchBugs.Api",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
         }
     ]
 }

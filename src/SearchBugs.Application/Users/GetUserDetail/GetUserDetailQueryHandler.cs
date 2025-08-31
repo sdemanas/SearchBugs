@@ -1,5 +1,6 @@
-﻿using SearchBugs.Domain.Users;
-using Shared.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using SearchBugs.Domain;
+using SearchBugs.Domain.Users;
 using Shared.Messaging;
 using Shared.Results;
 
@@ -7,27 +8,43 @@ namespace SearchBugs.Application.Users.GetUserDetail;
 
 public sealed class GetUserDetailQueryHandler : IQueryHandler<GetUserDetailQuery, GetUserDetailResponse>
 {
-    private readonly ISqlQueryExecutor _sqlQueryExecutor;
+    private readonly IApplicationDbContext _context;
 
-    public GetUserDetailQueryHandler(ISqlQueryExecutor sqlQueryExecutor) => _sqlQueryExecutor = sqlQueryExecutor;
+    public GetUserDetailQueryHandler(IApplicationDbContext context) => _context = context;
 
-    public async Task<Result<GetUserDetailResponse>> Handle(GetUserDetailQuery query, CancellationToken cancellationToken) =>
-            await Result.Success(query)
-            .Bind(async query => Result.Create(await GetUserDetailByIdAsync(query.UserId)))
-            .MapFailure(() => UserErrors.NotFound(new UserId(query.UserId)));
+    public async Task<Result<GetUserDetailResponse>> Handle(GetUserDetailQuery query, CancellationToken cancellationToken)
+    {
+        var user = await GetUserDetailByIdAsync(query.UserId, cancellationToken);
 
-    public async Task<GetUserDetailResponse?> GetUserDetailByIdAsync(Guid UserId) =>
-        await _sqlQueryExecutor.FirstOrDefaultAsync<GetUserDetailResponse>(@"
-            SELECT 
-                u.id as Id,
-                u.name_first_name as FirstName,
-                u.name_last_name as LastName,
-                u.email_value as Email,
-                r.name as Roles,
-                u.created_on_utc as CreatedOnUtc,
-                u.modified_on_utc as ModifiedOnUtc
-            FROM ""user"" u
-            LEFT JOIN user_role ur ON u.id = ur.user_id
-            LEFT JOIN ""role"" r ON ur.role_id = r.id
-            WHERE u.id = @UserId", new { UserId });
+        if (user == null)
+        {
+            return Result.Failure<GetUserDetailResponse>(UserErrors.NotFound(new UserId(query.UserId)));
+        }
+
+        return Result.Success(user);
+    }
+
+    public async Task<GetUserDetailResponse?> GetUserDetailByIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var userIdObj = new UserId(userId);
+        var user = await _context.Users
+            .Include(u => u.Roles)
+            .FirstOrDefaultAsync(u => u.Id == userIdObj, cancellationToken);
+
+        if (user == null)
+        {
+            return null;
+        }
+
+
+        return new GetUserDetailResponse(
+            user.Id.Value,
+            user.Name.FirstName,
+            user.Name.LastName,
+            user.Email.Value,
+            user.Roles?.Select(r => r.Name).ToArray(),
+            user.CreatedOnUtc,
+            user.ModifiedOnUtc
+        );
+    }
 }

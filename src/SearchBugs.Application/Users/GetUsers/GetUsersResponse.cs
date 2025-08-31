@@ -1,8 +1,10 @@
 ﻿namespace SearchBugs.Application.Users.GetUsers;
 
-public record GetUsersResponse(Guid Id,
+public sealed record GetUsersResponse(
+    Guid Id,
     string FirstName,
     string LastName,
     string Email,
+    string[]? Roles,
     DateTime CreatedOnUtc,
     DateTime? ModifiedOnUtc);

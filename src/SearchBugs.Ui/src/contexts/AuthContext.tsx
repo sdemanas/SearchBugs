@@ -6,7 +6,8 @@ interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: string;
+  roles: string[];
+  createdOnUtc: string;
   isImpersonating?: boolean;
   originalUserId?: string;
   originalUserEmail?: string;
@@ -36,47 +37,91 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Helper function to fetch user details from API
+  const fetchUserDetails = async (userId: string): Promise<User | null> => {
+    try {
+      const response = await apiClient.users.getById(userId);
+      if (response.data.isSuccess) {
+        const userData = response.data.value;
+        return {
+          ...userData,
+          roles: userData.roles || [],
+        };
+      } else {
+        console.error("Failed to fetch user details:", response.data.error);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+      return null;
+    }
+  };
+
+  // Helper function to decode JWT and extract basic info
+  const decodeToken = (token: string) => {
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const isExpired = payload.exp * 1000 < Date.now();
+
+      if (isExpired) {
+        return null;
+      }
+
+      return {
+        sub: payload.sub,
+        email: payload.email,
+        impersonated_user_id: payload.impersonated_user_id,
+        impersonated_email: payload.impersonated_email,
+        roles: payload.role ? [payload.role] : [],
+        exp: payload.exp,
+      };
+    } catch (error) {
+      console.error("Token decode error:", error);
+      return null;
+    }
+  };
+
+  // Initialize user from token
   useEffect(() => {
-    const token = localStorage.getItem(accessTokenKey);
-    if (token) {
-      try {
-        // Decode JWT to check expiration and get user info
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        const isExpired = payload.exp * 1000 < Date.now();
+    const initializeUser = async () => {
+      const token = localStorage.getItem(accessTokenKey);
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
 
-        if (isExpired) {
-          localStorage.removeItem(accessTokenKey);
-          setIsLoading(false);
-        } else {
-          // Check if this is an impersonation token
-          const isImpersonating = payload.impersonated_user_id != null;
-          const userId = isImpersonating
-            ? payload.impersonated_user_id
-            : payload.sub;
-          const email = isImpersonating
-            ? payload.impersonated_email
-            : payload.email;
-
-          setUser({
-            id: userId,
-            email: email,
-            firstName: "", // You might want to fetch this from another endpoint
-            lastName: "",
-            role: payload.role || "User",
-            isImpersonating: isImpersonating,
-            originalUserId: isImpersonating ? payload.sub : undefined,
-            originalUserEmail: isImpersonating ? payload.email : undefined,
-          });
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error("Token validation error:", error);
+      const tokenPayload = decodeToken(token);
+      if (!tokenPayload) {
         localStorage.removeItem(accessTokenKey);
         setIsLoading(false);
+        return;
       }
-    } else {
+
+      // Determine which user ID to fetch details for
+      const isImpersonating = !!tokenPayload.impersonated_user_id;
+      const userIdToFetch = isImpersonating
+        ? tokenPayload.impersonated_user_id
+        : tokenPayload.sub;
+
+      // Fetch user details from API
+      const userDetails = await fetchUserDetails(userIdToFetch);
+
+      if (userDetails) {
+        setUser({
+          ...userDetails,
+          isImpersonating,
+          originalUserId: isImpersonating ? tokenPayload.sub : undefined,
+          originalUserEmail: isImpersonating ? tokenPayload.email : undefined,
+        });
+      } else {
+        // If we can't fetch user details, remove the token
+        localStorage.removeItem(accessTokenKey);
+      }
+
       setIsLoading(false);
-    }
+    };
+
+    initializeUser();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -90,15 +135,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const { token } = response.data.value;
       localStorage.setItem(accessTokenKey, token);
 
-      // Decode JWT to get user info (optional - you might want to make a separate API call)
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      setUser({
-        id: payload.sub,
-        email: payload.email,
-        firstName: "", // You might want to add these to the JWT or fetch from another endpoint
-        lastName: "",
-        role: payload.role || "User",
-      });
+      // Decode token to get user ID
+      const tokenPayload = decodeToken(token);
+      if (!tokenPayload) {
+        throw new Error("Invalid token received");
+      }
+
+      // Fetch user details from API
+      const userDetails = await fetchUserDetails(tokenPayload.sub);
+      if (!userDetails) {
+        throw new Error("Failed to fetch user details");
+      }
+
+      setUser(userDetails);
     } catch (error) {
       console.error("Login error:", error);
       throw new Error("Login failed");
@@ -126,15 +175,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const { token } = response.data.value;
       localStorage.setItem(accessTokenKey, token);
 
-      // Decode JWT to get user info
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      setUser({
-        id: payload.sub,
-        email: payload.email,
-        firstName: firstName,
-        lastName: lastName,
-        role: payload.role || "User",
-      });
+      // Decode token to get user ID
+      const tokenPayload = decodeToken(token);
+      if (!tokenPayload) {
+        throw new Error("Invalid token received");
+      }
+
+      // Fetch user details from API
+      const userDetails = await fetchUserDetails(tokenPayload.sub);
+      if (!userDetails) {
+        throw new Error("Failed to fetch user details");
+      }
+
+      setUser(userDetails);
     } catch (error) {
       console.error("Registration error:", error);
       throw new Error("Registration failed");
@@ -156,20 +209,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         throw new Error(response.data.error.message || "Impersonation failed");
       }
 
-      const { token, impersonatedUserEmail } = response.data.value;
+      const { token } = response.data.value;
       localStorage.setItem(accessTokenKey, token);
 
-      // Decode JWT to get user info
-      const payload = JSON.parse(atob(token.split(".")[1]));
+      // Decode token to get impersonation info
+      const tokenPayload = decodeToken(token);
+      if (!tokenPayload) {
+        throw new Error("Invalid token received");
+      }
+
+      // Fetch impersonated user details from API
+      const userDetails = await fetchUserDetails(
+        tokenPayload.impersonated_user_id
+      );
+      if (!userDetails) {
+        throw new Error("Failed to fetch impersonated user details");
+      }
+
       setUser({
-        id: payload.impersonated_user_id,
-        email: impersonatedUserEmail,
-        firstName: "", // You might want to fetch this from another endpoint
-        lastName: "",
-        role: payload.role || "User",
+        ...userDetails,
         isImpersonating: true,
-        originalUserId: payload.sub,
-        originalUserEmail: payload.email,
+        originalUserId: tokenPayload.sub,
+        originalUserEmail: tokenPayload.email,
       });
     } catch (error) {
       console.error("Impersonation error:", error);
@@ -190,14 +251,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const { token } = response.data.value;
       localStorage.setItem(accessTokenKey, token);
 
-      // Decode JWT to get original user info
-      const payload = JSON.parse(atob(token.split(".")[1]));
+      // Decode token to get original user info
+      const tokenPayload = decodeToken(token);
+      if (!tokenPayload) {
+        throw new Error("Invalid token received");
+      }
+
+      // Fetch original user details from API
+      const userDetails = await fetchUserDetails(tokenPayload.sub);
+      if (!userDetails) {
+        throw new Error("Failed to fetch original user details");
+      }
+
       setUser({
-        id: payload.sub,
-        email: payload.email,
-        firstName: "", // You might want to fetch this from another endpoint
-        lastName: "",
-        role: payload.role || "User",
+        ...userDetails,
         isImpersonating: false,
       });
     } catch (error) {

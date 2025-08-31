@@ -38,18 +38,18 @@ import {
   Activity,
   Settings,
 } from "lucide-react";
-import { apiClient, User, UserRole, Role } from "@/lib/api";
+import { apiClient, User, Role } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 import { CardLoadingSkeleton } from "@/components/ui/loading";
 
-const roleColors: Record<UserRole, string> = {
-  [UserRole.Admin]: "bg-red-100 text-red-800 hover:bg-red-200",
-  [UserRole.User]: "bg-blue-100 text-blue-800 hover:bg-blue-200",
+const roleColors: Record<string, string> = {
+  Admin: "bg-red-100 text-red-800 hover:bg-red-200",
+  User: "bg-blue-100 text-blue-800 hover:bg-blue-200",
 };
 
-const roleIcons: Record<UserRole, React.ReactNode> = {
-  [UserRole.Admin]: <Shield className="h-3 w-3" />,
-  [UserRole.User]: <UserIcon className="h-3 w-3" />,
+const roleIcons: Record<string, React.ReactNode> = {
+  Admin: <Shield className="h-3 w-3" />,
+  User: <UserIcon className="h-3 w-3" />,
 };
 
 interface EditUserDialogProps {
@@ -282,7 +282,7 @@ export const UserDetailsPage: React.FC = () => {
     });
   };
 
-  const getRolesBadges = (roles: UserRole[]) => {
+  const getRolesBadges = (roles: string[]) => {
     if (!roles || roles.length === 0) {
       return <Badge variant="secondary">No Role</Badge>;
     }
@@ -291,9 +291,11 @@ export const UserDetailsPage: React.FC = () => {
       <Badge
         key={role}
         variant="secondary"
-        className={`${roleColors[role]} flex items-center gap-1`}
+        className={`${
+          roleColors[role] || "bg-gray-100 text-gray-800 hover:bg-gray-200"
+        } flex items-center gap-1`}
       >
-        {roleIcons[role]}
+        {roleIcons[role] || <UserIcon className="h-3 w-3" />}
         {role}
       </Badge>
     ));

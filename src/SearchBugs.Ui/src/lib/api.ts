@@ -143,7 +143,7 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  roles?: UserRole[];
+  roles?: string[];
   createdOnUtc: string;
   modifiedOnUtc?: string;
 }
@@ -404,7 +404,27 @@ export const apiClient = {
 
   // Users
   users: {
-    getAll: () => api.get<ApiResponse<User[]>>("/users"),
+    getAll: (params?: {
+      searchTerm?: string;
+      roleFilter?: string;
+      pageNumber?: number;
+      pageSize?: number;
+    }) => {
+      const queryParams = new URLSearchParams();
+      if (params?.searchTerm)
+        queryParams.append("searchTerm", params.searchTerm);
+      if (params?.roleFilter && params.roleFilter !== "all")
+        queryParams.append("roleFilter", params.roleFilter);
+      if (params?.pageNumber)
+        queryParams.append("pageNumber", params.pageNumber.toString());
+      if (params?.pageSize)
+        queryParams.append("pageSize", params.pageSize.toString());
+
+      const queryString = queryParams.toString();
+      return api.get<ApiResponse<User[]>>(
+        `/users${queryString ? `?${queryString}` : ""}`
+      );
+    },
     getById: (id: string) => api.get<ApiResponse<User>>(`/users/${id}`),
     create: (data: {
       firstName: string;

@@ -15,4 +15,6 @@ public static class UserErrors
         $"The user with the email '{email}' was not found.");
 
     public static Error InvalidPassword => new("User.InvalidPassword", "The password is invalid.");
+
+    public static Error InsufficientPermissions => new("User.InsufficientPermissions", "User does not have sufficient permissions to perform this action.");
 }

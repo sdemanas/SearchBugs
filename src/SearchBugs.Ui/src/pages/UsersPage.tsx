@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import {
@@ -57,18 +57,20 @@ import {
   RefreshCw,
   Plus,
   Trash2,
+  UserCog,
 } from "lucide-react";
 import { apiClient, User, UserRole, Role } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
-const roleColors: Record<UserRole, string> = {
-  [UserRole.Admin]: "bg-red-100 text-red-800 hover:bg-red-200",
-  [UserRole.User]: "bg-blue-100 text-blue-800 hover:bg-blue-200",
+const roleColors: Record<string, string> = {
+  Admin: "bg-red-100 text-red-800 hover:bg-red-200",
+  User: "bg-blue-100 text-blue-800 hover:bg-blue-200",
 };
 
-const roleIcons: Record<UserRole, React.ReactNode> = {
-  [UserRole.Admin]: <Shield className="h-3 w-3" />,
-  [UserRole.User]: <UserCheck className="h-3 w-3" />,
+const roleIcons: Record<string, React.ReactNode> = {
+  Admin: <Shield className="h-3 w-3" />,
+  User: <UserCheck className="h-3 w-3" />,
 };
 
 interface EditUserDialogProps {
@@ -360,8 +362,11 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({
 
 export const UsersPage = () => {
   const navigate = useNavigate();
+  const { user: currentUser, impersonate } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize] = useState(50);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [assigningRoleUser, setAssigningRoleUser] = useState<User | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -371,22 +376,35 @@ export const UsersPage = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Fetch users
+  // Check if current user is admin
+  const isAdmin = currentUser?.roles?.includes("Admin");
+
+  // Reset pagination when search or filter changes
+  useEffect(() => {
+    setPageNumber(1);
+  }, [searchTerm, roleFilter]);
+
+  // Fetch users with search, filter, and pagination
   const {
     data: users = [],
     isLoading,
     error,
     refetch,
   } = useQuery({
-    queryKey: ["users"],
+    queryKey: ["users", { searchTerm, roleFilter, pageNumber, pageSize }],
     queryFn: async () => {
-      const response = await apiClient.users.getAll();
+      const response = await apiClient.users.getAll({
+        searchTerm: searchTerm || undefined,
+        roleFilter: roleFilter === "all" ? undefined : roleFilter,
+        pageNumber,
+        pageSize,
+      });
       return response.data.value as User[];
     },
   });
 
   // Fetch available roles
-  const { data: rolesData, isLoading: isLoadingRoles } = useQuery({
+  const { data: rolesData } = useQuery({
     queryKey: ["roles"],
     queryFn: async () => {
       const response = await apiClient.roles.getAll();
@@ -495,19 +513,6 @@ export const UsersPage = () => {
     },
   });
 
-  // Filter users based on search term and role
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesRole =
-      roleFilter === "all" || user.roles?.includes(roleFilter as UserRole);
-
-    return matchesSearch && matchesRole;
-  });
-
   const handleEditUser = (user: User) => {
     setEditingUser(user);
     setIsEditDialogOpen(true);
@@ -549,6 +554,40 @@ export const UsersPage = () => {
     }
   };
 
+  const handleImpersonate = async (user: User) => {
+    if (!isAdmin) {
+      toast({
+        title: "Access Denied",
+        description: "Only administrators can impersonate users",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (user.id === currentUser?.id) {
+      toast({
+        title: "Cannot Impersonate",
+        description: "You cannot impersonate yourself",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await impersonate(user.id);
+      toast({
+        title: "Impersonation Started",
+        description: `You are now impersonating ${user.firstName} ${user.lastName}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Impersonation Failed",
+        description: "Failed to start impersonation. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -557,7 +596,7 @@ export const UsersPage = () => {
     });
   };
 
-  const getRolesBadges = (roles: UserRole[] | undefined) => {
+  const getRolesBadges = (roles: string[] | undefined) => {
     if (!roles || roles.length === 0) {
       return <Badge variant="secondary">No Role</Badge>;
     }
@@ -566,9 +605,11 @@ export const UsersPage = () => {
       <Badge
         key={role}
         variant="secondary"
-        className={`${roleColors[role]} flex items-center gap-1`}
+        className={`${
+          roleColors[role] || "bg-gray-100 text-gray-800 hover:bg-gray-200"
+        } flex items-center gap-1`}
       >
-        {roleIcons[role]}
+        {roleIcons[role] || <UserCheck className="h-3 w-3" />}
         {role}
       </Badge>
     ));
@@ -725,7 +766,7 @@ export const UsersPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
+                {users.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -784,6 +825,14 @@ export const UsersPage = () => {
                             <Shield className="h-4 w-4 mr-2" />
                             Assign Role
                           </DropdownMenuItem>
+                          {isAdmin && user.id !== currentUser?.id && (
+                            <DropdownMenuItem
+                              onClick={() => handleImpersonate(user)}
+                            >
+                              <UserCog className="h-4 w-4 mr-2" />
+                              Impersonate User
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             className="text-destructive"
@@ -801,7 +850,7 @@ export const UsersPage = () => {
             </Table>
           )}
 
-          {!isLoading && filteredUsers.length === 0 && (
+          {!isLoading && users.length === 0 && (
             <div className="text-center py-8">
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium mb-2">No users found</h3>
@@ -810,6 +859,31 @@ export const UsersPage = () => {
                   ? "Try adjusting your search or filter criteria"
                   : "There are no users in the system yet"}
               </p>
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {!isLoading && users.length > 0 && (
+            <div className="flex items-center justify-between pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPageNumber(Math.max(1, pageNumber - 1))}
+                disabled={pageNumber <= 1}
+              >
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Page {pageNumber}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPageNumber(pageNumber + 1)}
+                disabled={users.length < pageSize}
+              >
+                Next
+              </Button>
             </div>
           )}
         </CardContent>
