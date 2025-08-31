@@ -12,10 +12,10 @@ public static class NotificationEndpoints
         var group = app.MapGroup("/api/notifications")
             .WithTags("Notifications");
 
-        group.MapPost("/send", SendNotification);
-        group.MapPost("/send-to-user", SendNotificationToUser);
-        group.MapPost("/broadcast", BroadcastNotification);
-        group.MapPost("/bug-notification", SendBugNotification);
+        group.MapPost("/send", SendNotification).RequireAuthorization("ViewNotification");
+        group.MapPost("/send-to-user", SendNotificationToUser).RequireAuthorization("ViewNotification");
+        group.MapPost("/broadcast", BroadcastNotification).RequireAuthorization("ViewNotification");
+        group.MapPost("/bug-notification", SendBugNotification).RequireAuthorization("ViewNotification");
     }
 
     private static async Task<IResult> SendNotification(

@@ -1,6 +1,7 @@
 ﻿using SearchBugs.Domain;
 using SearchBugs.Domain.Roles;
 using SearchBugs.Domain.Users;
+using Shared.Errors;
 using Shared.Messaging;
 using Shared.Results;
 
@@ -34,6 +35,12 @@ internal sealed class AssignRoleCommandHandler : ICommandHandler<AssignRoleComma
         if (role.IsFailure)
         {
             return Result.Failure(role.Error);
+        }
+
+        // Check if user already has this role
+        if (user.Value.Roles.Any(r => r.Id == role.Value.Id))
+        {
+            return Result.Failure(new Error("UserRole.Conflict", "User already has this role"));
         }
 
         user.Value.AddRole(role.Value);

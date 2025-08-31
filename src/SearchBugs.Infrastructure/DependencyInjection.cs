@@ -1,12 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using SearchBugs.Domain.Git;
 using SearchBugs.Domain.Services;
 using SearchBugs.Domain.Users;
 using SearchBugs.Infrastructure.Authentication;
 using SearchBugs.Infrastructure.Options;
 using SearchBugs.Infrastructure.Services;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 namespace SearchBugs.Infrastructure;
 
@@ -27,24 +31,40 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
         services.ConfigureOptions<LoggingBackgroundJobSetup>();
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer();
-        services.AddTransient<IJwtProvider, JwtProvider>();
+        // Configure options BEFORE adding authentication
         services.ConfigureOptions<JwtOptionsSetup>();
-        services.ConfigureOptions<JwtBearerOptionsSetup>();
         services.ConfigureOptions<GitOptionsSetup>();
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                // Get the JWT options from the service provider
+                var serviceProvider = services.BuildServiceProvider();
+                var jwtOptions = serviceProvider.GetRequiredService<IOptions<JwtOptions>>().Value;
+
+                Console.WriteLine($"Inline JWT Config - Issuer: {jwtOptions.Issuer}, Audience: {jwtOptions.Audience}, Secret Length: {jwtOptions.Secret.Length}");
+
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtOptions.Audience,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
+                    NameClaimType = JwtRegisteredClaimNames.Sub,
+                    RoleClaimType = "role",
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                options.MapInboundClaims = false;
+            });
+        services.AddTransient<IJwtProvider, JwtProvider>();
         services.AddScoped<IPasswordHashingService, PasswordHashingService>();
         services.AddScoped<IDataEncryptionService, DataEncryptionService>();
         services.AddScoped<IGitHttpService, GitHttpService>();
         services.AddScoped<IGitRepositoryService, GitRepositoryService>();
-        services.AddCors(options =>
-        {
-            options.AddPolicy("AllowSpecificOrigin",
-                builder => builder.WithOrigins("http://localhost:5173")
-                                  .AllowAnyHeader()
-                                  .AllowAnyMethod()
-                                  .AllowCredentials());
-        });
 
         services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();

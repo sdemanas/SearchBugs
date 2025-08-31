@@ -23,6 +23,9 @@ internal sealed class JwtProvider : IJwtProvider
 
     public string GenerateJwtToken(User user)
     {
+        // Debug: Log JWT values during token generation
+        Console.WriteLine($"JwtProvider - Generating token with Issuer: {_jwtOptions.Issuer}, Audience: {_jwtOptions.Audience}, Secret Length: {_jwtOptions.Secret.Length}");
+
         var signCredentials = new SigningCredentials(
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Secret)),
             SecurityAlgorithms.HmacSha256

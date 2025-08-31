@@ -1,5 +1,8 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Errors;
+using Shared.Results;
+using Shared.Exceptions;
 
 namespace SearchBugs.Api.Middleware;
 
@@ -28,38 +31,92 @@ public class ExceptionHandlingMiddleware
 
             var exceptionDetails = GetExceptionDetails(exception);
 
-            var problemDetails = new ProblemDetails
+            // Create a Result failure response based on exception type
+            Result errorResult = exception switch
             {
-                Status = exceptionDetails.Status,
-                Type = exceptionDetails.Type,
-                Title = exceptionDetails.Title,
-                Detail = exceptionDetails.Detail,
+                FluentValidation.ValidationException fluentValidationException => CreateFluentValidationResult(fluentValidationException),
+                Shared.Exceptions.ValidationException customValidationException => CreateCustomValidationResult(customValidationException),
+                UnauthorizedAccessException unauthorizedException => Result.Failure(new Error("Auth.Unauthorized", unauthorizedException.Message)),
+                ArgumentException argumentException => Result.Failure(new Error("Argument.Invalid", argumentException.Message)),
+                InvalidOperationException invalidOperationException => Result.Failure(new Error("Operation.Invalid", invalidOperationException.Message)),
+                _ => Result.Failure(new Error(exceptionDetails.Type, exceptionDetails.Detail))
             };
 
-            if (exceptionDetails.Errors is not null)
-            {
-                problemDetails.Extensions["errors"] = exceptionDetails.Errors;
-            }
-
             context.Response.StatusCode = exceptionDetails.Status;
+            context.Response.ContentType = "application/json";
 
-            await context.Response.WriteAsJsonAsync(problemDetails);
+            await context.Response.WriteAsJsonAsync(errorResult);
         }
+    }
+
+    private static Result CreateFluentValidationResult(FluentValidation.ValidationException validationException)
+    {
+        // For multiple validation errors, we'll return the first error in the Result format
+        // and include all errors in a custom error message
+        var errors = validationException.Errors.ToArray();
+        if (errors.Length == 1)
+        {
+            var error = errors[0];
+            return Result.Failure(new Error(error.ErrorCode ?? "Validation.Error", error.ErrorMessage));
+        }
+
+        // For multiple errors, create a comprehensive error message
+        var errorMessages = string.Join("; ", errors.Select(e => e.ErrorMessage));
+        return Result.Failure(new Error("Validation.MultipleErrors", errorMessages));
+    }
+
+    private static Result CreateCustomValidationResult(Shared.Exceptions.ValidationException validationException)
+    {
+        // For custom validation errors
+        var errors = validationException.Errors.ToArray();
+        if (errors.Length == 1)
+        {
+            var error = errors[0];
+            return Result.Failure(new Error("Validation.Error", error.ErrorMessage));
+        }
+
+        // For multiple errors, create a comprehensive error message
+        var errorMessages = string.Join("; ", errors.Select(e => e.ErrorMessage));
+        return Result.Failure(new Error("Validation.MultipleErrors", errorMessages));
     }
 
     private static ExceptionDetails GetExceptionDetails(Exception exception)
     {
         return exception switch
         {
-            ValidationException validationException => new ExceptionDetails(
+            FluentValidation.ValidationException validationException => new ExceptionDetails(
                 StatusCodes.Status400BadRequest,
-                "ValidationFailure",
+                "Validation.Error",
                 "Validation error",
                 "One or more validation errors has occurred",
-                validationException.Errors),
+                validationException.Errors.Select(e => new { Code = e.ErrorCode, Message = e.ErrorMessage })),
+            Shared.Exceptions.ValidationException customValidationException => new ExceptionDetails(
+                StatusCodes.Status400BadRequest,
+                "Validation.Error",
+                "Validation error",
+                "One or more validation errors has occurred",
+                customValidationException.Errors.Select(e => new { Property = e.PropertyName, Message = e.ErrorMessage })),
+            UnauthorizedAccessException => new ExceptionDetails(
+                StatusCodes.Status401Unauthorized,
+                "Auth.Unauthorized",
+                "Unauthorized",
+                "Access is denied due to invalid credentials",
+                null),
+            ArgumentException => new ExceptionDetails(
+                StatusCodes.Status400BadRequest,
+                "Argument.Invalid",
+                "Invalid argument",
+                "One or more arguments are invalid",
+                null),
+            InvalidOperationException => new ExceptionDetails(
+                StatusCodes.Status400BadRequest,
+                "Operation.Invalid",
+                "Invalid operation",
+                "The requested operation is not valid in the current state",
+                null),
             _ => new ExceptionDetails(
                 StatusCodes.Status500InternalServerError,
-                "ServerError",
+                "Server.Error",
                 "Server error",
                 "An unexpected error has occurred",
                 null)

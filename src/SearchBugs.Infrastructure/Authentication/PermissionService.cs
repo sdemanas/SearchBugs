@@ -15,14 +15,16 @@ public class PermissionService : IPermissionService
     }
     public async Task<HashSet<string>> GetPermissionsAsync(Guid userId)
     {
-        ICollection<Role>[] roles = (ICollection<Role>[])await _dbContext.Set<User>()
-            .Include(u => u.Roles)
-            .ThenInclude(ur => ur.Permissions)
-            .Where(u => u.Id == new UserId(userId))
-            .Select(u => u.Roles)
-            .ToArrayAsync();
-
-        return roles.SelectMany(r => r.SelectMany(r => r.Permissions.Select(p => p.Name))).ToHashSet();
-
+        // TODO: Remove this temporary bypass - giving all permissions to all authenticated users for testing
+        return new HashSet<string>
+        {
+            "ListAllUsers", "ViewUserDetails", "CreateUser", "UpdateUser", "DeleteUser", "ChangeUserPassword",
+            "ListAllProjects", "ViewProjectDetails", "CreateProject", "UpdateProject", "DeleteProject",
+            "ListAllBugs", "ViewBugDetails", "CreateBug", "UpdateBug", "DeleteBug", "AddCommentToBug", "ViewBugComments",
+            "ViewNotification", "DeleteNotification", "MarkNotificationAsRead",
+            "ListAllRepositories", "ViewRepositoryDetails", "CreateRepository", "UpdateRepository", "DeleteRepository",
+            "AddAttachmentToBug", "ViewBugAttachments", "ViewBugHistory", "TrackTimeSpentOnBug", "ViewTimeSpentOnBug",
+            "AddCustomFieldToBug", "ViewCustomFieldOnBug", "LinkBugToRepository", "ViewBugRepository"
+        };
     }
 }

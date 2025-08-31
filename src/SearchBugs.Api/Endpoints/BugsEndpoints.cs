@@ -50,30 +50,30 @@ public static class BugsEndpoints
             .WithOpenApi();
 
         // Basic CRUD operations
-        bugs.MapGet("", GetBugs).WithName(nameof(GetBugs));
-        bugs.MapGet("{bugId:guid}", GetBugById).WithName(nameof(GetBugById));
-        bugs.MapPost("", CreateBug).WithName(nameof(CreateBug));
-        bugs.MapPut("{bugId:guid}", UpdateBug).WithName(nameof(UpdateBug));
-        bugs.MapDelete("{bugId:guid}", DeleteBug).WithName(nameof(DeleteBug));
+        bugs.MapGet("", GetBugs).WithName(nameof(GetBugs)).RequireAuthorization("ListAllBugs");
+        bugs.MapGet("{bugId:guid}", GetBugById).WithName(nameof(GetBugById)).RequireAuthorization("ViewBugDetails");
+        bugs.MapPost("", CreateBug).WithName(nameof(CreateBug)).RequireAuthorization("CreateBug");
+        bugs.MapPut("{bugId:guid}", UpdateBug).WithName(nameof(UpdateBug)).RequireAuthorization("UpdateBug");
+        bugs.MapDelete("{bugId:guid}", DeleteBug).WithName(nameof(DeleteBug)).RequireAuthorization("DeleteBug");
 
         // Comments
-        bugs.MapPost("{bugId:guid}/comments", AddComment).WithName(nameof(AddComment));
-        bugs.MapGet("{bugId:guid}/comments", GetComments).WithName(nameof(GetComments));
+        bugs.MapPost("{bugId:guid}/comments", AddComment).WithName(nameof(AddComment)).RequireAuthorization("AddCommentToBug");
+        bugs.MapGet("{bugId:guid}/comments", GetComments).WithName(nameof(GetComments)).RequireAuthorization("ViewBugComments");
 
         // Attachments
-        bugs.MapPost("{bugId:guid}/attachments", AddAttachment).WithName(nameof(AddAttachment));
-        bugs.MapGet("{bugId:guid}/attachments", GetAttachments).WithName(nameof(GetAttachments));
+        bugs.MapPost("{bugId:guid}/attachments", AddAttachment).WithName(nameof(AddAttachment)).RequireAuthorization("AddAttachmentToBug");
+        bugs.MapGet("{bugId:guid}/attachments", GetAttachments).WithName(nameof(GetAttachments)).RequireAuthorization("ViewBugAttachments");
 
         // History
-        bugs.MapGet("{bugId:guid}/history", GetBugHistory).WithName(nameof(GetBugHistory));
+        bugs.MapGet("{bugId:guid}/history", GetBugHistory).WithName(nameof(GetBugHistory)).RequireAuthorization("ViewBugHistory");
 
         // Time tracking
-        bugs.MapPost("{bugId:guid}/time-tracking", TrackTime).WithName(nameof(TrackTime));
-        bugs.MapGet("{bugId:guid}/time-tracking", GetTimeTracking).WithName(nameof(GetTimeTracking));
+        bugs.MapPost("{bugId:guid}/time-tracking", TrackTime).WithName(nameof(TrackTime)).RequireAuthorization("TrackTimeSpentOnBug");
+        bugs.MapGet("{bugId:guid}/time-tracking", GetTimeTracking).WithName(nameof(GetTimeTracking)).RequireAuthorization("ViewTimeSpentOnBug");
 
         // Custom fields
-        bugs.MapPost("{bugId:guid}/custom-fields", AddCustomField).WithName(nameof(AddCustomField));
-        bugs.MapGet("{bugId:guid}/custom-fields", GetCustomFields).WithName(nameof(GetCustomFields));
+        bugs.MapPost("{bugId:guid}/custom-fields", AddCustomField).WithName(nameof(AddCustomField)).RequireAuthorization("AddCustomFieldToBug");
+        bugs.MapGet("{bugId:guid}/custom-fields", GetCustomFields).WithName(nameof(GetCustomFields)).RequireAuthorization("ViewCustomFieldOnBug");
     }
 
     public static async Task<IResult> GetBugs([FromQuery] Guid? projectId, ISender sender)

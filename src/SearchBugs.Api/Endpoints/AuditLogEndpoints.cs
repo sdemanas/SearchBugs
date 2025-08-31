@@ -15,7 +15,8 @@ public static class AuditLogEndpoints
 
         auditLogs.MapGet("", GetAuditLogs)
             .WithName(nameof(GetAuditLogs))
-            .WithDescription("Get audit logs with optional filtering");
+            .WithDescription("Get audit logs with optional filtering")
+            .RequireAuthorization("ListAllUsers"); // Using basic user management permission for audit logs
     }
 
     public static async Task<IResult> GetAuditLogs(

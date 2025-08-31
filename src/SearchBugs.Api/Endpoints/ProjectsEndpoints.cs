@@ -16,9 +16,9 @@ public static class ProjectsEndpoints
     public static void MapProjectsEndpoints(this IEndpointRouteBuilder app)
     {
         var projects = app.MapGroup("api/projects");
-        projects.MapPost("", CreateProject).WithName(nameof(CreateProject));
-        projects.MapGet("", GetProjects).WithName(nameof(GetProjects));
-        projects.MapGet("{id:guid}", GetProject).WithName(nameof(GetProject));
+        projects.MapPost("", CreateProject).WithName(nameof(CreateProject)).RequireAuthorization("CreateProject");
+        projects.MapGet("", GetProjects).WithName(nameof(GetProjects)).RequireAuthorization("ListAllProjects");
+        projects.MapGet("{id:guid}", GetProject).WithName(nameof(GetProject)).RequireAuthorization("ViewProjectDetails");
     }
 
     public static async Task<IResult> CreateProject(

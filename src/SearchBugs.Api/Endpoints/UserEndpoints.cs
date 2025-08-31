@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using SearchBugs.Application.Users.AssignRole;
 using SearchBugs.Application.Users.ChangePassword;
 using SearchBugs.Application.Users.CreateUser;
@@ -22,16 +23,17 @@ public static class UserEndpoints
     public static void MapUserEndpoints(this IEndpointRouteBuilder app)
     {
         var users = app.MapGroup("api/users")
-            .WithTags("Users");
+            .WithTags("Users")
+            .WithOpenApi();
 
-        users.MapPost("", CreateUser).WithName(nameof(CreateUser));
-        users.MapGet("", GetUsers).WithName(nameof(GetUsers));
-        users.MapGet("{id}", GetUserDetail).WithName(nameof(GetUserDetail));
-        users.MapPut("{id}", UpdateUser).WithName(nameof(UpdateUser));
-        users.MapDelete("{id}", DeleteUser).WithName(nameof(DeleteUser));
-        users.MapPost("{id}/assign-role", AssignRole).WithName(nameof(AssignRole));
-        users.MapPost("{id}/remove-role", RemoveRole).WithName(nameof(RemoveRole));
-        users.MapPost("{id}/change-password", ChangePassword).WithName(nameof(ChangePassword));
+        users.MapGet("/", GetUsers).WithName(nameof(GetUsers)).RequireAuthorization();
+        users.MapGet("/{id:guid}", GetUserDetail).WithName(nameof(GetUserDetail)).RequireAuthorization("ViewUserDetails");
+        users.MapPost("/", CreateUser).WithName(nameof(CreateUser)).RequireAuthorization("CreateUser");
+        users.MapPut("/{id:guid}", UpdateUser).WithName(nameof(UpdateUser)).RequireAuthorization("UpdateUser");
+        users.MapDelete("/{id:guid}", DeleteUser).WithName(nameof(DeleteUser)).RequireAuthorization("DeleteUser");
+        users.MapPost("/{id:guid}/roles", AssignRole).WithName(nameof(AssignRole)).RequireAuthorization("UpdateUser");
+        users.MapDelete("/{id:guid}/roles", RemoveRole).WithName(nameof(RemoveRole)).RequireAuthorization("UpdateUser");
+        users.MapPut("/{id:guid}/change-password", ChangePassword).WithName(nameof(ChangePassword)).RequireAuthorization("ChangeUserPassword");
     }
 
     public static async Task<IResult> CreateUser(
@@ -72,7 +74,7 @@ public static class UserEndpoints
 
     public static async Task<IResult> RemoveRole(
         Guid id,
-        RemoveRoleRequest request,
+        [FromBody] RemoveRoleRequest request,
         ISender sender)
     {
         var command = new RemoveRoleCommand(request.UserId, request.Role);
@@ -82,7 +84,7 @@ public static class UserEndpoints
 
     public static async Task<IResult> ChangePassword(
         Guid id,
-        ChangePasswordRequest request,
+        [FromBody] ChangePasswordRequest request,
         ISender sender)
     {
         var command = new ChangePasswordCommand(id, request.CurrentPassword, request.NewPassword);
@@ -91,7 +93,7 @@ public static class UserEndpoints
     }
 
     public static async Task<IResult> AssignRole(
-        AssignRoleRequest request,
+        [FromBody] AssignRoleRequest request,
         ISender sender)
     {
         var command = new AssignRoleCommand(request.UserId, request.Role);
@@ -101,7 +103,7 @@ public static class UserEndpoints
 
     public static async Task<IResult> UpdateUser(
         Guid id,
-        UpdateUserRequest request,
+        [FromBody] UpdateUserRequest request,
         ISender sender)
     {
         var command = new UpdateUserCommand(id, request.FirstName, request.LastName);

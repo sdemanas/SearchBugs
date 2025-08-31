@@ -32,13 +32,14 @@ public class CurrentUserService : ICurrentUserService
                 return new UserId(impersonatedUserId);
             }
 
-            // Fall back to regular user ID claims
-            var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier) ??
-                             _httpContextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Sub);
+            // Try multiple claim types to find the user ID
+            var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Sub) ??
+                             _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier) ??
+                             _httpContextAccessor.HttpContext?.User.FindFirst("sub");
 
             if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
             {
-                throw new UnauthorizedAccessException("User is not authenticated");
+                throw new UnauthorizedAccessException("User is not authenticated or user ID claim is missing");
             }
             return new UserId(userId);
         }
@@ -95,8 +96,9 @@ public class CurrentUserService : ICurrentUserService
             return impersonatedEmail;
         }
 
-        // Fall back to regular email claims
-        return _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Email)?.Value ??
-               _httpContextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
+        // Try multiple claim types to find the email
+        return _httpContextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Email)?.Value ??
+               _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Email)?.Value ??
+               _httpContextAccessor.HttpContext?.User.FindFirst("email")?.Value;
     }
 }

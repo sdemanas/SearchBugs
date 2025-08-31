@@ -34,8 +34,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchBugs.Persistence.Unit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchBugs.Domain.UnitTests", "test\SearchBugs.Domain.UnitTests\SearchBugs.Domain.UnitTests.csproj", "{E750EF46-3355-4296-AC53-47A7DD1B99FA}"
 EndProject
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "searchbugs.frontend", "src\SearchBugs.FrontEnd\searchbugs.frontend.esproj", "{12D8C6E7-22A2-1FC9-8930-E18948A481E3}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
