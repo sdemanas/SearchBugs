@@ -1,5 +1,6 @@
 ﻿
 
+using SearchBugs.Application.BugTracking.GetBugs;
 using Shared.Messaging;
 
 namespace SearchBugs.Application.BugTracking.Create;
@@ -12,4 +13,4 @@ public record CreateBugCommand(
     string Severity,
     Guid ProjectId,
     Guid AssigneeId,
-    Guid ReporterId) : ICommand;
+    Guid ReporterId) : ICommand<BugsResponse>;

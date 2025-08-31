@@ -4,6 +4,7 @@ import {
   BugDetailsPage,
   BugsPage,
   CreateProjectPage,
+  CreateRepositoryPage,
   DashboardPage,
   LoginPage,
   NotificationsPage,
@@ -17,6 +18,7 @@ import {
 } from "./pages";
 import { RepositoryListPage } from "./modules/repository/RepositoryListPage";
 import { EnhancedProfilePage } from "./pages/EnhancedProfilePage";
+import NotificationTestPage from "./pages/NotificationTestPage";
 import MainLayout from "./layouts/Main";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -114,6 +116,14 @@ const router = createBrowserRouter([
         },
       },
       {
+        path: "/repositories/create",
+        element: <CreateRepositoryPage />,
+        handle: {
+          title: "Create Repository",
+          icon: "GitBranch",
+        },
+      },
+      {
         path: "/repositories/:url",
         element: <RepositoryPage />,
         handle: {
@@ -159,6 +169,14 @@ const router = createBrowserRouter([
         handle: {
           title: "Settings",
           icon: "Settings",
+        },
+      },
+      {
+        path: "/test-notifications",
+        element: <NotificationTestPage />,
+        handle: {
+          title: "Notification Test",
+          icon: "TestTube",
         },
       },
     ],

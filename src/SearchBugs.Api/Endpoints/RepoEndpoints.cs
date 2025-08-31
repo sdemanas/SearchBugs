@@ -12,6 +12,7 @@ using SearchBugs.Application.Git.GitHttpServer;
 using SearchBugs.Application.Git.GetFileContents;
 using SearchBugs.Application.Git.GetBranches;
 using SearchBugs.Application.Git.CloneRepository;
+using Shared.Results;
 
 
 namespace SearchBugs.Api.Endpoints;
@@ -54,8 +55,8 @@ public static class RepoEndpoints
     public static async Task<IResult> GetCommitDiff(string url, string commitSha, ISender sender)
     {
         var query = new GetCommitDiffQuery(url, commitSha);
-        var result = await sender.Send(query);
-        return Results.Ok(result);
+        dynamic result = await sender.Send(query);
+        return Results.Ok(result.Value!);
     }
 
     public record CommitChangeRequest(string Author, string Email, string Message, string Content);
@@ -64,52 +65,49 @@ public static class RepoEndpoints
     {
         var command = new CommitChangeCommand(url, request.Author, request.Email, request.Message, request.Content);
         var result = await sender.Send(command);
-        return Results.Ok(result);
+        return Results.Ok();
     }
 
     public static async Task<IResult> GetTree(string url, string commitSha, ISender sender)
     {
         var query = new GetListTreeQuery(url, commitSha);
-        var result = await sender.Send(query);
-        return Results.Ok(result);
+        dynamic result = await sender.Send(query);
+        return Results.Ok(result.Value!);
     }
 
     public static async Task<IResult> GetRepositoryDetails(string url, string path, ISender sender)
     {
         var query = new GetGitReposDetailsQuery(url, path);
-        var result = await sender.Send(query);
-        return Results.Ok(result);
+        dynamic result = await sender.Send(query);
+        return Results.Ok(result.Value!);
     }
 
     public static async Task<IResult> GetRepositories(ISender sender)
     {
         var query = new GetGitRepoQuery();
-        var result = await sender.Send(query);
-
-        return Results.Ok(result);
+        dynamic result = await sender.Send(query);
+        return Results.Ok(result.Value!);
     }
 
     public static async Task<IResult> CreateRepository([FromBody] CreateGitRepositoryRequest request, ISender sender)
     {
         var command = new CreateGitRepoCommand(request.Name, request.Description, request.Url, request.ProjectId);
         var result = await sender.Send(command);
-
-        return Results.Ok(result);
+        return Results.Ok();
     }
 
     public static async Task<IResult> DeleteRepository(string url, ISender sender)
     {
         var command = new DeleteGitRepoCommand(url);
         var result = await sender.Send(command);
-
-        return Results.Ok(result);
+        return Results.Ok();
     }
 
     public static async Task<IResult> GetFileContent(string url, string commitSha, string filePath, ISender sender)
     {
         var query = new GetFileContentQuery(url, commitSha, filePath);
-        var result = await sender.Send(query);
-        return Results.Ok(result);
+        dynamic result = await sender.Send(query);
+        return Results.Ok(result.Value!);
     }
 
     public record CloneRepositoryRequest(string TargetPath);
@@ -118,13 +116,13 @@ public static class RepoEndpoints
     {
         var command = new CloneRepositoryCommand(url, request.TargetPath);
         var result = await sender.Send(command);
-        return Results.Ok(result);
+        return Results.Ok();
     }
 
     public static async Task<IResult> GetBranches(string url, ISender sender)
     {
         var query = new GetBranchesQuery(url);
-        var result = await sender.Send(query);
-        return Results.Ok(result);
+        dynamic result = await sender.Send(query);
+        return Results.Ok(result.Value!);
     }
 }

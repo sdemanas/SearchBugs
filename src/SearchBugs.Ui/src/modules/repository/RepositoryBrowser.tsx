@@ -62,7 +62,11 @@ export const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
     queryKey: ["branches", repoUrl],
     queryFn: async () => {
       const response = await apiClient.repositories.getBranches(repoUrl);
-      return response.data as string[];
+      // Handle ApiResponse<string[]> wrapper from API
+      if (response.data?.isSuccess && Array.isArray(response.data.value)) {
+        return response.data.value;
+      }
+      return [];
     },
   });
 
@@ -78,7 +82,11 @@ export const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
         repoUrl,
         currentCommitSha
       );
-      const allItems = response.data as GitTreeItem[];
+      // Handle ApiResponse<GitTreeItem[]> wrapper from API
+      let allItems: GitTreeItem[] = [];
+      if (response.data?.isSuccess && Array.isArray(response.data.value)) {
+        allItems = response.data.value;
+      }
 
       // Filter items based on current path
       if (!currentPath) {
@@ -110,7 +118,11 @@ export const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
         currentCommitSha,
         selectedFile
       );
-      return response.data as string;
+      // Handle ApiResponse<string> wrapper from API
+      if (response.data?.isSuccess && typeof response.data.value === "string") {
+        return response.data.value;
+      }
+      return "";
     },
     enabled: !!selectedFile,
   });

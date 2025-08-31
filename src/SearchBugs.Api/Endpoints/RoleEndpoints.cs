@@ -1,6 +1,7 @@
 using MediatR;
 using SearchBugs.Application.Roles.GetPermissions;
 using SearchBugs.Application.Roles.GetRoles;
+using Shared.Results;
 
 namespace SearchBugs.Api.Endpoints;
 
@@ -18,14 +19,14 @@ public static class RoleEndpoints
     public static async Task<IResult> GetRoles(ISender sender)
     {
         var query = new GetRolesQuery();
-        var result = await sender.Send(query);
-        return Results.Ok(result);
+        dynamic result = await sender.Send(query);
+        return Results.Ok(result.Value!);
     }
 
     public static async Task<IResult> GetPermissions(ISender sender)
     {
         var query = new GetPermissionsQuery();
-        var result = await sender.Send(query);
-        return Results.Ok(result);
+        dynamic result = await sender.Send(query);
+        return Results.Ok(result.Value!);
     }
 }

@@ -137,7 +137,6 @@ namespace SearchBugs.Persistence.Migrations
                         .HasDatabaseName("ix_bug_status_id");
 
                     b.HasIndex("Title")
-                        .IsUnique()
                         .HasDatabaseName("ix_bug_title");
 
                     b.ToTable("bug", (string)null);

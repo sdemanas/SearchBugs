@@ -1,4 +1,5 @@
-﻿using SearchBugs.Domain.Projects;
+﻿using SearchBugs.Domain.Bugs.Events;
+using SearchBugs.Domain.Projects;
 using SearchBugs.Domain.Users;
 using Shared.Primitives;
 using Shared.Results;
@@ -53,13 +54,32 @@ public class Bug : Entity<BugId>, IAuditable
 
     private Bug()
     {
-
+        Title = string.Empty;
+        Description = string.Empty;
+        Severity = string.Empty;
+        Status = null!;
+        Priority = null!;
+        ProjectId = null!;
+        AssigneeId = null!;
+        ReporterId = null!;
     }
 
     public static Result<Bug> Create(string title, string description, int status, int priority, string severity, ProjectId projectId, UserId assigneeId, UserId reporterId)
     {
         BugId bugId = new(Guid.NewGuid());
-        return Result.Create(new Bug(bugId, title, description, status, priority, severity, projectId, assigneeId, reporterId, SystemTime.UtcNow));
+        var bug = new Bug(bugId, title, description, status, priority, severity, projectId, assigneeId, reporterId, SystemTime.UtcNow);
+
+        // Raise domain event for bug creation
+        bug.RaiseDomainEvent(new BugCreatedDomainEvent(
+            bugId,
+            title,
+            description,
+            assigneeId,
+            reporterId,
+            SystemTime.UtcNow
+        ));
+
+        return Result.Create(bug);
     }
 
     public void AddComment(Comment comment)
@@ -103,7 +123,8 @@ public class Bug : Entity<BugId>, IAuditable
         BugStatus status,
         BugPriority priority,
         string severity,
-        UserId? assigneeId)
+        UserId? assigneeId,
+        UserId updatedBy)
     {
         if (string.IsNullOrWhiteSpace(title))
             return Result.Failure(BugsErrors.InvalidTitle);
@@ -114,6 +135,8 @@ public class Bug : Entity<BugId>, IAuditable
         if (string.IsNullOrWhiteSpace(severity))
             return Result.Failure(BugsErrors.InvalidBugSeverity);
 
+        var previousAssigneeId = AssigneeId;
+
         Title = title;
         Description = description;
         Status = status;
@@ -121,13 +144,36 @@ public class Bug : Entity<BugId>, IAuditable
         Priority = priority;
         PriorityId = priority.Id;
         Severity = severity;
-        
+
         if (assigneeId != null)
         {
             AssigneeId = assigneeId;
+
+            // Raise assignment event if assignee changed
+            if (previousAssigneeId != assigneeId)
+            {
+                RaiseDomainEvent(new BugAssignedDomainEvent(
+                    Id,
+                    Title,
+                    assigneeId,
+                    updatedBy,
+                    SystemTime.UtcNow
+                ));
+            }
         }
 
         ModifiedOnUtc = SystemTime.UtcNow;
+
+        // Raise domain event for bug update
+        RaiseDomainEvent(new BugUpdatedDomainEvent(
+            Id,
+            Title,
+            Description,
+            AssigneeId,
+            updatedBy,
+            SystemTime.UtcNow,
+            "Updated"
+        ));
 
         return Result.Success();
     }

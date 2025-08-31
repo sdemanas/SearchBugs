@@ -34,7 +34,7 @@ interface User {
 export const BugAddPage = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState("New");
+  const [status, setStatus] = useState("Open");
   const [priority, setPriority] = useState("Medium");
   const [severity, setSeverity] = useState("Medium");
   const [projectId, setProjectId] = useState<string>("");
@@ -57,13 +57,15 @@ export const BugAddPage = () => {
           apiClient.users.getAll(),
         ]);
 
-        if (projectsResponse.data) {
-          setProjects(projectsResponse.data);
+        // Extract data from ApiResponse wrapper
+        if (projectsResponse.data?.value) {
+          setProjects(projectsResponse.data.value);
         }
-        if (usersResponse.data) {
-          setUsers(usersResponse.data);
+        if (usersResponse.data?.value) {
+          setUsers(usersResponse.data.value);
         }
       } catch (error) {
+        console.error("Error loading data:", error);
         toast({
           title: "Error loading data",
           description: "Failed to load projects and users.",
@@ -92,7 +94,7 @@ export const BugAddPage = () => {
 
     setIsLoading(true);
     try {
-      await apiClient.bugs.create({
+      const response = await apiClient.bugs.create({
         title,
         description,
         status,
@@ -103,16 +105,26 @@ export const BugAddPage = () => {
         reporterId: user.id,
       });
 
-      toast({
-        title: "Bug created successfully",
-        description: "The bug has been reported and added to the system.",
-      });
-
-      navigate("/bugs");
-    } catch (error) {
+      if (response.data?.isSuccess) {
+        toast({
+          title: "Bug created successfully",
+          description: "The bug has been reported and added to the system.",
+        });
+        navigate("/bugs");
+      } else {
+        throw new Error(
+          response.data?.error?.message || "Failed to create bug"
+        );
+      }
+    } catch (error: unknown) {
+      console.error("Error creating bug:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to create the bug. Please try again.";
       toast({
         title: "Error creating bug",
-        description: "Failed to create the bug. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -230,11 +242,10 @@ export const BugAddPage = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="New">New</SelectItem>
-                    <SelectItem value="InProgress">In Progress</SelectItem>
+                    <SelectItem value="Open">Open</SelectItem>
+                    <SelectItem value="In Progress">In Progress</SelectItem>
                     <SelectItem value="Resolved">Resolved</SelectItem>
                     <SelectItem value="Closed">Closed</SelectItem>
-                    <SelectItem value="Reopened">Reopened</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -253,7 +264,6 @@ export const BugAddPage = () => {
                     <SelectItem value="Low">Low</SelectItem>
                     <SelectItem value="Medium">Medium</SelectItem>
                     <SelectItem value="High">High</SelectItem>
-                    <SelectItem value="Critical">Critical</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -272,7 +282,6 @@ export const BugAddPage = () => {
                     <SelectItem value="Low">Low</SelectItem>
                     <SelectItem value="Medium">Medium</SelectItem>
                     <SelectItem value="High">High</SelectItem>
-                    <SelectItem value="Critical">Critical</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

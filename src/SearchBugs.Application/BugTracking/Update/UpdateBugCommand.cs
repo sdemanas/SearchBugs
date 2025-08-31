@@ -78,7 +78,8 @@ public class UpdateBugCommandHandler : ICommandHandler<UpdateBugCommand, BugDto>
             bugStatus,
             bugPriority,
             bugSeverity.Name,
-            command.AssigneeId.HasValue ? new UserId(command.AssigneeId.Value) : null);
+            command.AssigneeId.HasValue ? new UserId(command.AssigneeId.Value) : null,
+            _currentUserService.UserId);
 
         if (updateResult.IsFailure)
         {
@@ -145,4 +146,4 @@ internal sealed class UpdateBugCommandValidator : AbstractValidator<UpdateBugCom
             .WithError(BugValidationErrors.SeverityIsRequired)
             .MaximumLength(50);
     }
-} 
+}

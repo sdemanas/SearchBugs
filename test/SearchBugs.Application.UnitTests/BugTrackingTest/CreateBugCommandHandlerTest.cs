@@ -2,8 +2,10 @@
 using Moq;
 using SearchBugs.Application.BugTracking;
 using SearchBugs.Application.BugTracking.Create;
+using SearchBugs.Application.BugTracking.GetBugs;
 using SearchBugs.Domain;
 using SearchBugs.Domain.Bugs;
+using Shared.Data;
 using Shared.Results;
 
 namespace SearchBugs.Application.UnitTests.BugTrackingTest;
@@ -13,6 +15,7 @@ public class CreateBugCommandHandlerTest
 
     private readonly Mock<IBugRepository> _bugRepository;
     private readonly Mock<IUnitOfWork> _unitOfWork;
+    private readonly Mock<ISqlQueryExecutor> _sqlQueryExecutor;
     private readonly CreateBugCommandHandler _sut;
 
 
@@ -20,7 +23,8 @@ public class CreateBugCommandHandlerTest
     {
         _bugRepository = new();
         _unitOfWork = new();
-        _sut = new CreateBugCommandHandler(_bugRepository.Object, _unitOfWork.Object);
+        _sqlQueryExecutor = new();
+        _sut = new CreateBugCommandHandler(_bugRepository.Object, _unitOfWork.Object, _sqlQueryExecutor.Object);
     }
 
     [Theory]
@@ -29,12 +33,26 @@ public class CreateBugCommandHandlerTest
     {
         // Arrange
         _bugRepository.Setup(x => x.Add(It.IsAny<Bug>())).Returns(Task<Result>.FromResult(Result.Success()));
+        _sqlQueryExecutor.Setup(x => x.FirstOrDefaultAsync<BugsResponse>(It.IsAny<string>(), It.IsAny<object>()))
+            .ReturnsAsync(new BugsResponse(
+                Guid.NewGuid(),
+                "Test Title",
+                "Test Description",
+                "Open",
+                "High",
+                "Low",
+                "Test Project",
+                "Test Assignee",
+                "Test Reporter",
+                DateTime.UtcNow,
+                null));
 
         // Act
         var result = await _sut.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
     }
 
     [Theory]
@@ -83,6 +101,19 @@ public class CreateBugCommandHandlerTest
         );
 
         _bugRepository.Setup(x => x.Add(It.IsAny<Bug>())).Returns(Task<Result>.FromResult(Result.Success()));
+        _sqlQueryExecutor.Setup(x => x.FirstOrDefaultAsync<BugsResponse>(It.IsAny<string>(), It.IsAny<object>()))
+            .ReturnsAsync(new BugsResponse(
+                Guid.NewGuid(),
+                "Test Title",
+                "Test Description",
+                "Open",
+                "High",
+                "Low",
+                "Test Project",
+                "Test Assignee",
+                "Test Reporter",
+                DateTime.UtcNow,
+                null));
 
         // Act
         var result = await _sut.Handle(command, CancellationToken.None);
@@ -90,6 +121,7 @@ public class CreateBugCommandHandlerTest
         // Assert
         _unitOfWork.Verify(x => x.SaveChangesAsync(CancellationToken.None), Times.Once);
         result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
     }
 
 }

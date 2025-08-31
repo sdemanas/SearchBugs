@@ -1,5 +1,6 @@
 using Scalar.AspNetCore;
 using SearchBugs.Api.Endpoints;
+using SearchBugs.Api.Hubs;
 using SearchBugs.Api.Middleware;
 using SearchBugs.Api.Services;
 using SearchBugs.Application;
@@ -25,6 +26,10 @@ public abstract partial class Program
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
+        // Add SignalR
+        builder.Services.AddSignalR();
+        builder.Services.AddScoped<INotificationService, NotificationService>();
+
         // Add CORS
         builder.Services.AddCors(options =>
         {
@@ -36,14 +41,15 @@ public abstract partial class Program
             });
         });
 
-        // Add Cors
+        // Add Cors for SignalR
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("AllowAll", builder =>
             {
-                builder.AllowAnyOrigin()
+                builder.WithOrigins("http://localhost:3000", "http://localhost:5173")
                        .AllowAnyMethod()
-                       .AllowAnyHeader();
+                       .AllowAnyHeader()
+                       .AllowCredentials();
             });
         });
 
@@ -56,7 +62,7 @@ public abstract partial class Program
         }
 
         // Enable CORS
-        app.UseCors();
+        app.UseCors("AllowAll");
 
         app.MapAuthenticationsEndpoints();
         app.MapBugsEndpoints();
@@ -64,11 +70,13 @@ public abstract partial class Program
         app.MapRoleEndpoints();
         app.MapProjectsEndpoints();
         app.MapRepoEndpoints();
+        app.MapNotificationEndpoints();
+        app.MapTestNotificationEndpoints();
+
+        // Map SignalR hub
+        app.MapHub<NotificationHub>("/hubs/notifications");
 
         // app.UseHttpsRedirection();
-
-        app.UseCors("AllowAll");
-
 
         app.UseAuthentication();
         app.UseStaticFiles();

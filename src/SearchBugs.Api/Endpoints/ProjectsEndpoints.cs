@@ -1,7 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SearchBugs.Application.Projects.CreateProject;
+using SearchBugs.Application.Projects.GetProject;
 using SearchBugs.Application.Projects.GetProjects;
+using SearchBugs.Api.Extensions;
 
 namespace SearchBugs.Api.Endpoints;
 
@@ -16,6 +18,7 @@ public static class ProjectsEndpoints
         var projects = app.MapGroup("api/projects");
         projects.MapPost("", CreateProject).WithName(nameof(CreateProject));
         projects.MapGet("", GetProjects).WithName(nameof(GetProjects));
+        projects.MapGet("{id:guid}", GetProject).WithName(nameof(GetProject));
     }
 
     public static async Task<IResult> CreateProject(
@@ -28,14 +31,21 @@ public static class ProjectsEndpoints
             );
 
         var result = await sender.Send(command);
-        return Results.Ok(result);
+        return result!.ToHttpResult();
     }
 
     public static async Task<IResult> GetProjects(ISender sender)
     {
         var query = new GetProjectsQuery();
         var result = await sender.Send(query);
-        return Results.Ok(result);
+        return result!.ToHttpResult();
+    }
+
+    public static async Task<IResult> GetProject(Guid id, ISender sender)
+    {
+        var query = new GetProjectQuery(id);
+        var result = await sender.Send(query);
+        return result!.ToHttpResult();
     }
 
 }

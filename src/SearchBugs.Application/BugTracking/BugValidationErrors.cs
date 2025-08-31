@@ -16,6 +16,7 @@ internal static class BugValidationErrors
     internal static Error PriorityIsRequired => new("Bug.PriorityIsRequired", "The bug priority is required.");
     internal static Error InvalidBugStatus => new("Bug.InvalidBugStatus", "The bug status is invalid.");
     internal static Error InvalidBugPriority => new("Bug.InvalidBugPriority", "The bug priority is invalid.");
+    internal static Error InvalidBugSeverity => new("Bug.InvalidBugSeverity", "The bug severity is invalid.");
 
     // Attachment validation errors
     internal static Error FileRequired => new("Attachment.FileRequired", "A file must be provided.");

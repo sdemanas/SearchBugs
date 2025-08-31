@@ -79,7 +79,7 @@ public static class BugsEndpoints
     {
         var query = new GetBugsQuery(projectId);
         var result = await sender.Send(query);
-        return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(result.Error);
+        return Results.Ok(((dynamic)result).Value!);
     }
 
     public static async Task<IResult> CreateBug(
@@ -97,14 +97,14 @@ public static class BugsEndpoints
             request.ReporterId);
 
         var result = await sender.Send(command);
-        return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Error);
+        return Results.Ok(((dynamic)result).Value!);
     }
 
     public static async Task<IResult> GetBugById(Guid bugId, ISender sender)
     {
         var query = new GetBugByIdQuery(bugId);
         var result = await sender.Send(query);
-        return result.IsSuccess ? Results.Ok(result.Value) : Results.NotFound(result.Error);
+        return Results.Ok(((dynamic)result).Value!);
     }
 
     public static async Task<IResult> UpdateBug(
@@ -122,14 +122,14 @@ public static class BugsEndpoints
             request.AssigneeId);
 
         var result = await sender.Send(command);
-        return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(result.Error);
+        return Results.Ok(((dynamic)result).Value!);
     }
 
     public static async Task<IResult> DeleteBug(Guid bugId, ISender sender)
     {
         var command = new DeleteBugCommand(bugId);
         var result = await sender.Send(command);
-        return result.IsSuccess ? Results.NoContent() : Results.NotFound(result.Error);
+        return Results.NoContent();
     }
 
     public static async Task<IResult> AddComment(
@@ -139,14 +139,14 @@ public static class BugsEndpoints
     {
         var command = new AddCommentCommand(bugId, request.Content);
         var result = await sender.Send(command);
-        return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(result.Error);
+        return Results.Ok(((dynamic)result).Value!);
     }
 
     public static async Task<IResult> GetComments(Guid bugId, ISender sender)
     {
         var query = new GetBugCommentsQuery(bugId);
         var result = await sender.Send(query);
-        return result.IsSuccess ? Results.Ok(result.Value) : Results.NotFound(result.Error);
+        return Results.Ok(((dynamic)result).Value!);
     }
 
     public static async Task<IResult> AddAttachment(
@@ -156,21 +156,21 @@ public static class BugsEndpoints
     {
         var command = new AddAttachmentCommand(bugId, request.File);
         var result = await sender.Send(command);
-        return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(result.Error);
+        return Results.Ok(((dynamic)result).Value!);
     }
 
     public static async Task<IResult> GetAttachments(Guid bugId, ISender sender)
     {
         var query = new GetBugAttachmentsQuery(bugId);
         var result = await sender.Send(query);
-        return result.IsSuccess ? Results.Ok(result.Value) : Results.NotFound(result.Error);
+        return Results.Ok(((dynamic)result).Value!);
     }
 
     public static async Task<IResult> GetBugHistory(Guid bugId, ISender sender)
     {
         var query = new GetBugHistoryQuery(bugId);
         var result = await sender.Send(query);
-        return result.IsSuccess ? Results.Ok(result.Value) : Results.NotFound(result.Error);
+        return Results.Ok(((dynamic)result).Value!);
     }
 
     public static async Task<IResult> TrackTime(
@@ -180,14 +180,14 @@ public static class BugsEndpoints
     {
         var command = new TrackTimeCommand(bugId, request.Duration, request.Description);
         var result = await sender.Send(command);
-        return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(result.Error);
+        return Results.Ok(((dynamic)result).Value!);
     }
 
     public static async Task<IResult> GetTimeTracking(Guid bugId, ISender sender)
     {
         var query = new GetBugTimeTrackingQuery(bugId);
         var result = await sender.Send(query);
-        return result.IsSuccess ? Results.Ok(result.Value) : Results.NotFound(result.Error);
+        return Results.Ok(((dynamic)result).Value!);
     }
 
     public static async Task<IResult> AddCustomField(
@@ -197,13 +197,13 @@ public static class BugsEndpoints
     {
         var command = new AddCustomFieldCommand(bugId, request.Name, request.Value);
         var result = await sender.Send(command);
-        return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(result.Error);
+        return Results.Ok(((dynamic)result).Value!);
     }
 
     public static async Task<IResult> GetCustomFields(Guid bugId, ISender sender)
     {
         var query = new GetBugCustomFieldsQuery(bugId);
         var result = await sender.Send(query);
-        return result.IsSuccess ? Results.Ok(result.Value) : Results.NotFound(result.Error);
+        return Results.Ok(((dynamic)result).Value!);
     }
 }

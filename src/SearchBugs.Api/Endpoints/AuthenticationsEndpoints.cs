@@ -2,6 +2,8 @@
 using MediatR;
 using SearchBugs.Application.Authentications.Login;
 using SearchBugs.Application.Authentications.Register;
+using Shared.Results;
+using SearchBugs.Api.Extensions;
 
 namespace SearchBugs.Api.Endpoints;
 
@@ -24,12 +26,12 @@ public static class AuthenticationsEndpoints
     {
         var command = new LoginCommand(req.Email, req.Password);
         var result = await sender.Send(command);
-        return Results.Ok(result);
+        return result!.ToHttpResult();
     }
     public static async Task<IResult> Register(RegisterRequest req, ISender sender)
     {
         var command = new RegisterCommand(req.Email, req.Password, req.FirstName, req.LastName);
         var result = await sender.Send(command);
-        return Results.Ok(result);
+        return result!.ToHttpResult();
     }
 }

@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Bell, Plus, Search, LogOut } from "lucide-react";
+import { Plus, Search, LogOut } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +13,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/use-toast";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -81,15 +82,7 @@ export const Header = () => {
 
         {/* User Actions */}
         <div className="flex items-center space-x-2">
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => navigate("/notifications")}
-            className="relative"
-          >
-            <Bell className="h-4 w-4" />
-            <span className="sr-only">Notifications</span>
-          </Button>
+          <NotificationBell />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

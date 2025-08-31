@@ -70,7 +70,8 @@ internal sealed class BugConfiguration : IEntityTypeConfiguration<Bug>
 
     private static void ConfigureIndexes(EntityTypeBuilder<Bug> builder)
     {
-        builder.HasIndex(b => b.Title)
-            .IsUnique();
+        // Index for performance, but not unique
+        builder.HasIndex(b => b.Title);
+        builder.HasIndex(b => b.ProjectId);
     }
 }

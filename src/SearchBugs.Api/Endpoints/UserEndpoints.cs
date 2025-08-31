@@ -7,6 +7,7 @@ using SearchBugs.Application.Users.GetUserDetail;
 using SearchBugs.Application.Users.GetUsers;
 using SearchBugs.Application.Users.RemoveRole;
 using SearchBugs.Application.Users.UpdateUser;
+using SearchBugs.Api.Extensions;
 
 namespace SearchBugs.Api.Endpoints;
 
@@ -45,7 +46,19 @@ public static class UserEndpoints
             request.Roles);
 
         var result = await sender.Send(command);
-        return result.IsSuccess ? Results.Created($"/api/users/{result.Value.UserId}", result.Value) : Results.BadRequest(result.Error);
+
+        // Extract UserId for the location header
+        var resultType = result!.GetType();
+        var valueProperty = resultType.GetProperty("Value");
+        if (valueProperty != null)
+        {
+            var value = valueProperty.GetValue(result);
+            var userIdProperty = value?.GetType().GetProperty("UserId");
+            var userId = userIdProperty?.GetValue(value)?.ToString();
+            return result.ToCreatedResult($"/api/users/{userId}");
+        }
+
+        return result.ToHttpResult();
     }
 
     public static async Task<IResult> DeleteUser(
@@ -54,7 +67,7 @@ public static class UserEndpoints
     {
         var command = new DeleteUserCommand(id);
         var result = await sender.Send(command);
-        return result.IsSuccess ? Results.NoContent() : Results.BadRequest(result.Error);
+        return Results.NoContent();
     }
 
     public static async Task<IResult> RemoveRole(
@@ -64,7 +77,7 @@ public static class UserEndpoints
     {
         var command = new RemoveRoleCommand(request.UserId, request.Role);
         var result = await sender.Send(command);
-        return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Error);
+        return Results.Ok();
     }
 
     public static async Task<IResult> ChangePassword(
@@ -74,7 +87,7 @@ public static class UserEndpoints
     {
         var command = new ChangePasswordCommand(id, request.CurrentPassword, request.NewPassword);
         var result = await sender.Send(command);
-        return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Error);
+        return Results.Ok();
     }
 
     public static async Task<IResult> AssignRole(
@@ -83,7 +96,7 @@ public static class UserEndpoints
     {
         var command = new AssignRoleCommand(request.UserId, request.Role);
         var result = await sender.Send(command);
-        return Results.Ok(result);
+        return Results.Ok();
     }
 
     public static async Task<IResult> UpdateUser(
@@ -93,14 +106,14 @@ public static class UserEndpoints
     {
         var command = new UpdateUserCommand(id, request.FirstName, request.LastName);
         var result = await sender.Send(command);
-        return Results.Ok(result);
+        return Results.Ok();
     }
 
     public static async Task<IResult> GetUsers(ISender sender)
     {
         var query = new GetUsersQuery();
         var result = await sender.Send(query);
-        return Results.Ok(result);
+        return result!.ToHttpResult();
     }
 
     public static async Task<IResult> GetUserDetail(
@@ -109,6 +122,6 @@ public static class UserEndpoints
     {
         var query = new GetUserDetailQuery(id);
         var result = await sender.Send(query);
-        return Results.Ok(result);
+        return result!.ToHttpResult();
     }
 }

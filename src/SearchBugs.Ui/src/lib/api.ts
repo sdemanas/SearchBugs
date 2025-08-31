@@ -302,6 +302,7 @@ export const apiClient = {
   // Projects
   projects: {
     getAll: () => api.get<ApiResponse<Project[]>>("/projects"),
+    getById: (id: string) => api.get<ApiResponse<Project>>(`/projects/${id}`),
     create: (data: CreateProjectDto) =>
       api.post<ApiResponse<Project>>("/projects", data),
     delete: (id: string) => api.delete<ApiResponse<void>>(`/projects/${id}`),
@@ -426,12 +427,27 @@ export const apiClient = {
       }
     ) => api.post(`/repo/${encodeURIComponent(url)}/commit/${commitSha}`, data),
     getTree: (url: string, commitSha: string) =>
-      api.get(`/repo/${encodeURIComponent(url)}/tree/${commitSha}`),
+      api.get<ApiResponse<GitTreeItem[]>>(
+        `/repo/${encodeURIComponent(url)}/tree/${commitSha}`
+      ),
     getFileContent: (url: string, commitSha: string, filePath: string) =>
-      api.get(`/repo/${encodeURIComponent(url)}/file/${commitSha}/${filePath}`),
+      api.get<ApiResponse<string>>(
+        `/repo/${encodeURIComponent(url)}/file/${commitSha}/${filePath}`
+      ),
     getBranches: (url: string) =>
-      api.get<string[]>(`/repo/${encodeURIComponent(url)}/branches`),
+      api.get<ApiResponse<string[]>>(
+        `/repo/${encodeURIComponent(url)}/branches`
+      ),
     clone: (url: string, targetPath: string) =>
       api.post(`/repo/${encodeURIComponent(url)}/clone`, { targetPath }),
+  },
+
+  // Test Notifications
+  testNotifications: {
+    sendTestNotification: (data: { userId: string; message?: string }) =>
+      api.post<{ message: string }>(
+        "/test-notifications/send-test-notification",
+        data
+      ),
   },
 };
