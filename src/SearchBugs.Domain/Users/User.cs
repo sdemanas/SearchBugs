@@ -13,6 +13,7 @@ public class User : Entity<UserId>, IAuditable
     public string Password { get; private set; } = string.Empty;
     public IReadOnlyCollection<Role> Roles => _roles.ToList().AsReadOnly();
     private readonly HashSet<Role> _roles = new();
+    public Profile? Profile { get; private set; }
     public DateTime CreatedOnUtc { get; private set; }
     public DateTime? ModifiedOnUtc { get; private set; }
 

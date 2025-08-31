@@ -150,6 +150,87 @@ export interface User {
   modifiedOnUtc?: string;
 }
 
+export interface UserProfile {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  roles?: string[];
+  createdOnUtc?: string;
+  modifiedOnUtc?: string;
+  // Real profile fields from domain model
+  bio?: string;
+  location?: string;
+  website?: string;
+  avatarUrl?: string;
+  company?: string;
+  jobTitle?: string;
+  twitterHandle?: string;
+  linkedInProfile?: string;
+  gitHubProfile?: string;
+  isPublic: boolean;
+  dateOfBirth?: string;
+  phoneNumber?: string;
+  timeZone?: string;
+  preferredLanguage?: string;
+  recentActivity: ProfileActivity[];
+}
+
+export interface ProfileActivity {
+  id: string;
+  type: string;
+  action: string;
+  target: string;
+  timestamp: string;
+  icon: string;
+  isSuccess: boolean;
+  duration: string; // TimeSpan as string
+}
+
+export interface UserActivityItem {
+  id: string;
+  type: string;
+  action: string;
+  target: string;
+  description: string;
+  timestamp: string;
+  icon: string;
+  isSuccess: boolean;
+  duration: string; // TimeSpan as string
+  errorMessage?: string;
+}
+
+export interface UserActivityResponse {
+  activities: UserActivityItem[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+export interface UpdateProfileRequest {
+  firstName: string;
+  lastName: string;
+  bio?: string;
+  location?: string;
+  website?: string;
+  gitHubUsername?: string;
+  linkedInUrl?: string;
+  twitterHandle?: string;
+  company?: string;
+  jobTitle?: string;
+  phoneNumber?: string;
+  timeZone?: string;
+  avatarUrl?: string;
+  dateOfBirth?: string; // ISO string format
+}
+
+export interface UpdateProfileResponse {
+  success: boolean;
+  message: string;
+}
+
 export interface Role {
   id: number;
   name: string;
@@ -464,6 +545,25 @@ export const apiClient = {
         currentPassword,
         newPassword,
       }),
+  },
+
+  // Profile
+  profile: {
+    getCurrent: () => api.get<ApiResponse<UserProfile>>("/profile"),
+    update: (data: UpdateProfileRequest) =>
+      api.put<ApiResponse<UpdateProfileResponse>>("/profile", data),
+    getActivity: (params?: { pageNumber?: number; pageSize?: number }) => {
+      const queryParams = new URLSearchParams();
+      if (params?.pageNumber)
+        queryParams.append("pageNumber", params.pageNumber.toString());
+      if (params?.pageSize)
+        queryParams.append("pageSize", params.pageSize.toString());
+
+      const queryString = queryParams.toString();
+      return api.get<ApiResponse<UserActivityResponse>>(
+        `/profile/activity${queryString ? `?${queryString}` : ""}`
+      );
+    },
   },
 
   // Roles

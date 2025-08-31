@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { FormInput } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import {

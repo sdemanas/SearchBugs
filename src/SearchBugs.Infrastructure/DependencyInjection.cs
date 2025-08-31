@@ -41,9 +41,6 @@ public static class DependencyInjection
                 // Get the JWT options from the service provider
                 var serviceProvider = services.BuildServiceProvider();
                 var jwtOptions = serviceProvider.GetRequiredService<IOptions<JwtOptions>>().Value;
-
-                Console.WriteLine($"Inline JWT Config - Issuer: {jwtOptions.Issuer}, Audience: {jwtOptions.Audience}, Secret Length: {jwtOptions.Secret.Length}");
-
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,

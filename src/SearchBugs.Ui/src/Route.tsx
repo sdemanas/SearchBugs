@@ -8,6 +8,7 @@ import {
   DashboardPage,
   LoginPage,
   NotificationsPage,
+  ProfilePage,
   ProjectDetailsPage,
   ProjectsPage,
   RegisterPage,
@@ -19,7 +20,6 @@ import {
 } from "./pages";
 import AuditLogsPage from "./pages/AuditLogsPage";
 import { RepositoryListPage } from "./modules/repository/RepositoryListPage";
-import { EnhancedProfilePage } from "./pages/EnhancedProfilePage";
 import NotificationTestPage from "./pages/NotificationTestPage";
 import MainLayout from "./layouts/Main";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -94,7 +94,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/profile",
-        element: <EnhancedProfilePage />,
+        element: <ProfilePage />,
         handle: {
           title: "Profile",
           icon: "User",

@@ -65,6 +65,23 @@ export const profileSettingsSchema = z.object({
     .url("Please enter a valid URL")
     .optional()
     .or(z.literal("")),
+  company: z.string().optional(),
+  jobTitle: z.string().optional(),
+  twitterHandle: z.string().optional(),
+  linkedInUrl: z
+    .string()
+    .url("Please enter a valid LinkedIn URL")
+    .optional()
+    .or(z.literal("")),
+  gitHubUsername: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  timeZone: z.string().optional(),
+  avatarUrl: z
+    .string()
+    .url("Please enter a valid avatar URL")
+    .optional()
+    .or(z.literal("")),
+  dateOfBirth: z.string().optional(), // ISO date string
 });
 
 // Comment schemas

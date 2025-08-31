@@ -39,7 +39,6 @@ public abstract partial class Program
         var jwtSecret = jwtSection["Secret"];
         var jwtIssuer = jwtSection["Issuer"];
         var jwtAudience = jwtSection["Audience"];
-        Console.WriteLine($"JWT Config - Issuer: {jwtIssuer}, Audience: {jwtAudience}, Secret Length: {jwtSecret?.Length ?? 0}");
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
@@ -83,6 +82,7 @@ public abstract partial class Program
         app.MapAuthenticationsEndpoints();
         app.MapBugsEndpoints();
         app.MapUserEndpoints();
+        app.MapProfileEndpoints();
         app.MapRoleEndpoints();
         app.MapProjectsEndpoints();
         app.MapRepoEndpoints();

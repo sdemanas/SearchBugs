@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SearchBugs.Domain.AuditLogs;
 using SearchBugs.Domain.Repositories;
+using SearchBugs.Domain.Users;
 
 namespace SearchBugs.Persistence.Repositories;
 
@@ -28,8 +29,9 @@ internal sealed class AuditLogRepository : IAuditLogRepository
 
     public async Task<IReadOnlyList<AuditLog>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
+        var userIdEntity = new UserId(userId);
         return await _context.AuditLogs
-            .Where(al => al.UserId != null && al.UserId.Value == userId)
+            .Where(al => al.UserId == userIdEntity)
             .OrderByDescending(al => al.CreatedOnUtc)
             .ToListAsync(cancellationToken);
     }
