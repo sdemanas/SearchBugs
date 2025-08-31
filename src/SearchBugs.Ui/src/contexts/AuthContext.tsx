@@ -7,6 +7,9 @@ interface User {
   firstName: string;
   lastName: string;
   role: string;
+  isImpersonating?: boolean;
+  originalUserId?: string;
+  originalUserEmail?: string;
 }
 
 export interface AuthContextType {
@@ -19,6 +22,8 @@ export interface AuthContextType {
     lastName: string
   ) => Promise<void>;
   logout: () => void;
+  impersonate: (userId: string) => Promise<void>;
+  stopImpersonate: () => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -43,12 +48,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           localStorage.removeItem(accessTokenKey);
           setIsLoading(false);
         } else {
+          // Check if this is an impersonation token
+          const isImpersonating = payload.impersonated_user_id != null;
+          const userId = isImpersonating
+            ? payload.impersonated_user_id
+            : payload.sub;
+          const email = isImpersonating
+            ? payload.impersonated_email
+            : payload.email;
+
           setUser({
-            id: payload.sub,
-            email: payload.email,
+            id: userId,
+            email: email,
             firstName: "", // You might want to fetch this from another endpoint
             lastName: "",
             role: payload.role || "User",
+            isImpersonating: isImpersonating,
+            originalUserId: isImpersonating ? payload.sub : undefined,
+            originalUserEmail: isImpersonating ? payload.email : undefined,
           });
           setIsLoading(false);
         }
@@ -129,6 +146,66 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser(null);
   };
 
+  const impersonate = async (userId: string) => {
+    try {
+      const response = await apiClient.auth.impersonate({
+        userIdToImpersonate: userId,
+      });
+
+      if (!response.data.isSuccess) {
+        throw new Error(response.data.error.message || "Impersonation failed");
+      }
+
+      const { token, impersonatedUserEmail } = response.data.value;
+      localStorage.setItem(accessTokenKey, token);
+
+      // Decode JWT to get user info
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      setUser({
+        id: payload.impersonated_user_id,
+        email: impersonatedUserEmail,
+        firstName: "", // You might want to fetch this from another endpoint
+        lastName: "",
+        role: payload.role || "User",
+        isImpersonating: true,
+        originalUserId: payload.sub,
+        originalUserEmail: payload.email,
+      });
+    } catch (error) {
+      console.error("Impersonation error:", error);
+      throw new Error("Impersonation failed");
+    }
+  };
+
+  const stopImpersonate = async () => {
+    try {
+      const response = await apiClient.auth.stopImpersonate();
+
+      if (!response.data.isSuccess) {
+        throw new Error(
+          response.data.error.message || "Stop impersonation failed"
+        );
+      }
+
+      const { token } = response.data.value;
+      localStorage.setItem(accessTokenKey, token);
+
+      // Decode JWT to get original user info
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      setUser({
+        id: payload.sub,
+        email: payload.email,
+        firstName: "", // You might want to fetch this from another endpoint
+        lastName: "",
+        role: payload.role || "User",
+        isImpersonating: false,
+      });
+    } catch (error) {
+      console.error("Stop impersonation error:", error);
+      throw new Error("Stop impersonation failed");
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -136,6 +213,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         login,
         register,
         logout,
+        impersonate,
+        stopImpersonate,
         isAuthenticated: !!user,
         isLoading,
       }}

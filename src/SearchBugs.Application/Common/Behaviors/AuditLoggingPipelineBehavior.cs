@@ -21,6 +21,10 @@ public sealed class AuditLoggingPipelineBehavior<TRequest, TResponse> : IPipelin
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<AuditLoggingPipelineBehavior<TRequest, TResponse>> _logger;
 
+    // Maximum lengths for JSON data to prevent database issues
+    private const int MaxRequestDataLength = 10000; // 10KB
+    private const int MaxResponseDataLength = 50000; // 50KB
+
     public AuditLoggingPipelineBehavior(
         IAuditLogRepository auditLogRepository,
         ICurrentUserService currentUserService,
@@ -37,11 +41,7 @@ public sealed class AuditLoggingPipelineBehavior<TRequest, TResponse> : IPipelin
     {
         var stopwatch = Stopwatch.StartNew();
         var requestName = typeof(TRequest).Name;
-        var requestData = JsonSerializer.Serialize(request, new JsonSerializerOptions
-        {
-            WriteIndented = false,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
+        var requestData = SerializeAndTruncate(request, MaxRequestDataLength);
 
         string? responseData = null;
         bool isSuccess = false;
@@ -57,11 +57,7 @@ public sealed class AuditLoggingPipelineBehavior<TRequest, TResponse> : IPipelin
                 errorMessage = response.Error?.Message;
             }
 
-            responseData = JsonSerializer.Serialize(response, new JsonSerializerOptions
-            {
-                WriteIndented = false,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
+            responseData = SerializeAndTruncate(response, MaxResponseDataLength);
 
             return response;
         }
@@ -129,5 +125,30 @@ public sealed class AuditLoggingPipelineBehavior<TRequest, TResponse> : IPipelin
         if (httpContext == null) return "Unknown";
 
         return httpContext.Request.Headers["User-Agent"].ToString() ?? "Unknown";
+    }
+
+    private static string SerializeAndTruncate<T>(T obj, int maxLength)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(obj, new JsonSerializerOptions
+            {
+                WriteIndented = false,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
+            if (json.Length <= maxLength)
+            {
+                return json;
+            }
+
+            // Truncate and add indicator
+            var truncatedJson = json[..(maxLength - 50)]; // Leave space for truncation message
+            return truncatedJson + "... [TRUNCATED - Original length: " + json.Length + " chars]";
+        }
+        catch (Exception)
+        {
+            return "[SERIALIZATION_ERROR]";
+        }
     }
 }

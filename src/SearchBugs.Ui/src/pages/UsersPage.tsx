@@ -58,7 +58,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { apiClient, User, UserRole } from "@/lib/api";
+import { apiClient, User, UserRole, Role } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 
 const roleColors: Record<UserRole, string> = {
@@ -153,6 +153,7 @@ interface AssignRoleDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onAssign: (userId: string, role: string) => void;
+  availableRoles: Role[];
 }
 
 const AssignRoleDialog: React.FC<AssignRoleDialogProps> = ({
@@ -160,6 +161,7 @@ const AssignRoleDialog: React.FC<AssignRoleDialogProps> = ({
   isOpen,
   onClose,
   onAssign,
+  availableRoles,
 }) => {
   const [selectedRole, setSelectedRole] = useState<string>("");
 
@@ -190,8 +192,11 @@ const AssignRoleDialog: React.FC<AssignRoleDialogProps> = ({
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="User">User</SelectItem>
-                <SelectItem value="Admin">Admin</SelectItem>
+                {availableRoles.map((role) => (
+                  <SelectItem key={role.id} value={role.name}>
+                    {role.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -219,12 +224,14 @@ interface CreateUserDialogProps {
     password: string;
     roles?: string[];
   }) => void;
+  availableRoles: Role[];
 }
 
 const CreateUserDialog: React.FC<CreateUserDialogProps> = ({
   isOpen,
   onClose,
   onCreate,
+  availableRoles,
 }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -318,25 +325,20 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right">Roles</Label>
-            <div className="col-span-3 flex gap-2">
-              <Button
-                type="button"
-                variant={selectedRoles.includes("User") ? "default" : "outline"}
-                size="sm"
-                onClick={() => toggleRole("User")}
-              >
-                User
-              </Button>
-              <Button
-                type="button"
-                variant={
-                  selectedRoles.includes("Admin") ? "default" : "outline"
-                }
-                size="sm"
-                onClick={() => toggleRole("Admin")}
-              >
-                Admin
-              </Button>
+            <div className="col-span-3 flex gap-2 flex-wrap">
+              {availableRoles.map((role) => (
+                <Button
+                  key={role.id}
+                  type="button"
+                  variant={
+                    selectedRoles.includes(role.name) ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() => toggleRole(role.name)}
+                >
+                  {role.name}
+                </Button>
+              ))}
             </div>
           </div>
         </div>
@@ -382,6 +384,17 @@ export const UsersPage = () => {
       return response.data.value as User[];
     },
   });
+
+  // Fetch available roles
+  const { data: rolesData, isLoading: isLoadingRoles } = useQuery({
+    queryKey: ["roles"],
+    queryFn: async () => {
+      const response = await apiClient.roles.getAll();
+      return response.data.value;
+    },
+  });
+
+  const availableRoles = rolesData || [];
 
   // Update user mutation
   const updateUserMutation = useMutation({
@@ -673,8 +686,11 @@ export const UsersPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
-                  <SelectItem value="Admin">Administrators</SelectItem>
-                  <SelectItem value="User">Users</SelectItem>
+                  {availableRoles.map((role) => (
+                    <SelectItem key={role.id} value={role.name}>
+                      {role.name}s
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -818,12 +834,14 @@ export const UsersPage = () => {
           setAssigningRoleUser(null);
         }}
         onAssign={handleRoleAssign}
+        availableRoles={availableRoles}
       />
 
       <CreateUserDialog
         isOpen={isCreateDialogOpen}
         onClose={() => setIsCreateDialogOpen(false)}
         onCreate={handleCreateUser}
+        availableRoles={availableRoles}
       />
     </div>
   );

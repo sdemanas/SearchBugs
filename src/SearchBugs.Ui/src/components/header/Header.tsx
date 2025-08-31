@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/use-toast";
 import { NotificationBell } from "@/components/NotificationBell";
+import { ImpersonationDialog } from "@/components/ImpersonationDialog";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -83,6 +84,9 @@ export const Header = () => {
         {/* User Actions */}
         <div className="flex items-center space-x-2">
           <NotificationBell />
+
+          {/* Show impersonation dialog for admin users - TODO: Add proper permission check */}
+          {user?.role === "Admin" && <ImpersonationDialog />}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

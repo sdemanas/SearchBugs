@@ -11,6 +11,11 @@ internal sealed class JwtProvider : IJwtProvider
 {
     private readonly JwtOptions _jwtOptions;
 
+    // Custom claim types for impersonation
+    private const string ImpersonatedUserIdClaimType = "impersonated_user_id";
+    private const string OriginalUserIdClaimType = "original_user_id";
+    private const string ImpersonatedEmailClaimType = "impersonated_email";
+
     public JwtProvider(IOptions<JwtOptions> jwtOptions)
     {
         _jwtOptions = jwtOptions.Value;
@@ -27,6 +32,36 @@ internal sealed class JwtProvider : IJwtProvider
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.Value.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email.Value),
         };
+        var token = new JwtSecurityToken(
+            issuer: _jwtOptions.Issuer,
+            audience: _jwtOptions.Audience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(_jwtOptions.ExpiryMinutes),
+            signingCredentials: signCredentials
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public string GenerateImpersonationJwtToken(User originalUser, User impersonatedUser)
+    {
+        var signCredentials = new SigningCredentials(
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Secret)),
+            SecurityAlgorithms.HmacSha256
+        );
+
+        var claims = new List<Claim>
+        {
+            // Original user claims (the actual logged-in user)
+            new Claim(JwtRegisteredClaimNames.Sub, originalUser.Id.Value.ToString()),
+            new Claim(JwtRegisteredClaimNames.Email, originalUser.Email.Value),
+            new Claim(OriginalUserIdClaimType, originalUser.Id.Value.ToString()),
+            
+            // Impersonated user claims
+            new Claim(ImpersonatedUserIdClaimType, impersonatedUser.Id.Value.ToString()),
+            new Claim(ImpersonatedEmailClaimType, impersonatedUser.Email.Value),
+        };
+
         var token = new JwtSecurityToken(
             issuer: _jwtOptions.Issuer,
             audience: _jwtOptions.Audience,

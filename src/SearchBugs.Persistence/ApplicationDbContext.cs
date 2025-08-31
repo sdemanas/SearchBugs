@@ -29,6 +29,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext, IUnitOfWor
     public DbSet<User> Users { get; private set; }
     public DbSet<Permission> Permissions { get; private set; }
     public DbSet<Role> Roles { get; private set; }
+    public DbSet<RolePermission> RolePermissions { get; private set; }
     public DbSet<Bug> Bugs { get; private set; }
     public DbSet<BugStatus> BugStatuses { get; private set; }
     public DbSet<BugPriority> BugPriorities { get; private set; }

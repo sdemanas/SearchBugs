@@ -12,10 +12,12 @@ import {
   ProjectsPage,
   RegisterPage,
   RepositoryPage,
+  RolePermissionsPage,
   SettingPage,
   UserDetailsPage,
   UsersPage,
 } from "./pages";
+import AuditLogsPage from "./pages/AuditLogsPage";
 import { RepositoryListPage } from "./modules/repository/RepositoryListPage";
 import { EnhancedProfilePage } from "./pages/EnhancedProfilePage";
 import NotificationTestPage from "./pages/NotificationTestPage";
@@ -104,6 +106,24 @@ const router = createBrowserRouter([
         handle: {
           title: "User Details",
           icon: "User",
+          adminOnly: true,
+        },
+      },
+      {
+        path: "/roles-permissions",
+        element: <RolePermissionsPage />,
+        handle: {
+          title: "Role Permissions",
+          icon: "Shield",
+          adminOnly: true,
+        },
+      },
+      {
+        path: "/audit-logs",
+        element: <AuditLogsPage />,
+        handle: {
+          title: "Audit Logs",
+          icon: "FileText",
           adminOnly: true,
         },
       },

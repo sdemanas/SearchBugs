@@ -28,14 +28,6 @@ public class AddCommentCommandHandler : ICommandHandler<AddCommentCommand, Comme
 
     public async Task<Result<CommentDto>> Handle(AddCommentCommand command, CancellationToken cancellationToken)
     {
-        // Check if user is authenticated
-        if (!_currentUserService.IsAuthenticated)
-        {
-            return Result.Failure<CommentDto>(new Error(
-                "User.Unauthorized",
-                "User must be authenticated to add comments"));
-        }
-
         var bugResult = await _bugRepository.GetByIdAsync(new BugId(command.BugId), cancellationToken);
         if (bugResult.IsFailure)
         {

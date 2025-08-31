@@ -13,7 +13,6 @@ import type {
   CreateProjectDto,
   CreateBugDto,
   UpdateBugDto,
-  CreateRepositoryDto,
   ApiResponse,
 } from "@/lib/api";
 
@@ -150,14 +149,14 @@ export const useApiClient = () => {
   const useBugComments = (bugId: string) => {
     return useQuery({
       queryKey: ["bugs", bugId, "comments"],
-      queryFn: () => apiClient.bugs.getComments(bugId).then(extractData),
+      queryFn: () => apiClient.comments.getByBugId(bugId).then(extractData),
     });
   };
 
   const useAddComment = () => {
     return useMutation<Comment, Error, { bugId: string; content: string }>({
       mutationFn: async ({ bugId, content }) => {
-        const response = await apiClient.bugs.addComment(bugId, content);
+        const response = await apiClient.comments.create({ bugId, content });
         return extractData(response);
       },
       onSuccess: (_, { bugId }) => {

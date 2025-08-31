@@ -56,6 +56,15 @@ export interface RegisterResponse {
   token: string;
 }
 
+export interface ImpersonateResponse {
+  token: string;
+  impersonatedUserEmail: string;
+}
+
+export interface StopImpersonateResponse {
+  token: string;
+}
+
 // Types
 export interface Project {
   id: string;
@@ -81,11 +90,10 @@ export interface Bug {
 
 export interface Comment {
   id: string;
-  bugId: string;
+  commentText: string;
   userId: string;
-  content: string;
   createdOnUtc: string;
-  updatedOnUtc: string;
+  modifiedOnUtc?: string;
 }
 
 export interface Attachment {
@@ -146,10 +154,31 @@ export interface Role {
   permissions: string[];
 }
 
+export interface RoleWithPermissions {
+  id: number;
+  name: string;
+  permissions: Permission[];
+}
+
 export interface Permission {
   id: number;
   name: string;
   description: string;
+}
+
+export interface AuditLog {
+  id: string;
+  requestName: string;
+  requestData: string;
+  responseData?: string;
+  isSuccess: boolean;
+  errorMessage?: string;
+  duration: string; // TimeSpan as string
+  userId?: string;
+  userName?: string;
+  ipAddress: string;
+  userAgent: string;
+  createdOnUtc: string;
 }
 
 export interface Repository {
@@ -245,7 +274,6 @@ export interface UpdateBugDto {
 
 export interface CreateCommentDto {
   bugId: string;
-  userId: string;
   content: string;
 }
 
@@ -297,6 +325,10 @@ export const apiClient = {
       firstName: string;
       lastName: string;
     }) => api.post<ApiResponse<RegisterResponse>>("/auth/register", data),
+    impersonate: (data: { userIdToImpersonate: string }) =>
+      api.post<ApiResponse<ImpersonateResponse>>("/auth/impersonate", data),
+    stopImpersonate: () =>
+      api.post<ApiResponse<StopImpersonateResponse>>("/auth/stop-impersonate"),
   },
 
   // Projects
@@ -306,6 +338,16 @@ export const apiClient = {
     create: (data: CreateProjectDto) =>
       api.post<ApiResponse<Project>>("/projects", data),
     delete: (id: string) => api.delete<ApiResponse<void>>(`/projects/${id}`),
+  },
+
+  // Comments
+  comments: {
+    getByBugId: (bugId: string) =>
+      api.get<ApiResponse<Comment[]>>(`/bugs/${bugId}/comments`),
+    create: (data: CreateCommentDto) =>
+      api.post<ApiResponse<Comment>>(`/bugs/${data.bugId}/comments`, {
+        content: data.content,
+      }),
   },
 
   // Bugs
@@ -323,8 +365,8 @@ export const apiClient = {
     // Comments
     getComments: (bugId: string) =>
       api.get<ApiResponse<Comment[]>>(`/bugs/${bugId}/comments`),
-    addComment: (bugId: string, content: string) =>
-      api.post<ApiResponse<Comment>>(`/bugs/${bugId}/comments`, { content }),
+    addComment: (data: CreateCommentDto) =>
+      api.post<ApiResponse<Comment>>(`/bugs/${data.bugId}/comments`, data),
 
     // Attachments
     getAttachments: (bugId: string) =>
@@ -400,6 +442,12 @@ export const apiClient = {
     getAll: () => api.get<ApiResponse<Role[]>>("/roles"),
     getPermissions: () =>
       api.get<ApiResponse<Permission[]>>("/roles/permissions"),
+    getRoleWithPermissions: (roleId: number) =>
+      api.get<ApiResponse<RoleWithPermissions>>(`/roles/${roleId}`),
+    assignPermissionToRole: (roleId: number, permissionId: number) =>
+      api.post(`/roles/${roleId}/permissions/${permissionId}`),
+    removePermissionFromRole: (roleId: number, permissionId: number) =>
+      api.delete(`/roles/${roleId}/permissions/${permissionId}`),
   },
 
   // Repositories
@@ -449,5 +497,30 @@ export const apiClient = {
         "/test-notifications/send-test-notification",
         data
       ),
+  },
+
+  // Audit Logs
+  auditLogs: {
+    getAll: (params?: {
+      userId?: string;
+      startDate?: string;
+      endDate?: string;
+      pageNumber?: number;
+      pageSize?: number;
+    }) => {
+      const queryParams = new URLSearchParams();
+      if (params?.userId) queryParams.append("userId", params.userId);
+      if (params?.startDate) queryParams.append("startDate", params.startDate);
+      if (params?.endDate) queryParams.append("endDate", params.endDate);
+      if (params?.pageNumber)
+        queryParams.append("pageNumber", params.pageNumber.toString());
+      if (params?.pageSize)
+        queryParams.append("pageSize", params.pageSize.toString());
+
+      const queryString = queryParams.toString();
+      return api.get<ApiResponse<AuditLog[]>>(
+        `/audit-logs${queryString ? `?${queryString}` : ""}`
+      );
+    },
   },
 };

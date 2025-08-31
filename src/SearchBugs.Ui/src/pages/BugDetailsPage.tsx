@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useApi } from "@/hooks/useApi";
+import { apiClient } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -38,10 +39,11 @@ interface Bug {
 
 interface Comment {
   id: string;
-  content: string;
-  createdAt: string;
+  commentText: string;
   userId: string;
-  userName: string;
+  createdOnUtc: string;
+  modifiedOnUtc?: string;
+  userName?: string; // This might come from a join or separate call
 }
 
 interface Attachment {
@@ -80,6 +82,7 @@ export const BugDetailsPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [newComment, setNewComment] = useState("");
+  const [isAddingComment, setIsAddingComment] = useState(false);
   const [timeEntry, setTimeEntry] = useState({ duration: "", description: "" });
   const [customField, setCustomField] = useState({ name: "", value: "" });
 
@@ -100,11 +103,20 @@ export const BugDetailsPage = () => {
   >(`bugs/${bugId}/custom-fields`);
 
   const handleAddComment = async () => {
-    if (!newComment.trim()) return;
+    if (!newComment.trim() || !bugId) return;
+    setIsAddingComment(true);
     try {
-      const result = await mutateComments.mutateAsync({ content: newComment });
-      if (result.isSuccess) {
+      const response = await apiClient.comments.create({
+        bugId: bugId,
+        content: newComment,
+      });
+
+      if (response.data.isSuccess) {
         setNewComment("");
+        // Refetch comments
+        if (mutateComments.mutate) {
+          mutateComments.mutate({});
+        }
         toast({
           title: "Comment added",
           description: "Your comment has been added successfully.",
@@ -112,7 +124,7 @@ export const BugDetailsPage = () => {
       } else {
         toast({
           title: "Error",
-          description: result.error.message,
+          description: response.data.error?.message || "Failed to add comment",
           variant: "destructive",
         });
       }
@@ -122,6 +134,8 @@ export const BugDetailsPage = () => {
         description: "Failed to add comment. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsAddingComment(false);
     }
   };
 
@@ -336,18 +350,20 @@ export const BugDetailsPage = () => {
                   <div key={comment.id} className="flex gap-4">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-primary/10 text-primary">
-                        {comment.userName[0]}
+                        {comment.userName?.[0] || "U"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">{comment.userName}</span>
+                        <span className="font-medium">
+                          {comment.userName || "Unknown User"}
+                        </span>
                         <span className="text-sm text-muted-foreground">
-                          {safeFormatDistance(comment.createdAt)}
+                          {safeFormatDistance(comment.createdOnUtc)}
                         </span>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {comment.content}
+                        {comment.commentText}
                       </p>
                     </div>
                   </div>
@@ -362,10 +378,10 @@ export const BugDetailsPage = () => {
                 />
                 <Button
                   onClick={handleAddComment}
-                  disabled={mutateComments.isPending}
+                  disabled={isAddingComment}
                   className="w-full sm:w-auto"
                 >
-                  {mutateComments.isPending ? "Adding..." : "Add Comment"}
+                  {isAddingComment ? "Adding..." : "Add Comment"}
                 </Button>
               </div>
             </CardContent>

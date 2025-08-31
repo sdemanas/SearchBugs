@@ -38,7 +38,7 @@ import {
   Activity,
   Settings,
 } from "lucide-react";
-import { apiClient, User, UserRole } from "@/lib/api";
+import { apiClient, User, UserRole, Role } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 import { CardLoadingSkeleton } from "@/components/ui/loading";
 
@@ -144,14 +144,18 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
 interface AssignRoleDialogProps {
   user: User;
-  isOpen: boolean;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onRoleAssigned: () => void;
+  availableRoles: Role[];
 }
 
 const AssignRoleDialog: React.FC<AssignRoleDialogProps> = ({
   user,
-  isOpen,
-  onClose,
+  open,
+  onOpenChange,
+  onRoleAssigned,
+  availableRoles,
 }) => {
   const [selectedRole, setSelectedRole] = React.useState<string>("");
 
@@ -170,7 +174,8 @@ const AssignRoleDialog: React.FC<AssignRoleDialogProps> = ({
         title: "Success",
         description: "Role assigned successfully",
       });
-      onClose();
+      onRoleAssigned();
+      onOpenChange(false);
       setSelectedRole("");
     },
     onError: (error: Error) => {
@@ -189,7 +194,7 @@ const AssignRoleDialog: React.FC<AssignRoleDialogProps> = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Assign Role</DialogTitle>
@@ -207,14 +212,17 @@ const AssignRoleDialog: React.FC<AssignRoleDialogProps> = ({
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="User">User</SelectItem>
-                <SelectItem value="Admin">Admin</SelectItem>
+                {availableRoles.map((role) => (
+                  <SelectItem key={role.id} value={role.name}>
+                    {role.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button
@@ -232,6 +240,7 @@ const AssignRoleDialog: React.FC<AssignRoleDialogProps> = ({
 export const UserDetailsPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
   const [isRoleDialogOpen, setIsRoleDialogOpen] = React.useState(false);
 
@@ -243,10 +252,25 @@ export const UserDetailsPage: React.FC = () => {
     queryKey: ["user", userId],
     queryFn: async () => {
       const response = await apiClient.users.getById(userId!);
-      return response.data as User;
+      return response.data.value as User;
     },
     enabled: !!userId,
   });
+
+  // Fetch available roles
+  const { data: rolesData } = useQuery({
+    queryKey: ["roles"],
+    queryFn: async () => {
+      const response = await apiClient.roles.getAll();
+      return response.data.value;
+    },
+  });
+
+  const availableRoles = rolesData || [];
+
+  const handleRoleAssigned = () => {
+    queryClient.invalidateQueries({ queryKey: ["user", userId] });
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -394,7 +418,7 @@ export const UserDetailsPage: React.FC = () => {
               <span className="text-sm font-medium text-muted-foreground mr-2">
                 Roles:
               </span>
-              {getRolesBadges(user.roles)}
+              {getRolesBadges(user.roles || [])}
             </div>
           </CardContent>
         </Card>
@@ -475,7 +499,7 @@ export const UserDetailsPage: React.FC = () => {
                         Roles
                       </span>
                       <span className="text-sm font-medium">
-                        {user.roles.length}
+                        {user.roles?.length || 0}
                       </span>
                     </div>
                   </CardContent>
@@ -530,8 +554,10 @@ export const UserDetailsPage: React.FC = () => {
           />
           <AssignRoleDialog
             user={user}
-            isOpen={isRoleDialogOpen}
-            onClose={() => setIsRoleDialogOpen(false)}
+            open={isRoleDialogOpen}
+            onOpenChange={setIsRoleDialogOpen}
+            onRoleAssigned={handleRoleAssigned}
+            availableRoles={availableRoles}
           />
         </>
       )}

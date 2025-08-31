@@ -9,12 +9,12 @@ namespace SearchBugs.Application.Common.Interfaces;
 public interface ICurrentUserService
 {
     /// <summary>
-    /// Gets the ID of the currently authenticated user
+    /// Gets the ID of the currently authenticated user (returns impersonated user ID if impersonating)
     /// </summary>
     UserId UserId { get; }
 
     /// <summary>
-    /// Gets the email of the currently authenticated user
+    /// Gets the email of the currently authenticated user (returns impersonated user email if impersonating)
     /// </summary>
     string? Email { get; }
 
@@ -41,4 +41,20 @@ public interface ICurrentUserService
     /// <param name="permission">The permission to check</param>
     /// <returns>True if the user has the permission, false otherwise</returns>
     bool HasPermission(string permission);
-} 
+
+    /// <summary>
+    /// Gets the original user ID (the one actually logged in, not impersonated)
+    /// Returns null if not impersonating
+    /// </summary>
+    UserId? OriginalUserId { get; }
+
+    /// <summary>
+    /// Checks if the current session is impersonating another user
+    /// </summary>
+    bool IsImpersonating { get; }
+
+    /// <summary>
+    /// Gets the actual logged-in user ID (returns original user ID if impersonating, otherwise current user ID)
+    /// </summary>
+    UserId ActualUserId { get; }
+}
