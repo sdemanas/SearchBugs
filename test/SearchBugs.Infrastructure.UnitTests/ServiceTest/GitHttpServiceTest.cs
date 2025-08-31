@@ -75,38 +75,4 @@ public class GitHttpServiceTest
         //await act.Should().NotThrowAsync();
         request.HttpContext.Response.StatusCode.Should().Be(StatusCodes.Status200OK);
     }
-
-
-
-    [Fact]
-    public async Task Handle_GitPush_Success_ShouldReturn200OK()
-    {
-        // Arrange
-        var service = new GitHttpService(new OptionsTest(), _httpContextAccessor);
-        var repositoryName = "test-repo";
-        // create Test repository
-        var repoPath = GetOrCreateRepository(repositoryName);
-
-        var request = new DefaultHttpContext().Request;
-        request.Headers["Git-Protocol"] = "http";
-        request.Method = HttpMethods.Post;
-        request.RouteValues["path"] = "git-receive-pack";
-        request.QueryString = new QueryString("?service=git-receive-pack");
-        request.ContentType = "application/x-git-receive-pack-request";
-        request.ContentLength = 0;
-        request.Headers.ContentEncoding = "gzip";
-        // mock authenticated user
-
-        request.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
-        {
-            new Claim(ClaimTypes.Name, "test-user")
-        }));
-
-        // Act
-        //Func<Task> act = async () => await service.Handle(repositoryName);
-
-        // Assert 
-        //await act.Should().NotThrowAsync();
-        request.HttpContext.Response.StatusCode.Should().Be(StatusCodes.Status200OK);
-    }
 }

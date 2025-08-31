@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Moq;
+﻿using Moq;
 using SearchBugs.Application.BugTracking;
 using SearchBugs.Application.BugTracking.Create;
 using SearchBugs.Application.BugTracking.GetBugs;
@@ -51,8 +50,8 @@ public class CreateBugCommandHandlerTest
         var result = await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
     }
 
     [Theory]
@@ -66,8 +65,8 @@ public class CreateBugCommandHandlerTest
         var result = await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Error.Should().Be(BugValidationErrors.InvalidBugStatus);
-        result.IsSuccess.Should().BeFalse();
+        Assert.Equal(BugValidationErrors.InvalidBugStatus, result.Error);
+        Assert.False(result.IsSuccess);
     }
 
     [Theory]
@@ -81,8 +80,8 @@ public class CreateBugCommandHandlerTest
         var result = await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Error.Should().Be(BugValidationErrors.InvalidBugPriority);
-        result.IsSuccess.Should().BeFalse();
+        Assert.Equal(BugValidationErrors.InvalidBugPriority, result.Error);
+        Assert.False(result.IsSuccess);
     }
 
     [Fact]
@@ -120,8 +119,8 @@ public class CreateBugCommandHandlerTest
 
         // Assert
         _unitOfWork.Verify(x => x.SaveChangesAsync(CancellationToken.None), Times.Once);
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
     }
 
 }

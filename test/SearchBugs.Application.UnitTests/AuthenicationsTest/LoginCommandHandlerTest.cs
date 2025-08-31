@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Moq;
+﻿using Moq;
 using SearchBugs.Application.Authentications.Login;
 using SearchBugs.Domain.Services;
 using SearchBugs.Domain.Users;
@@ -26,7 +25,7 @@ public class LoginCommandHandlerTest
     public async Task Handle_WhenUserNotFound_ShouldReturnFailure_WithNotFoundByEmailError()
     {
         // Arrange
-        var email = "teat@email.com";
+        var email = "test@email.com";
         var password = "password";
         var command = new LoginCommand(email, password);
         _userRepository.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -36,8 +35,8 @@ public class LoginCommandHandlerTest
         var result = await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(UserErrors.NotFoundByEmail(email));
+        Assert.False(result.IsSuccess);
+        Assert.Equal(UserErrors.NotFoundByEmail(email), result.Error);
     }
 
     [Fact]
@@ -55,8 +54,10 @@ public class LoginCommandHandlerTest
 
         // Act
         var result = await _sut.Handle(command, CancellationToken.None);
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(UserErrors.InvalidPassword);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.Equal(UserErrors.InvalidPassword, result.Error);
     }
 
     [Fact]
@@ -65,8 +66,10 @@ public class LoginCommandHandlerTest
         // Arrange
         var email = "test@gmail.com";
         var password = "password";
+        var expectedToken = "jwtToken";
         var command = new LoginCommand(email, password);
         var user = User.Create(Name.Create("First", "Last"), Email.Create(email), "hashedPassword").Value;
+
         _userRepository.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(user));
 
@@ -74,14 +77,14 @@ public class LoginCommandHandlerTest
             .Returns(true);
 
         _jwtProvider.Setup(x => x.GenerateJwtToken(It.IsAny<User>()))
-            .Returns("jwtToken");
+            .Returns(expectedToken);
 
         // Act
         var result = await _sut.Handle(command, CancellationToken.None);
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Token.Should().Be("jwtToken");
 
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(expectedToken, result.Value.Token);
     }
-
 }
 

@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Moq;
+﻿using Moq;
 using SearchBugs.Application.Authentications;
 using SearchBugs.Application.Authentications.Register;
 using SearchBugs.Domain;
@@ -34,15 +33,16 @@ public class RegisterCommandHandlerTest
 
         var command = new RegisterCommand(email, password, "First", "Last");
 
+        // IsEmailUniqueAsync returns success when email is NOT unique (email exists)
         _userRepository.Setup(x => x.IsEmailUniqueAsync(Email.Create(email), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Failure<User>(AuthValidationErrors.EmailAlreadyExists));
+            .ReturnsAsync(Result.Success<User>(User.Create(Name.Create("First", "Last"), Email.Create(email), "hashedPassword").Value));
 
         // Act
         var result = await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(AuthValidationErrors.EmailAlreadyExists);
+        Assert.False(result.IsSuccess);
+        Assert.Equal(AuthValidationErrors.EmailAlreadyExists, result.Error);
     }
 
     [Fact]
@@ -54,9 +54,9 @@ public class RegisterCommandHandlerTest
 
         var command = new RegisterCommand(email, password, "First", "Last");
 
+        // IsEmailUniqueAsync returns failure when email is unique (email doesn't exist)
         _userRepository.Setup(x => x.IsEmailUniqueAsync(Email.Create(email), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Success<User>(User.Create(Name.Create("First", "Last"), Email.Create(email), "hashedPassword").Value));
-
+            .ReturnsAsync(Result.Failure<User>(AuthValidationErrors.EmailAlreadyExists));
 
         _userRepository.Setup(x => x.GetRoleByIdAsync(Role.Guest.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success<Role>(Role.Guest));
@@ -65,7 +65,7 @@ public class RegisterCommandHandlerTest
         var result = await _sut.Handle(command, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        Assert.True(result.IsSuccess);
         _userRepository.Verify(x => x.Add(It.IsAny<User>()), Times.Once);
         _unitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         _userRepository.Verify(x => x.GetRoleByIdAsync(Role.Guest.Id, It.IsAny<CancellationToken>()), Times.Once);
