@@ -1,7 +1,8 @@
-import { Bug, FolderGit, GitGraph, Home } from "lucide-react";
+import { Bug, FolderGit, GitGraph, Home, Bell } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { NavLink } from "react-router-dom";
+import { useNotifications } from "../hooks/useNotifications";
 
 class SideBarModel {
   name: string;
@@ -9,7 +10,12 @@ class SideBarModel {
   url: string;
   badge: number;
 
-  constructor(name: string, icon: React.ReactNode, url: string, badge: number = 0) {
+  constructor(
+    name: string,
+    icon: React.ReactNode,
+    url: string,
+    badge: number = 0
+  ) {
     this.name = name;
     this.icon = icon;
     this.badge = badge;
@@ -18,15 +24,28 @@ class SideBarModel {
 }
 
 export const Sidebar = () => {
+  const { unreadCount } = useNotifications();
+
   const sidebar: SideBarModel[] = [
     new SideBarModel("Dashboard", <Home className="h-4 w-4" />, "/", 0),
-    new SideBarModel("Projects", <FolderGit className="h-4 w-4" />, "/projects", 0),
+    new SideBarModel(
+      "Projects",
+      <FolderGit className="h-4 w-4" />,
+      "/projects",
+      0
+    ),
     new SideBarModel("Bugs", <Bug className="h-4 w-4" />, "/bugs", 0),
     new SideBarModel(
       "Repository",
       <GitGraph className="h-4 w-4" />,
       "/repositories",
       0
+    ),
+    new SideBarModel(
+      "Notifications",
+      <Bell className="h-4 w-4" />,
+      "/notifications",
+      unreadCount
     ),
   ];
 
@@ -36,7 +55,9 @@ export const Sidebar = () => {
         <NavLink
           key={index}
           style={({ isActive }) => ({
-            color: isActive ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
+            color: isActive
+              ? "hsl(var(--primary))"
+              : "hsl(var(--muted-foreground))",
             backgroundColor: isActive ? "hsl(var(--muted))" : "transparent",
           })}
           to={item.url}

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SearchBugs.Application.Users.Common;
 using SearchBugs.Domain;
 using SearchBugs.Domain.Users;
 using Shared.Messaging;
@@ -42,7 +43,7 @@ public sealed class GetUserDetailQueryHandler : IQueryHandler<GetUserDetailQuery
             user.Name.FirstName,
             user.Name.LastName,
             user.Email.Value,
-            user.Roles?.Select(r => r.Name).ToArray(),
+            user.Roles?.Select(r => new RoleDto(r.Id, r.Name)).ToArray(),
             user.CreatedOnUtc,
             user.ModifiedOnUtc
         );

@@ -1,4 +1,5 @@
 using MediatR;
+using SearchBugs.Application.Users.Common;
 using SearchBugs.Domain.Roles;
 using SearchBugs.Domain.Services;
 using SearchBugs.Domain.Users;
@@ -55,10 +56,15 @@ internal sealed class CreateUserCommandHandler : IRequestHandler<CreateUserComma
             {
                 foreach (var roleName in request.Roles)
                 {
-                    var role = Role.FromName(roleName);
-                    if (role is not null)
+                    var staticRole = Role.FromName(roleName);
+                    if (staticRole is not null)
                     {
-                        user.AddRole(role);
+                        // Get the role from the database context to ensure it's tracked properly
+                        var roleResult = await _userRepository.GetRoleByIdAsync(staticRole.Id, cancellationToken);
+                        if (roleResult.IsSuccess)
+                        {
+                            user.AddRole(roleResult.Value);
+                        }
                     }
                 }
             }
@@ -72,7 +78,7 @@ internal sealed class CreateUserCommandHandler : IRequestHandler<CreateUserComma
                 user.Name.FirstName,
                 user.Name.LastName,
                 user.Email.Value,
-                user.Roles.Select(r => r.Name).ToArray(),
+                user.Roles.Select(r => new RoleDto(r.Id, r.Name)).ToArray(),
                 user.CreatedOnUtc);
         }
         catch (ArgumentException ex)

@@ -145,7 +145,7 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  roles?: string[];
+  roles?: Role[];
   createdOnUtc: string;
   modifiedOnUtc?: string;
 }
@@ -155,7 +155,7 @@ export interface UserProfile {
   firstName: string;
   lastName: string;
   email: string;
-  roles?: string[];
+  roles?: Role[];
   createdOnUtc?: string;
   modifiedOnUtc?: string;
   // Real profile fields from domain model
@@ -262,6 +262,28 @@ export interface AuditLog {
   ipAddress: string;
   userAgent: string;
   createdOnUtc: string;
+}
+
+export interface NotificationDto {
+  id: string;
+  type: string;
+  message: string;
+  data?: string;
+  bugId?: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface PagedNotificationResponse {
+  notifications: NotificationDto[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface UnreadCountResponse {
+  count: number;
 }
 
 export interface Repository {
@@ -651,5 +673,38 @@ export const apiClient = {
         `/audit-logs${queryString ? `?${queryString}` : ""}`
       );
     },
+  },
+
+  // Notifications
+  notifications: {
+    getAll: (params?: {
+      pageNumber?: number;
+      pageSize?: number;
+      isRead?: boolean;
+    }) => {
+      const queryParams = new URLSearchParams();
+      if (params?.pageNumber)
+        queryParams.append("pageNumber", params.pageNumber.toString());
+      if (params?.pageSize)
+        queryParams.append("pageSize", params.pageSize.toString());
+      if (params?.isRead !== undefined)
+        queryParams.append("isRead", params.isRead.toString());
+
+      const queryString = queryParams.toString();
+      return api.get<ApiResponse<PagedNotificationResponse>>(
+        `/notifications${queryString ? `?${queryString}` : ""}`
+      );
+    },
+    getUnread: () =>
+      api.get<ApiResponse<NotificationDto[]>>("/notifications/unread"),
+    getUnreadCount: () =>
+      api.get<ApiResponse<UnreadCountResponse>>("/notifications/unread-count"),
+    markAsRead: (id: string) =>
+      api.put<ApiResponse<void>>(`/notifications/${id}/read`),
+    markAllAsRead: () =>
+      api.put<ApiResponse<void>>("/notifications/mark-all-read"),
+    delete: (id: string) =>
+      api.delete<ApiResponse<void>>(`/notifications/${id}`),
+    clearAll: () => api.delete<ApiResponse<void>>("/notifications/clear-all"),
   },
 };

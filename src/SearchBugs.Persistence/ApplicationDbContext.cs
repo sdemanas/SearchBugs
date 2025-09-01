@@ -75,9 +75,19 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext, IUnitOfWor
 
         var result = await base.SaveChangesAsync(cancellationToken);
 
+        // Publish domain events after successful database save
         foreach (var domainEvent in domainEvents)
         {
-            await _publisher.Publish(domainEvent, cancellationToken);
+            try
+            {
+                await _publisher.Publish(domainEvent, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // Log the error but don't fail the transaction
+                // You might want to add proper logging here
+                Console.WriteLine($"Error publishing domain event {domainEvent.GetType().Name}: {ex.Message}");
+            }
         }
 
         return result;

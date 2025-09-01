@@ -36,7 +36,7 @@ export const AdminBanner: React.FC<AdminBannerProps> = ({
   const { toast } = useToast();
 
   // Check if current user is admin
-  const isAdmin = currentUser?.roles?.includes("Admin");
+  const isAdmin = currentUser?.roles?.some((role) => role.name === "Admin");
 
   // Reset secret click count after 5 seconds
   useEffect(() => {

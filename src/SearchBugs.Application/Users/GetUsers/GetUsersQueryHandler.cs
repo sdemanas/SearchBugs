@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SearchBugs.Application.Users.Common;
 using SearchBugs.Domain;
 using Shared.Messaging;
 using Shared.Results;
@@ -52,7 +53,7 @@ internal sealed class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, List<G
                 u.Name.FirstName,
                 u.Name.LastName,
                 u.Email.Value,
-                u.Roles.Select(r => r.Name).ToArray(),
+                u.Roles.Select(r => new RoleDto(r.Id, r.Name)).ToArray(),
                 u.CreatedOnUtc,
                 u.ModifiedOnUtc))
             .ToListAsync(cancellationToken);

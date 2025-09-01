@@ -1,5 +1,6 @@
 using Scalar.AspNetCore;
 using SearchBugs.Api.Endpoints;
+using SearchBugs.Api.Extensions;
 using SearchBugs.Api.Hubs;
 using SearchBugs.Api.Middleware;
 using SearchBugs.Api.Services;
@@ -21,7 +22,7 @@ public abstract partial class Program
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddOpenApi();
+        builder.Services.AddOpenApiWithAuthentication();
 
         // Configure JSON serialization for UTC dates
         builder.Services.ConfigureHttpJsonOptions(options =>
@@ -64,7 +65,12 @@ public abstract partial class Program
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
-            app.MapScalarApiReference();
+            app.MapScalarApiReference(options =>
+            {
+                options.Title = "SearchBugs API";
+                options.Theme = ScalarTheme.Alternate;
+                options.ShowSidebar = true;
+            });
         }
 
         // Enable CORS first

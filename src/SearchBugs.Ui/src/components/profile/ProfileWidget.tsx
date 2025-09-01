@@ -70,8 +70,12 @@ const ProfileWidget: React.FC<ProfileWidgetProps> = ({ profile }) => {
                 {profile.roles && profile.roles.length > 0 && (
                   <div className="flex gap-1 mt-2">
                     {profile.roles.map((role) => (
-                      <Badge key={role} variant="secondary" className="text-xs">
-                        {role}
+                      <Badge
+                        key={role.id}
+                        variant="secondary"
+                        className="text-xs"
+                      >
+                        {role.name}
                       </Badge>
                     ))}
                   </div>

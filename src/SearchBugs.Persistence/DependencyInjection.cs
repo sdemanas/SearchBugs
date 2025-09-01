@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using SearchBugs.Domain;
 using SearchBugs.Domain.Bugs;
 using SearchBugs.Domain.Git;
+using SearchBugs.Domain.Notifications;
 using SearchBugs.Domain.Projects;
 using SearchBugs.Domain.Repositories;
 using SearchBugs.Domain.Roles;
@@ -42,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<IGitRepository, GitRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<ICustomFieldRepository, CustomFieldRepository>();
 
         services.AddMemoryCache()

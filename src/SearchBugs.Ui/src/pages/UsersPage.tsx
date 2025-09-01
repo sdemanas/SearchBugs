@@ -60,7 +60,7 @@ import {
   Trash2,
   UserCog,
 } from "lucide-react";
-import { apiClient, User, UserRole, Role } from "@/lib/api";
+import { apiClient, User, Role } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useForm } from "react-hook-form";
@@ -396,7 +396,7 @@ export const UsersPage = () => {
   const { toast } = useToast();
 
   // Check if current user is admin
-  const isAdmin = currentUser?.roles?.includes("Admin");
+  const isAdmin = currentUser?.roles?.some((role) => role.name === "Admin");
 
   // Reset pagination when search or filter changes
   useEffect(() => {
@@ -615,21 +615,21 @@ export const UsersPage = () => {
     });
   };
 
-  const getRolesBadges = (roles: string[] | undefined) => {
+  const getRolesBadges = (roles: Role[] | undefined) => {
     if (!roles || roles.length === 0) {
       return <Badge variant="secondary">No Role</Badge>;
     }
 
     return roles.map((role) => (
       <Badge
-        key={role}
+        key={role.id}
         variant="secondary"
         className={`${
-          roleColors[role] || "bg-gray-100 text-gray-800 hover:bg-gray-200"
+          roleColors[role.name] || "bg-gray-100 text-gray-800 hover:bg-gray-200"
         } flex items-center gap-1`}
       >
-        {roleIcons[role] || <UserCheck className="h-3 w-3" />}
-        {role}
+        {roleIcons[role.name] || <UserCheck className="h-3 w-3" />}
+        {role.name}
       </Badge>
     ));
   };
@@ -700,7 +700,11 @@ export const UsersPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {users.filter((u) => u.roles?.includes(UserRole.Admin)).length}
+              {
+                users.filter((u) =>
+                  u.roles?.some((role) => role.name === "Admin")
+                ).length
+              }
             </div>
             <p className="text-xs text-muted-foreground">Admin users</p>
           </CardContent>

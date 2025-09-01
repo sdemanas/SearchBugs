@@ -38,4 +38,22 @@ public class Notification : Entity<NotificationId>, IAuditable
         var id = new NotificationId(Guid.NewGuid());
         return new Notification(id, userId, type, message, bugId, isRead, SystemTime.UtcNow);
     }
+
+    public void MarkAsRead()
+    {
+        if (!IsRead)
+        {
+            IsRead = true;
+            ModifiedOnUtc = SystemTime.UtcNow;
+        }
+    }
+
+    public void MarkAsUnread()
+    {
+        if (IsRead)
+        {
+            IsRead = false;
+            ModifiedOnUtc = SystemTime.UtcNow;
+        }
+    }
 }

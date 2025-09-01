@@ -30,13 +30,20 @@ internal sealed class RemoveRoleCommandHandler : IRequestHandler<RemoveRoleComma
         }
 
         var user = userResult.Value;
-        var role = Role.FromName(request.Role);
-        if (role is null)
+        var staticRole = Role.FromName(request.Role);
+        if (staticRole is null)
         {
             return Result.Failure(UserValidationErrors.InvalidRole);
         }
 
-        user.RemoveRole(role);
+        // Get the role from the database context to ensure it's tracked properly
+        var roleResult = await _userRepository.GetRoleByIdAsync(staticRole.Id, cancellationToken);
+        if (roleResult.IsFailure)
+        {
+            return Result.Failure(UserValidationErrors.InvalidRole);
+        }
+
+        user.RemoveRole(roleResult.Value);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();

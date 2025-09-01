@@ -1,4 +1,5 @@
 ﻿using Shared.Errors;
+using System.Text.Json.Serialization;
 
 namespace Shared.Results;
 
@@ -31,16 +32,19 @@ public class Result
     /// <summary>
     /// Gets a value indicating whether the result is a success.
     /// </summary>
+    [JsonPropertyName("isSuccess")]
     public bool IsSuccess { get; }
 
     /// <summary>
     /// Gets a value indicating whether the result is a failure.
     /// </summary>
+    [JsonPropertyName("isFailure")]
     public bool IsFailure => !IsSuccess;
 
     /// <summary>
     /// Gets the error.
     /// </summary>
+    [JsonPropertyName("error")]
     public Error Error { get; }
 
     /// <summary>

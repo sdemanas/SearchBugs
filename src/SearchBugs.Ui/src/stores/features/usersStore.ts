@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { apiClient, User, UserRole } from "@/lib/api";
+import { apiClient, User } from "@/lib/api";
 
 interface UsersState {
   // State
@@ -256,7 +256,7 @@ export const useUsersStore = create<UsersState>((set, get) => ({
     // Filter by role
     if (roleFilter !== "all") {
       filtered = filtered.filter((user) =>
-        user.roles?.includes(roleFilter as UserRole)
+        user.roles?.some((role) => role.name === roleFilter)
       );
     }
 
@@ -285,7 +285,9 @@ export const useUsersStore = create<UsersState>((set, get) => ({
   },
 
   getUsersByRole: (role: string) => {
-    return get().users.filter((user) => user.roles?.includes(role as UserRole));
+    return get().users.filter((user) =>
+      user.roles?.some((r) => r.name === role)
+    );
   },
 
   getAdmins: () => {

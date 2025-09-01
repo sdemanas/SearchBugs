@@ -1,4 +1,6 @@
-﻿namespace Shared.Errors;
+﻿using System.Text.Json.Serialization;
+
+namespace Shared.Errors;
 
 /// <summary>
 /// Represents an error.
@@ -34,11 +36,13 @@ public class Error : IEquatable<Error>
     /// <summary>
     /// Gets the error code.
     /// </summary>
+    [JsonPropertyName("code")]
     public string Code { get; }
 
     /// <summary>
     /// Gets the error message.
     /// </summary>
+    [JsonPropertyName("message")]
     public string Message { get; }
 
     public static implicit operator string(Error error) => error.Code;

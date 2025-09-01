@@ -1,12 +1,12 @@
 import React, { createContext, useState, useEffect } from "react";
-import { apiClient, accessTokenKey } from "@/lib/api";
+import { apiClient, accessTokenKey, Role } from "@/lib/api";
 
 interface User {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  roles: string[];
+  roles: Role[];
   createdOnUtc: string;
   isImpersonating?: boolean;
   originalUserId?: string;

@@ -1,9 +1,16 @@
-import React, { createContext, useEffect, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useEffect,
+  useState,
+  ReactNode,
+  useCallback,
+} from "react";
 import {
   notificationService,
   NotificationData,
 } from "../services/notificationService";
 import { useAuthStore } from "../stores/global/authStore";
+import { apiClient } from "../lib/api";
 
 interface NotificationContextType {
   notifications: NotificationData[];
@@ -13,6 +20,7 @@ interface NotificationContextType {
   markAsRead: (notificationId: string) => void;
   markAllAsRead: () => void;
   clearNotifications: () => void;
+  loadNotifications: () => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
@@ -31,21 +39,30 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const { user, isAuthenticated } = useAuthStore();
+  const [token, setToken] = useState<string | null>(null);
+
+  // Get token from auth store
+  useEffect(() => {
+    const authToken = localStorage.getItem("access"); // Use the correct key from api.ts
+    setToken(authToken);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const initializeSignalR = async () => {
-      if (isAuthenticated && user) {
+      if (isAuthenticated && user && token) {
         try {
-          await notificationService.startConnection();
+          await notificationService.startConnection(token);
           await notificationService.joinUserGroup(user.id);
           setIsConnected(true);
 
           // Set up notification listeners
           const handleNotification = (data: NotificationData) => {
+            console.log("Received notification:", data);
             addNotification(data);
           };
 
           const handleBugNotification = (data: NotificationData) => {
+            console.log("Received bug notification:", data);
             addNotification(data);
           };
 
@@ -57,6 +74,27 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
             "bugNotification",
             handleBugNotification
           );
+
+          // Set up connection state handlers
+          const connection = notificationService.getConnection();
+          if (connection) {
+            connection.onreconnecting(() => {
+              console.log("SignalR reconnecting...");
+              setIsConnected(false);
+            });
+
+            connection.onreconnected(() => {
+              console.log("SignalR reconnected");
+              setIsConnected(true);
+              // Rejoin user group after reconnection
+              notificationService.joinUserGroup(user.id);
+            });
+
+            connection.onclose(() => {
+              console.log("SignalR connection closed");
+              setIsConnected(false);
+            });
+          }
 
           return () => {
             notificationService.offNotification(
@@ -82,7 +120,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         cleanup.then((cleanupFn) => cleanupFn?.());
       }
     };
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, token]);
 
   useEffect(() => {
     return () => {
@@ -91,13 +129,26 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   }, []);
 
   const addNotification = (notification: NotificationData) => {
-    setNotifications((prev) => [
-      {
-        ...notification,
-        id: notification.id || Date.now().toString(),
-      },
-      ...prev,
-    ]);
+    const notificationWithId = {
+      ...notification,
+      id: notification.id || Date.now().toString(),
+      timestamp:
+        notification.timestamp ||
+        notification.createdAt ||
+        new Date().toISOString(),
+    };
+
+    setNotifications((prev) => {
+      // Check if notification already exists to avoid duplicates
+      const exists = prev.find((n) => n.id === notificationWithId.id);
+      if (exists) {
+        return prev;
+      }
+
+      // Add new notification to the beginning and limit to 50 notifications
+      const updated = [notificationWithId, ...prev].slice(0, 50);
+      return updated;
+    });
   };
 
   const markAsRead = (notificationId: string) => {
@@ -120,6 +171,56 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     setNotifications([]);
   };
 
+  const loadNotifications = useCallback(async () => {
+    if (!isAuthenticated) return;
+
+    try {
+      // Load recent notifications from the backend
+      const response = await apiClient.notifications.getAll({ pageSize: 50 });
+      if (response.data.isSuccess) {
+        const backendNotifications = response.data.value.notifications.map(
+          (n) => ({
+            id: n.id,
+            type: n.type,
+            message: n.message,
+            data: n.data || undefined,
+            bugId: n.bugId || undefined,
+            isRead: n.isRead,
+            timestamp: n.createdAt,
+            createdAt: n.createdAt,
+          })
+        );
+
+        // Merge with existing SignalR notifications, avoiding duplicates
+        setNotifications((prev) => {
+          const existingIds = new Set(prev.map((n) => n.id));
+          const newNotifications = backendNotifications.filter(
+            (n) => !existingIds.has(n.id)
+          );
+
+          // Combine and sort by timestamp (newest first)
+          const combined = [...prev, ...newNotifications].sort(
+            (a, b) =>
+              new Date(b.timestamp || b.createdAt || 0).getTime() -
+              new Date(a.timestamp || a.createdAt || 0).getTime()
+          );
+
+          // Limit to 50 notifications
+          return combined.slice(0, 50);
+        });
+      }
+    } catch (error) {
+      console.error("Failed to load notifications:", error);
+    }
+  }, [isAuthenticated]);
+
+  // Load initial notifications when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      loadNotifications();
+    }
+  }, [isAuthenticated, user, loadNotifications]);
+
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const value: NotificationContextType = {
@@ -130,6 +231,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     markAsRead,
     markAllAsRead,
     clearNotifications,
+    loadNotifications,
   };
 
   return (

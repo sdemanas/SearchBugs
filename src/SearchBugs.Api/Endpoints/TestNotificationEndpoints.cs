@@ -17,13 +17,15 @@ public static class TestNotificationEndpoints
         [FromBody] TestNotificationRequest request,
         [FromServices] INotificationService notificationService)
     {
-        await notificationService.SendNotificationToUserAsync(
+        var result = await notificationService.SendNotificationToUserAsync(
             request.UserId,
             "test",
             request.Message ?? "This is a test notification!",
             "Test data from backend");
 
-        return Results.Ok(new { Message = "Test notification sent successfully" });
+        return result.IsSuccess
+            ? Results.Ok(new { Message = "Test notification sent successfully" })
+            : Results.BadRequest(result.Error);
     }
 }
 

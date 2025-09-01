@@ -282,21 +282,21 @@ export const UserDetailsPage: React.FC = () => {
     });
   };
 
-  const getRolesBadges = (roles: string[]) => {
+  const getRolesBadges = (roles: Role[]) => {
     if (!roles || roles.length === 0) {
       return <Badge variant="secondary">No Role</Badge>;
     }
 
     return roles.map((role) => (
       <Badge
-        key={role}
+        key={role.id}
         variant="secondary"
         className={`${
-          roleColors[role] || "bg-gray-100 text-gray-800 hover:bg-gray-200"
+          roleColors[role.name] || "bg-gray-100 text-gray-800 hover:bg-gray-200"
         } flex items-center gap-1`}
       >
-        {roleIcons[role] || <UserIcon className="h-3 w-3" />}
-        {role}
+        {roleIcons[role.name] || <UserIcon className="h-3 w-3" />}
+        {role.name}
       </Badge>
     ));
   };

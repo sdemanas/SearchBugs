@@ -3,6 +3,12 @@ import {
   HubConnectionBuilder,
   LogLevel,
 } from "@microsoft/signalr";
+import { apiBaseUrl } from "../lib/constants";
+
+// Extract base URL without /api/ path
+const getSignalRBaseUrl = () => {
+  return apiBaseUrl.replace("/api/", "");
+};
 
 export interface NotificationData {
   id?: string;
@@ -21,19 +27,31 @@ export class NotificationService {
   private listeners: Map<string, ((data: NotificationData) => void)[]> =
     new Map();
 
-  constructor(baseUrl: string = "http://localhost:5000") {
-    this.baseUrl = baseUrl;
+  constructor(baseUrl?: string) {
+    this.baseUrl = baseUrl || getSignalRBaseUrl();
   }
 
-  public async startConnection(): Promise<void> {
+  public async startConnection(accessToken?: string): Promise<void> {
     if (this.connection) {
       return;
     }
 
+    interface ConnectionOptions {
+      withCredentials: boolean;
+      accessTokenFactory?: () => string;
+    }
+
+    const connectionOptions: ConnectionOptions = {
+      withCredentials: true,
+    };
+
+    // Add authorization header if token is provided
+    if (accessToken) {
+      connectionOptions.accessTokenFactory = () => accessToken;
+    }
+
     this.connection = new HubConnectionBuilder()
-      .withUrl(`${this.baseUrl}/hubs/notifications`, {
-        withCredentials: false, // Set to true if using authentication
-      })
+      .withUrl(`${this.baseUrl}/hubs/notifications`, connectionOptions)
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Information)
       .build();
@@ -46,6 +64,10 @@ export class NotificationService {
       console.error("Failed to establish SignalR connection:", error);
       throw error;
     }
+  }
+
+  public getConnection(): HubConnection | null {
+    return this.connection;
   }
 
   public async stopConnection(): Promise<void> {

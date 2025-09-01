@@ -1,3 +1,5 @@
+using SearchBugs.Application.Users.Common;
+
 namespace SearchBugs.Application.Users.CreateUser;
 
 public record CreateUserResponse(
@@ -5,5 +7,5 @@ public record CreateUserResponse(
     string FirstName,
     string LastName,
     string Email,
-    string[] Roles,
+    RoleDto[] Roles,
     DateTime CreatedOnUtc);

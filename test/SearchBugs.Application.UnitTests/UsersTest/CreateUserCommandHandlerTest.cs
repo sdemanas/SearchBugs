@@ -100,8 +100,8 @@ public class CreateUserCommandHandlerTest
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.Contains("Admin", result.Value.Roles);
-        Assert.Contains("Guest", result.Value.Roles);
+        Assert.Contains(result.Value.Roles, r => r.Name == "Admin");
+        Assert.Contains(result.Value.Roles, r => r.Name == "Guest");
     }
 
     [Fact]

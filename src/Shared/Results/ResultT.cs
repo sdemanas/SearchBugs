@@ -1,4 +1,5 @@
 ﻿using Shared.Errors;
+using System.Text.Json.Serialization;
 
 namespace Shared.Results;
 
@@ -25,6 +26,7 @@ public class Result<TValue> : Result
     /// </summary>
     /// <returns>The result value if the result is successful.</returns>
     /// <exception cref="InvalidOperationException"> when <see cref="Result.IsFailure"/> is true.</exception>
+    [JsonPropertyName("value")]
     public TValue Value => IsSuccess || _value is null
         ? _value!
             : throw new InvalidOperationException("The value of a failure result can not be accessed.");

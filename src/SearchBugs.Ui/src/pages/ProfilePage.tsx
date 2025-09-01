@@ -87,8 +87,12 @@ const ProfileHeader: React.FC<{
                 {profile.roles && profile.roles.length > 0 && (
                   <div className="flex gap-1 mt-2">
                     {profile.roles.map((role) => (
-                      <Badge key={role} variant="secondary" className="text-xs">
-                        {role}
+                      <Badge
+                        key={role.id}
+                        variant="secondary"
+                        className="text-xs"
+                      >
+                        {role.name}
                       </Badge>
                     ))}
                   </div>
@@ -893,7 +897,7 @@ export const ProfilePage: React.FC = () => {
                 <div className="flex justify-between">
                   <span>Role:</span>
                   <span className="font-medium">
-                    {profile.roles?.[0] || "User"}
+                    {profile.roles?.[0]?.name || "User"}
                   </span>
                 </div>
               </div>
