@@ -16,11 +16,11 @@ public static class RoleEndpoints
         var roles = app.MapGroup("api/roles")
             .WithTags("Roles");
 
-        roles.MapGet("", GetRoles).WithName(nameof(GetRoles)).RequireAuthorization("ListAllUsers"); // Using basic user management permission
-        roles.MapGet("permissions", GetPermissions).WithName(nameof(GetPermissions)).RequireAuthorization("ListAllUsers");
-        roles.MapGet("{roleId:int}", GetRoleWithPermissions).WithName(nameof(GetRoleWithPermissions)).RequireAuthorization("ViewUserDetails");
-        roles.MapPost("{roleId:int}/permissions/{permissionId:int}", AssignPermissionToRole).WithName(nameof(AssignPermissionToRole)).RequireAuthorization("UpdateUser");
-        roles.MapDelete("{roleId:int}/permissions/{permissionId:int}", RemovePermissionFromRole).WithName(nameof(RemovePermissionFromRole)).RequireAuthorization("UpdateUser");
+        roles.MapGet("", GetRoles).WithName(nameof(GetRoles)).RequireAuthorization("ViewRoles");
+        roles.MapGet("permissions", GetPermissions).WithName(nameof(GetPermissions)).RequireAuthorization("ViewPermissions");
+        roles.MapGet("{roleId:int}", GetRoleWithPermissions).WithName(nameof(GetRoleWithPermissions)).RequireAuthorization("ViewRolePermissions");
+        roles.MapPost("{roleId:int}/permissions/{permissionId:int}", AssignPermissionToRole).WithName(nameof(AssignPermissionToRole)).RequireAuthorization("AssignPermissionToRole");
+        roles.MapDelete("{roleId:int}/permissions/{permissionId:int}", RemovePermissionFromRole).WithName(nameof(RemovePermissionFromRole)).RequireAuthorization("RemovePermissionFromRole");
     }
 
     public static async Task<IResult> GetRoles(ISender sender)

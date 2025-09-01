@@ -163,6 +163,7 @@ internal sealed class RolePermissionConfiguration
     {
         var permissions = new List<RolePermission>
         {
+            // User permissions
             Create(Role.Admin, Permission.CreateUser),
             Create(Role.Admin, Permission.ViewUserDetails),
             Create(Role.Admin, Permission.UpdateUser),
@@ -170,11 +171,15 @@ internal sealed class RolePermissionConfiguration
             Create(Role.Admin, Permission.AuthenticateUser),
             Create(Role.Admin, Permission.ChangeUserPassword),
             Create(Role.Admin, Permission.ListAllUsers),
+            
+            // Project permissions
             Create(Role.Admin, Permission.CreateProject),
             Create(Role.Admin, Permission.ViewProjectDetails),
             Create(Role.Admin, Permission.UpdateProject),
             Create(Role.Admin, Permission.DeleteProject),
             Create(Role.Admin, Permission.ListAllProjects),
+            
+            // Bug permissions
             Create(Role.Admin, Permission.CreateBug),
             Create(Role.Admin, Permission.ViewBugDetails),
             Create(Role.Admin, Permission.UpdateBug),
@@ -189,16 +194,29 @@ internal sealed class RolePermissionConfiguration
             Create(Role.Admin, Permission.ViewTimeSpentOnBug),
             Create(Role.Admin, Permission.AddCustomFieldToBug),
             Create(Role.Admin, Permission.ViewCustomFieldOnBug),
+            
+            // Notification permissions
             Create(Role.Admin, Permission.ViewNotification),
             Create(Role.Admin, Permission.DeleteNotification),
             Create(Role.Admin, Permission.MarkNotificationAsRead),
+            
+            // Repository permissions
             Create(Role.Admin, Permission.CreateRepository),
             Create(Role.Admin, Permission.ViewRepositoryDetails),
             Create(Role.Admin, Permission.UpdateRepository),
             Create(Role.Admin, Permission.DeleteRepository),
             Create(Role.Admin, Permission.ListAllRepositories),
             Create(Role.Admin, Permission.LinkBugToRepository),
-            Create(Role.Admin, Permission.ViewBugRepository)
+            Create(Role.Admin, Permission.ViewBugRepository),
+            
+            // Role Management permissions
+            Create(Role.Admin, Permission.ViewRoles),
+            Create(Role.Admin, Permission.ViewPermissions),
+            Create(Role.Admin, Permission.AssignPermissionToRole),
+            Create(Role.Admin, Permission.RemovePermissionFromRole),
+            Create(Role.Admin, Permission.ViewRolePermissions),
+            Create(Role.Admin, Permission.AssignRoleToUser),
+            Create(Role.Admin, Permission.RemoveRoleFromUser)
         };
         return permissions;
     }

@@ -45,7 +45,11 @@ public abstract partial class Program
         builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         // Add SignalR
-        builder.Services.AddSignalR();
+        builder.Services.AddSignalR(options =>
+        {
+            // Configure SignalR for CORS
+            options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+        });
         builder.Services.AddScoped<INotificationService, NotificationService>();
 
         // Add CORS
@@ -53,7 +57,7 @@ public abstract partial class Program
         {
             options.AddPolicy("AllowAll", policy =>
             {
-                policy.WithOrigins("http://localhost:3000", "http://localhost:5173")
+                policy.WithOrigins("http://localhost:5173", "https://searchbugs.com")
                       .AllowAnyMethod()
                       .AllowAnyHeader()
                       .AllowCredentials();
@@ -76,7 +80,7 @@ public abstract partial class Program
         // Enable CORS first
         app.UseCors("AllowAll");
 
-        // Add authentication and authorization middleware in correct order
+        // Add authentication and authorization middleware after CORS
         app.UseAuthentication();
         app.UseAuthorization();
 
@@ -84,7 +88,6 @@ public abstract partial class Program
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
         app.UseStaticFiles();
-
         app.MapAuthenticationsEndpoints();
         app.MapBugsEndpoints();
         app.MapUserEndpoints();
@@ -96,7 +99,12 @@ public abstract partial class Program
         app.MapTestNotificationEndpoints();
         app.MapAuditLogEndpoints();
 
-        // Map SignalR hub
+        // Map new comprehensive endpoints
+        app.MapRepositoryEndpoints();
+        app.MapAnalyticsEndpoints();
+        app.MapAdminEndpoints();
+
+        // Map SignalR hub with CORS
         app.MapHub<NotificationHub>("/hubs/notifications");
 
         // app.UseHttpsRedirection();

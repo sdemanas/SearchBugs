@@ -1,12 +1,15 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SearchBugs.Application.Users.AssignRole;
+using SearchBugs.Application.Users.AssignRoleToUser;
 using SearchBugs.Application.Users.ChangePassword;
 using SearchBugs.Application.Users.CreateUser;
 using SearchBugs.Application.Users.DeleteUser;
 using SearchBugs.Application.Users.GetUserDetail;
+using SearchBugs.Application.Users.GetUserRoles;
 using SearchBugs.Application.Users.GetUsers;
 using SearchBugs.Application.Users.RemoveRole;
+using SearchBugs.Application.Users.RemoveRoleFromUser;
 using SearchBugs.Application.Users.UpdateUser;
 using SearchBugs.Api.Extensions;
 
@@ -17,7 +20,9 @@ public static class UserEndpoints
     public record CreateUserRequest(string FirstName, string LastName, string Email, string Password, string[]? Roles = null);
     public record UpdateUserRequest(string FirstName, string LastName);
     public record AssignRoleRequest(Guid UserId, string Role);
+    public record AssignRoleToUserRequest(Guid UserId, int RoleId);
     public record RemoveRoleRequest(Guid UserId, string Role);
+    public record RemoveRoleFromUserRequest(Guid UserId, int RoleId);
     public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
 
     public static void MapUserEndpoints(this IEndpointRouteBuilder app)
@@ -26,14 +31,48 @@ public static class UserEndpoints
             .WithTags("Users")
             .WithOpenApi();
 
-        users.MapGet("/", GetUsers).WithName(nameof(GetUsers)).RequireAuthorization();
+        users.MapGet("/", GetUsers).WithName(nameof(GetUsers)).RequireAuthorization("ListAllUsers");
         users.MapGet("/{id:guid}", GetUserDetail).WithName(nameof(GetUserDetail)).RequireAuthorization("ViewUserDetails");
+        users.MapGet("/{id:guid}/roles", GetUserRoles).WithName(nameof(GetUserRoles)).RequireAuthorization("ViewUserDetails");
         users.MapPost("/", CreateUser).WithName(nameof(CreateUser)).RequireAuthorization("CreateUser");
         users.MapPut("/{id:guid}", UpdateUser).WithName(nameof(UpdateUser)).RequireAuthorization("UpdateUser");
         users.MapDelete("/{id:guid}", DeleteUser).WithName(nameof(DeleteUser)).RequireAuthorization("DeleteUser");
-        users.MapPost("/{id:guid}/roles", AssignRole).WithName(nameof(AssignRole)).RequireAuthorization("UpdateUser");
-        users.MapDelete("/{id:guid}/roles", RemoveRole).WithName(nameof(RemoveRole)).RequireAuthorization("UpdateUser");
+        users.MapPost("/{id:guid}/roles", AssignRoleToUser).WithName(nameof(AssignRoleToUser)).RequireAuthorization("AssignRoleToUser");
+        users.MapDelete("/{id:guid}/roles/{roleId:int}", RemoveRoleFromUser).WithName(nameof(RemoveRoleFromUser)).RequireAuthorization("RemoveRoleFromUser");
         users.MapPut("/{id:guid}/change-password", ChangePassword).WithName(nameof(ChangePassword)).RequireAuthorization("ChangeUserPassword");
+
+        // Legacy endpoints (keeping for backward compatibility)
+        users.MapPost("/{id:guid}/assign-role", AssignRole).WithName("AssignRoleLegacy").RequireAuthorization("AssignRoleToUser");
+        users.MapDelete("/{id:guid}/remove-role", RemoveRole).WithName("RemoveRoleLegacy").RequireAuthorization("RemoveRoleFromUser");
+    }
+
+    public static async Task<IResult> GetUserRoles(
+        Guid id,
+        ISender sender)
+    {
+        var query = new GetUserRolesQuery(id);
+        var result = await sender.Send(query);
+        return result!.ToHttpResult();
+    }
+
+    public static async Task<IResult> AssignRoleToUser(
+        Guid id,
+        [FromBody] AssignRoleToUserRequest request,
+        ISender sender)
+    {
+        var command = new AssignRoleToUserCommand(id, request.RoleId);
+        var result = await sender.Send(command);
+        return result!.ToHttpResult();
+    }
+
+    public static async Task<IResult> RemoveRoleFromUser(
+        Guid id,
+        int roleId,
+        ISender sender)
+    {
+        var command = new RemoveRoleFromUserCommand(id, roleId);
+        var result = await sender.Send(command);
+        return result!.ToHttpResult();
     }
 
     public static async Task<IResult> CreateUser(

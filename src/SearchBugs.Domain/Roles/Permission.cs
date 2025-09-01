@@ -16,7 +16,7 @@ public class Permission : Enumeration<Permission>
 
     #region Project 
     public static readonly Permission CreateProject = new(8, nameof(CreateProject), "Can Create Project");
-    public static readonly Permission ViewProjectDetails = new(9, nameof(ViewUserDetails), "Can View Project Details");
+    public static readonly Permission ViewProjectDetails = new(9, nameof(ViewProjectDetails), "Can View Project Details");
     public static readonly Permission UpdateProject = new(10, nameof(UpdateProject), "Can Update Project");
     public static readonly Permission DeleteProject = new(11, nameof(DeleteProject), "Can Delete Project");
     public static readonly Permission ListAllProjects = new(12, nameof(ListAllProjects), "Can List All Projects");
@@ -55,6 +55,16 @@ public class Permission : Enumeration<Permission>
     public static readonly Permission ListAllRepositories = new(35, nameof(ListAllRepositories), "Can List All Repositories");
     public static readonly Permission LinkBugToRepository = new(36, nameof(LinkBugToRepository), "Can Link Bug To Repository");
     public static readonly Permission ViewBugRepository = new(37, nameof(ViewBugRepository), "Can View Bug Repository");
+    #endregion
+
+    #region Role Management 
+    public static readonly Permission ViewRoles = new(38, nameof(ViewRoles), "Can View Roles");
+    public static readonly Permission ViewPermissions = new(39, nameof(ViewPermissions), "Can View Permissions");
+    public static readonly Permission AssignPermissionToRole = new(40, nameof(AssignPermissionToRole), "Can Assign Permission To Role");
+    public static readonly Permission RemovePermissionFromRole = new(41, nameof(RemovePermissionFromRole), "Can Remove Permission From Role");
+    public static readonly Permission ViewRolePermissions = new(42, nameof(ViewRolePermissions), "Can View Role Permissions");
+    public static readonly Permission AssignRoleToUser = new(43, nameof(AssignRoleToUser), "Can Assign Role To User");
+    public static readonly Permission RemoveRoleFromUser = new(44, nameof(RemoveRoleFromUser), "Can Remove Role From User");
     #endregion
 
     private Permission(int id, string name, string description)

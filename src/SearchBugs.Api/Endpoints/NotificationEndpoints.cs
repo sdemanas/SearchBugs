@@ -19,22 +19,33 @@ public static class NotificationEndpoints
     public static void MapNotificationEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/notifications")
-            .WithTags("Notifications");
+            .WithTags("Notifications")
+            .WithOpenApi();
 
-        // Retrieval endpoints
-        group.MapGet("/", GetUserNotifications).RequireAuthorization();
-        group.MapGet("/unread", GetUnreadNotifications).RequireAuthorization();
-        group.MapGet("/unread-count", GetUnreadCount).RequireAuthorization();
-        group.MapPut("/{id}/read", MarkAsRead).RequireAuthorization();
-        group.MapPut("/mark-all-read", MarkAllAsRead).RequireAuthorization();
-        group.MapDelete("/{id}", DeleteNotification).RequireAuthorization();
-        group.MapDelete("/clear-all", ClearAllNotifications).RequireAuthorization();
+        // Retrieval endpoints - these require ViewNotification permission
+        group.MapGet("/", GetUserNotifications).RequireAuthorization("ViewNotification");
+        group.MapGet("/unread", GetUnreadNotifications).RequireAuthorization("ViewNotification");
+        group.MapGet("/unread-count", GetUnreadCount).RequireAuthorization("ViewNotification");
 
-        // Sending endpoints
+        // Modification endpoints - these require MarkNotificationAsRead permission
+        group.MapPut("/{id}/read", MarkAsRead).RequireAuthorization("MarkNotificationAsRead");
+        group.MapPut("/mark-all-read", MarkAllAsRead).RequireAuthorization("MarkNotificationAsRead");
+
+        // Deletion endpoints - these require DeleteNotification permission
+        group.MapDelete("/{id}", DeleteNotification).RequireAuthorization("DeleteNotification");
+        group.MapDelete("/clear-all", ClearAllNotifications).RequireAuthorization("DeleteNotification");
+
+        // Admin sending endpoints - these require ViewNotification permission (could be more restrictive)
         group.MapPost("/send", SendNotification).RequireAuthorization("ViewNotification");
         group.MapPost("/send-to-user", SendNotificationToUser).RequireAuthorization("ViewNotification");
         group.MapPost("/broadcast", BroadcastNotification).RequireAuthorization("ViewNotification");
         group.MapPost("/bug-notification", SendBugNotification).RequireAuthorization("ViewNotification");
+
+        // Additional notification management endpoints
+        group.MapGet("/admin/all", GetAllNotifications).RequireAuthorization("ViewNotification");
+        group.MapGet("/admin/statistics", GetNotificationStatistics).RequireAuthorization("ViewNotification");
+        group.MapPost("/admin/bulk-delete", BulkDeleteNotifications).RequireAuthorization("DeleteNotification");
+        group.MapPost("/admin/bulk-mark-read", BulkMarkAsRead).RequireAuthorization("MarkNotificationAsRead");
     }
 
     // Retrieval methods
@@ -163,6 +174,38 @@ public static class NotificationEndpoints
 
         return result!.ToHttpResult();
     }
+
+    // Additional admin notification management methods
+    private static Task<IResult> GetAllNotifications(
+        [FromServices] ISender sender,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 50)
+    {
+        // Note: This would require implementing GetAllNotificationsQuery in the Application layer
+        return Task.FromResult(Results.Ok($"Get all notifications for admin - page {pageNumber}, size {pageSize}"));
+    }
+
+    private static Task<IResult> GetNotificationStatistics([FromServices] ISender sender)
+    {
+        // Note: This would require implementing GetNotificationStatisticsQuery in the Application layer
+        return Task.FromResult(Results.Ok("Get notification statistics for admin"));
+    }
+
+    private static Task<IResult> BulkDeleteNotifications(
+        [FromBody] BulkNotificationRequest request,
+        [FromServices] ISender sender)
+    {
+        // Note: This would require implementing BulkDeleteNotificationsCommand in the Application layer
+        return Task.FromResult(Results.Ok($"Bulk delete {request.NotificationIds.Length} notifications"));
+    }
+
+    private static Task<IResult> BulkMarkAsRead(
+        [FromBody] BulkNotificationRequest request,
+        [FromServices] ISender sender)
+    {
+        // Note: This would require implementing BulkMarkAsReadCommand in the Application layer
+        return Task.FromResult(Results.Ok($"Bulk mark as read {request.NotificationIds.Length} notifications"));
+    }
 }
 
 public record SendNotificationRequest(
@@ -187,3 +230,6 @@ public record SendBugNotificationRequest(
     string BugId,
     string Type,
     string Message);
+
+public record BulkNotificationRequest(
+    string[] NotificationIds);

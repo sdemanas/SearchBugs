@@ -13,11 +13,11 @@ import {
   ProjectsPage,
   RegisterPage,
   RepositoryPage,
-  RolePermissionsPage,
   SettingPage,
   UserDetailsPage,
   UsersPage,
 } from "./pages";
+import { AdminRBACPage } from "./pages/admin/AdminRBACPage";
 import AuditLogsPage from "./pages/AuditLogsPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
@@ -129,9 +129,9 @@ const router = createBrowserRouter([
       },
       {
         path: "/roles-permissions",
-        element: <RolePermissionsPage />,
+        element: <AdminRBACPage />,
         handle: {
-          title: "Role Permissions",
+          title: "Role Management",
           icon: "Shield",
           adminOnly: true,
         },

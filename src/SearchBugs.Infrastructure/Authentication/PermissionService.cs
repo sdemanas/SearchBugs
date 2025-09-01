@@ -13,18 +13,26 @@ public class PermissionService : IPermissionService
     {
         _dbContext = dbContext;
     }
+
     public async Task<HashSet<string>> GetPermissionsAsync(Guid userId)
     {
-        // TODO: Remove this temporary bypass - giving all permissions to all authenticated users for testing
-        return new HashSet<string>
+        // Get user with their roles and permissions
+        var user = await _dbContext.Users
+            .Include(u => u.Roles)
+                .ThenInclude(r => r.Permissions)
+            .FirstOrDefaultAsync(u => u.Id == new UserId(userId));
+
+        if (user == null)
         {
-            "ListAllUsers", "ViewUserDetails", "CreateUser", "UpdateUser", "DeleteUser", "ChangeUserPassword",
-            "ListAllProjects", "ViewProjectDetails", "CreateProject", "UpdateProject", "DeleteProject",
-            "ListAllBugs", "ViewBugDetails", "CreateBug", "UpdateBug", "DeleteBug", "AddCommentToBug", "ViewBugComments",
-            "ViewNotification", "DeleteNotification", "MarkNotificationAsRead",
-            "ListAllRepositories", "ViewRepositoryDetails", "CreateRepository", "UpdateRepository", "DeleteRepository",
-            "AddAttachmentToBug", "ViewBugAttachments", "ViewBugHistory", "TrackTimeSpentOnBug", "ViewTimeSpentOnBug",
-            "AddCustomFieldToBug", "ViewCustomFieldOnBug", "LinkBugToRepository", "ViewBugRepository"
-        };
+            return new HashSet<string>();
+        }
+
+        // Get all permissions from user's roles
+        var permissions = user.Roles
+            .SelectMany(role => role.Permissions)
+            .Select(permission => permission.Name)
+            .ToHashSet();
+
+        return permissions;
     }
 }
