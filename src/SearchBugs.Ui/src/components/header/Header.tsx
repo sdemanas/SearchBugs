@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, LogOut } from "lucide-react";
+import { Plus, Search, LogOut, Sun, Moon, Monitor } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,11 +16,13 @@ import { useToast } from "@/components/ui/use-toast";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ImpersonationDialog } from "@/components/ImpersonationDialog";
 import { TimezoneIndicator } from "@/components/ui/timezone-indicator";
+import { useUIStore } from "../../stores/global/uiStore";
 
 export const Header = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { toast } = useToast();
+  const { theme, setTheme } = useUIStore();
 
   const handleLogout = () => {
     logout();
@@ -29,6 +31,22 @@ export const Header = () => {
       description: "You have been successfully logged out.",
     });
     navigate("/login");
+  };
+
+  const toggleTheme = () => {
+    if (theme === "light") {
+      setTheme("dark");
+    } else if (theme === "dark") {
+      setTheme("system");
+    } else {
+      setTheme("light");
+    }
+  };
+
+  const getThemeIcon = () => {
+    if (theme === "dark") return <Moon className="h-4 w-4" />;
+    if (theme === "light") return <Sun className="h-4 w-4" />;
+    return <Monitor className="h-4 w-4" />; // System theme
   };
 
   return (
@@ -86,6 +104,18 @@ export const Header = () => {
         <div className="flex items-center space-x-2">
           <TimezoneIndicator />
           <NotificationBell />
+
+          {/* Theme Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            title={`Switch to ${
+              theme === "light" ? "dark" : theme === "dark" ? "system" : "light"
+            } theme`}
+          >
+            {getThemeIcon()}
+          </Button>
 
           {/* Show impersonation dialog for admin users - TODO: Add proper permission check */}
           {user?.roles?.includes("Admin") && <ImpersonationDialog />}

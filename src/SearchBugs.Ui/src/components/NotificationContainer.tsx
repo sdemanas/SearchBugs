@@ -56,7 +56,7 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({
       ${isVisible ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"}
     `}
     >
-      <div className="bg-white rounded-lg shadow-lg border border-gray-200 max-w-sm w-full">
+      <div className="bg-card rounded-lg shadow-lg border border-border max-w-sm w-full">
         <div
           className={`${getNotificationColor(
             notification.type
@@ -71,17 +71,17 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({
               </div>
 
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-card-foreground">
                   {notification.message}
                 </p>
 
                 {notification.data && (
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {notification.data}
                   </p>
                 )}
 
-                <p className="text-xs text-gray-400 mt-2">
+                <p className="text-xs text-muted-foreground mt-2">
                   {new Date(notification.timestamp).toLocaleTimeString()}
                 </p>
               </div>
@@ -89,7 +89,7 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({
 
             <button
               onClick={handleDismiss}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path

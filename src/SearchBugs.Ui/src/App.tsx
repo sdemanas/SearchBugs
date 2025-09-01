@@ -7,11 +7,15 @@ import { NotificationContainer } from "./components/NotificationContainer";
 import { Toaster } from "@/components/ui/toaster";
 import { useEffect } from "react";
 import { useTimezoneStore } from "./stores/global/timezoneStore";
+import { useThemeInitialization } from "./hooks/useThemeInitialization";
 
 function App() {
   const initializeTimezone = useTimezoneStore(
     (state) => state.initializeTimezone
   );
+
+  // Initialize theme
+  useThemeInitialization();
 
   // Initialize timezone on app startup
   useEffect(() => {

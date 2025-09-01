@@ -145,24 +145,24 @@ const RichTextEditor = React.forwardRef<
     const formatActions = [
       {
         icon: Bold,
-        label: "Bold",
+        label: "Bold (Ctrl+B)",
         action: () =>
           insertFormat({ before: "**", after: "**", placeholder: "bold text" }),
       },
       {
         icon: Italic,
-        label: "Italic",
+        label: "Italic (Ctrl+I)",
         action: () =>
-          insertFormat({ before: "_", after: "_", placeholder: "italic text" }),
+          insertFormat({ before: "*", after: "*", placeholder: "italic text" }),
       },
       {
         icon: Underline,
-        label: "Underline",
+        label: "Strikethrough",
         action: () =>
           insertFormat({
-            before: "<u>",
-            after: "</u>",
-            placeholder: "underlined text",
+            before: "~~",
+            after: "~~",
+            placeholder: "strikethrough text",
           }),
       },
       {
@@ -178,7 +178,7 @@ const RichTextEditor = React.forwardRef<
           insertFormat({
             before: "```\n",
             after: "\n```",
-            placeholder: "code block",
+            placeholder: "// Your code here",
           }),
       },
       {
@@ -193,7 +193,7 @@ const RichTextEditor = React.forwardRef<
       },
       {
         icon: Quote,
-        label: "Quote",
+        label: "Blockquote",
         action: () =>
           insertFormat({ before: "> ", after: "", placeholder: "quote" }),
       },
@@ -203,7 +203,7 @@ const RichTextEditor = React.forwardRef<
         action: () =>
           insertFormat({
             before: "[",
-            after: "](url)",
+            after: "](https://)",
             placeholder: "link text",
           }),
       },
@@ -309,8 +309,8 @@ const RichTextEditor = React.forwardRef<
                     } else if (e.key === "i") {
                       e.preventDefault();
                       insertFormat({
-                        before: "_",
-                        after: "_",
+                        before: "*",
+                        after: "*",
                         placeholder: "italic text",
                       });
                     }
@@ -338,7 +338,10 @@ const RichTextEditor = React.forwardRef<
 
         {maxLength && (
           <div className="px-3 py-2 text-xs text-muted-foreground flex justify-between items-center bg-muted/20">
-            <span>Supports Markdown formatting</span>
+            <span>
+              Markdown supported: **bold**, *italic*, `code`, [links](url),{" "}
+              {">"}quotes
+            </span>
             <span
               className={cn(
                 value.length > maxLength * 0.9 ? "text-orange-600" : "",

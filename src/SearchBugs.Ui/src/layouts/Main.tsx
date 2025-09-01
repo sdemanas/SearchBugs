@@ -23,7 +23,7 @@ export default function Layout() {
         <AdminBanner onQuickImpersonate={handleQuickImpersonate} />
         <ImpersonationBanner />
       </div>
-      <main className="flex-1 bg-gray-100">
+      <main className="flex-1 bg-background">
         <Outlet />
       </main>
       <Footer />

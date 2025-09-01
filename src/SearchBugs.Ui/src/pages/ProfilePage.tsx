@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormInput, FormTextarea } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +26,19 @@ import {
   Clock,
   ExternalLink,
   RefreshCw,
+  Shield,
+  Puzzle,
+  HelpCircle,
+  Building,
+  Cog,
+  Lock,
+  Eye,
+  Smartphone,
+  Bell,
+  Globe,
+  Key,
+  Database,
+  Trash2,
 } from "lucide-react";
 import { CardLoadingSkeleton } from "@/components/ui/loading";
 import {
@@ -34,6 +47,13 @@ import {
 } from "@/lib/validations";
 import { apiClient, type UserProfile } from "@/lib/api";
 import { formatDistanceToNow } from "date-fns";
+import { RecentActivitySmall } from "@/components/profile/RecentActivitySmall";
+import {
+  SecuritySettingsPanel,
+  NotificationSettingsPanel,
+  IntegrationSettingsPanel,
+  AdvancedSettingsPanel,
+} from "@/components/settings/SettingsPanels";
 
 const ProfileHeader: React.FC<{
   profile: UserProfile;
@@ -188,6 +208,7 @@ const ProfileSettings: React.FC<{
   onCancel: () => void;
 }> = ({ profile, onCancel }) => {
   const queryClient = useQueryClient();
+  const [activeSettingsTab, setActiveSettingsTab] = useState("profile");
   const {
     control,
     handleSubmit,
@@ -274,194 +295,330 @@ const ProfileSettings: React.FC<{
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold">Personal Information</h3>
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      {/* Settings Navigation */}
+      <Card className="lg:col-span-1 h-fit">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Settings</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Basic Info Section */}
-            <div className="space-y-4">
-              <h4 className="text-md font-medium">Basic Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormInput
-                  control={control}
-                  name="firstName"
-                  label="First Name"
-                  required
-                  disabled={isSubmitting}
-                  error={errors.firstName}
-                />
-                <FormInput
-                  control={control}
-                  name="lastName"
-                  label="Last Name"
-                  required
-                  disabled={isSubmitting}
-                  error={errors.lastName}
-                />
-              </div>
-
-              <FormInput
-                control={control}
-                name="email"
-                label="Email"
-                type="email"
-                required
-                disabled={true} // Email should not be editable
-                error={errors.email}
-              />
-
-              <FormTextarea
-                control={control}
-                name="bio"
-                label="Bio"
-                placeholder="Tell us about yourself..."
-                rows={3}
-                disabled={isSubmitting}
-                error={errors.bio}
-              />
-
-              <FormInput
-                control={control}
-                name="avatarUrl"
-                label="Avatar URL"
-                placeholder="https://example.com/avatar.jpg"
-                disabled={isSubmitting}
-                error={errors.avatarUrl}
-              />
-            </div>
-
-            {/* Professional Info Section */}
-            <div className="space-y-4">
-              <h4 className="text-md font-medium">Professional Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormInput
-                  control={control}
-                  name="company"
-                  label="Company"
-                  placeholder="Your company name"
-                  disabled={isSubmitting}
-                  error={errors.company}
-                />
-                <FormInput
-                  control={control}
-                  name="jobTitle"
-                  label="Job Title"
-                  placeholder="Your job title"
-                  disabled={isSubmitting}
-                  error={errors.jobTitle}
-                />
-              </div>
-            </div>
-
-            {/* Contact & Location Section */}
-            <div className="space-y-4">
-              <h4 className="text-md font-medium">Contact & Location</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormInput
-                  control={control}
-                  name="location"
-                  label="Location"
-                  placeholder="City, Country"
-                  disabled={isSubmitting}
-                  error={errors.location}
-                />
-                <FormInput
-                  control={control}
-                  name="phoneNumber"
-                  label="Phone Number"
-                  placeholder="+1 (555) 123-4567"
-                  disabled={isSubmitting}
-                  error={errors.phoneNumber}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormInput
-                  control={control}
-                  name="timeZone"
-                  label="Time Zone"
-                  placeholder="America/New_York"
-                  disabled={isSubmitting}
-                  error={errors.timeZone}
-                />
-                <FormInput
-                  control={control}
-                  name="dateOfBirth"
-                  label="Date of Birth"
-                  placeholder="YYYY-MM-DD"
-                  disabled={isSubmitting}
-                  error={errors.dateOfBirth}
-                />
-              </div>
-            </div>
-
-            {/* Social Links Section */}
-            <div className="space-y-4">
-              <h4 className="text-md font-medium">Social Links</h4>
-              <FormInput
-                control={control}
-                name="website"
-                label="Website"
-                placeholder="https://yourwebsite.com"
-                disabled={isSubmitting}
-                error={errors.website}
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormInput
-                  control={control}
-                  name="gitHubUsername"
-                  label="GitHub Username"
-                  placeholder="yourusername"
-                  disabled={isSubmitting}
-                  error={errors.gitHubUsername}
-                />
-                <FormInput
-                  control={control}
-                  name="twitterHandle"
-                  label="Twitter Handle"
-                  placeholder="@yourusername"
-                  disabled={isSubmitting}
-                  error={errors.twitterHandle}
-                />
-              </div>
-
-              <FormInput
-                control={control}
-                name="linkedInUrl"
-                label="LinkedIn URL"
-                placeholder="https://linkedin.com/in/yourusername"
-                disabled={isSubmitting}
-                error={errors.linkedInUrl}
-              />
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCancel}
-                disabled={isSubmitting}
+        <CardContent>
+          <nav className="space-y-2">
+            <button
+              className={`w-full text-left p-3 rounded-lg transition-colors flex items-center gap-3 ${
+                activeSettingsTab === "profile"
+                  ? "bg-primary/10 text-primary"
+                  : "hover:bg-muted"
+              }`}
+              onClick={() => setActiveSettingsTab("profile")}
+            >
+              <Settings className="h-4 w-4" />
+              <span
+                className={activeSettingsTab === "profile" ? "font-medium" : ""}
               >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  "Save Changes"
-                )}
-              </Button>
-            </div>
-          </form>
+                Profile
+              </span>
+            </button>
+            <button
+              className={`w-full text-left p-3 rounded-lg transition-colors flex items-center gap-3 ${
+                activeSettingsTab === "security"
+                  ? "bg-primary/10 text-primary"
+                  : "hover:bg-muted"
+              }`}
+              onClick={() => setActiveSettingsTab("security")}
+            >
+              <Shield className="h-4 w-4" />
+              <span
+                className={
+                  activeSettingsTab === "security" ? "font-medium" : ""
+                }
+              >
+                Security
+              </span>
+            </button>
+            <button
+              className={`w-full text-left p-3 rounded-lg transition-colors flex items-center gap-3 ${
+                activeSettingsTab === "integrations"
+                  ? "bg-primary/10 text-primary"
+                  : "hover:bg-muted"
+              }`}
+              onClick={() => setActiveSettingsTab("integrations")}
+            >
+              <Puzzle className="h-4 w-4" />
+              <span
+                className={
+                  activeSettingsTab === "integrations" ? "font-medium" : ""
+                }
+              >
+                Integrations
+              </span>
+            </button>
+            <button
+              className={`w-full text-left p-3 rounded-lg transition-colors flex items-center gap-3 ${
+                activeSettingsTab === "support"
+                  ? "bg-primary/10 text-primary"
+                  : "hover:bg-muted"
+              }`}
+              onClick={() => setActiveSettingsTab("support")}
+            >
+              <HelpCircle className="h-4 w-4" />
+              <span
+                className={activeSettingsTab === "support" ? "font-medium" : ""}
+              >
+                Support
+              </span>
+            </button>
+            <button
+              className={`w-full text-left p-3 rounded-lg transition-colors flex items-center gap-3 ${
+                activeSettingsTab === "organizations"
+                  ? "bg-primary/10 text-primary"
+                  : "hover:bg-muted"
+              }`}
+              onClick={() => setActiveSettingsTab("organizations")}
+            >
+              <Building className="h-4 w-4" />
+              <span
+                className={
+                  activeSettingsTab === "organizations" ? "font-medium" : ""
+                }
+              >
+                Organizations
+              </span>
+            </button>
+            <button
+              className={`w-full text-left p-3 rounded-lg transition-colors flex items-center gap-3 ${
+                activeSettingsTab === "advanced"
+                  ? "bg-primary/10 text-primary"
+                  : "hover:bg-muted"
+              }`}
+              onClick={() => setActiveSettingsTab("advanced")}
+            >
+              <Cog className="h-4 w-4" />
+              <span
+                className={
+                  activeSettingsTab === "advanced" ? "font-medium" : ""
+                }
+              >
+                Advanced
+              </span>
+            </button>
+          </nav>
         </CardContent>
       </Card>
+
+      {/* Settings Content */}
+      <div className="lg:col-span-3 space-y-6">
+        {/* Profile Settings */}
+        {activeSettingsTab === "profile" && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Profile Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                {/* Basic Info Section */}
+                <div className="space-y-4">
+                  <h4 className="text-md font-medium">Basic Information</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormInput
+                      control={control}
+                      name="firstName"
+                      label="First Name"
+                      required
+                      disabled={isSubmitting}
+                      error={errors.firstName}
+                    />
+                    <FormInput
+                      control={control}
+                      name="lastName"
+                      label="Last Name"
+                      required
+                      disabled={isSubmitting}
+                      error={errors.lastName}
+                    />
+                  </div>
+
+                  <FormInput
+                    control={control}
+                    name="email"
+                    label="Email"
+                    type="email"
+                    required
+                    disabled={true} // Email should not be editable
+                    error={errors.email}
+                  />
+
+                  <FormTextarea
+                    control={control}
+                    name="bio"
+                    label="Bio"
+                    placeholder="Tell us about yourself..."
+                    rows={3}
+                    disabled={isSubmitting}
+                    error={errors.bio}
+                  />
+                </div>
+
+                {/* Professional Info Section */}
+                <div className="space-y-4">
+                  <h4 className="text-md font-medium">
+                    Professional Information
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormInput
+                      control={control}
+                      name="company"
+                      label="Company"
+                      placeholder="Your company name"
+                      disabled={isSubmitting}
+                      error={errors.company}
+                    />
+                    <FormInput
+                      control={control}
+                      name="jobTitle"
+                      label="Job Title"
+                      placeholder="Your job title"
+                      disabled={isSubmitting}
+                      error={errors.jobTitle}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancel}
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save Changes"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Security Settings */}
+        {activeSettingsTab === "security" && <SecuritySettingsPanel />}
+
+        {/* Integrations Settings */}
+        {activeSettingsTab === "integrations" && <IntegrationSettingsPanel />}
+
+        {/* Support Settings */}
+        {activeSettingsTab === "support" && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <HelpCircle className="h-5 w-5" />
+                Support & Help
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                  <h4 className="font-medium">Help Center</h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Browse our comprehensive guides
+                  </p>
+                </div>
+                <div className="p-4 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                  <h4 className="font-medium">Contact Support</h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Get help from our support team
+                  </p>
+                </div>
+                <div className="p-4 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                  <h4 className="font-medium">Bug Reports</h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Report issues or request features
+                  </p>
+                </div>
+                <div className="p-4 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                  <h4 className="font-medium">System Status</h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Check service availability
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Organizations Settings */}
+        {activeSettingsTab === "organizations" && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Building className="h-5 w-5" />
+                  Organizations
+                </CardTitle>
+                <Button variant="outline" size="sm">
+                  <Users className="h-4 w-4 mr-2" />
+                  Create Organization
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                      <Building className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium">TechCorp</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Owner • 12 members
+                      </p>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    Manage
+                  </Button>
+                </div>
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-secondary/20 rounded-full flex items-center justify-center">
+                      <Building className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium">OpenSource Contributors</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Member • 45 members
+                      </p>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    View
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Advanced Settings */}
+        {activeSettingsTab === "advanced" && (
+          <div className="space-y-6">
+            <NotificationSettingsPanel />
+            <AdvancedSettingsPanel />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -711,6 +868,39 @@ export const ProfilePage: React.FC = () => {
           onEditClick={() => setActiveTab("settings")}
         />
 
+        {/* Quick Dashboard Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="md:col-span-2 lg:col-span-3">
+            <RecentActivitySmall
+              maxItems={3}
+              showViewAll={true}
+              onViewAll={() => setActiveTab("activity")}
+            />
+          </div>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm">Profile Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Member since:</span>
+                  <span className="font-medium">
+                    {profile.createdOnUtc &&
+                      new Date(profile.createdOnUtc).getFullYear()}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Role:</span>
+                  <span className="font-medium">
+                    {profile.roles?.[0] || "User"}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
@@ -747,7 +937,35 @@ export const ProfilePage: React.FC = () => {
                 </Card>
               </div>
               <div className="space-y-6">
-                <ActivityFeed />
+                {/* Compact Recent Activity for sidebar */}
+                <RecentActivitySmall
+                  maxItems={4}
+                  showViewAll={true}
+                  onViewAll={() => setActiveTab("activity")}
+                />
+
+                {/* Additional Profile Widgets */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Quick Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Profile Views:</span>
+                        <span className="font-medium">247</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Contributions:</span>
+                        <span className="font-medium">32</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Followers:</span>
+                        <span className="font-medium">15</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </TabsContent>

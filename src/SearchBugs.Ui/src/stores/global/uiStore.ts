@@ -1,6 +1,11 @@
 import { create } from "zustand";
+import {
+  applyTheme,
+  getStoredTheme,
+  setStoredTheme,
+  type Theme,
+} from "../../lib/theme";
 
-export type Theme = "light" | "dark" | "system";
 export type NotificationType = "success" | "error" | "warning" | "info";
 
 export interface Notification {
@@ -48,21 +53,12 @@ interface UIState {
 }
 
 export const useUIStore = create<UIState>((set, get) => ({
-  // Theme
-  theme: "system",
+  // Theme - Initialize using Vite-friendly utilities
+  theme: getStoredTheme(),
   setTheme: (theme: Theme) => {
     set({ theme });
-    // Apply theme to document
-    const root = document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else if (theme === "light") {
-      root.classList.remove("dark");
-    } else {
-      // System theme
-      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      root.classList.toggle("dark", isDark);
-    }
+    setStoredTheme(theme);
+    applyTheme(theme);
   },
 
   // Sidebar
