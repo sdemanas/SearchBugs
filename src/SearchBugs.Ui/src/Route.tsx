@@ -19,6 +19,8 @@ import {
   UsersPage,
 } from "./pages";
 import AuditLogsPage from "./pages/AuditLogsPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { RepositoryListPage } from "./modules/repository/RepositoryListPage";
 import NotificationTestPage from "./pages/NotificationTestPage";
 import MainLayout from "./layouts/Main";
@@ -38,6 +40,22 @@ const router = createBrowserRouter([
     element: <RegisterPage />,
     handle: {
       title: "Register",
+      hideNav: true,
+    },
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPasswordPage />,
+    handle: {
+      title: "Forgot Password",
+      hideNav: true,
+    },
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPasswordPage />,
+    handle: {
+      title: "Reset Password",
       hideNav: true,
     },
   },

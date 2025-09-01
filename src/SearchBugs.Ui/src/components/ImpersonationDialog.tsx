@@ -88,7 +88,7 @@ export const ImpersonationDialog: React.FC = () => {
         <div className="space-y-4">
           <div className="space-y-2">
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
               <FormInput
                 control={control}
                 name="query"
@@ -101,11 +101,11 @@ export const ImpersonationDialog: React.FC = () => {
 
           <div className="space-y-2 max-h-[400px] overflow-y-auto">
             {isLoading ? (
-              <div className="text-center py-4 text-gray-500">
+              <div className="text-center py-4 text-muted-foreground">
                 Loading users...
               </div>
             ) : filteredUsers.length === 0 ? (
-              <div className="text-center py-4 text-gray-500">
+              <div className="text-center py-4 text-muted-foreground">
                 {searchTerm
                   ? "No users found matching your search"
                   : "No users available"}
@@ -114,7 +114,7 @@ export const ImpersonationDialog: React.FC = () => {
               filteredUsers.map((userOption) => (
                 <Card
                   key={userOption.id}
-                  className="cursor-pointer hover:bg-gray-50"
+                  className="cursor-pointer hover:bg-muted/50"
                 >
                   <CardContent className="p-3">
                     <div className="flex items-center justify-between">
@@ -122,11 +122,11 @@ export const ImpersonationDialog: React.FC = () => {
                         <div className="font-medium">
                           {userOption.firstName} {userOption.lastName}
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-muted-foreground">
                           {userOption.email}
                         </div>
                         {userOption.roles && userOption.roles.length > 0 && (
-                          <div className="text-xs text-gray-400 mt-1">
+                          <div className="text-xs text-muted-foreground mt-1">
                             Roles: {userOption.roles.join(", ")}
                           </div>
                         )}

@@ -37,6 +37,9 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         });
         builder.Property(u => u.Password)
             .HasMaxLength(200);
+        builder.Property(u => u.PasswordResetToken)
+            .HasMaxLength(500);
+        builder.Property(u => u.PasswordResetTokenExpiry);
     }
 
     private static void ConfigureRelationships(EntityTypeBuilder<User> builder)

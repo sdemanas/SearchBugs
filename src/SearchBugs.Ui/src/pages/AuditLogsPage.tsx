@@ -300,7 +300,7 @@ const AuditLogsPage = () => {
 
   // Fetch audit logs
   const {
-    data: auditLogs = [],
+    data: auditLogsResponse,
     isLoading,
     error,
     refetch,
@@ -316,27 +316,49 @@ const AuditLogsPage = () => {
       },
     ],
     queryFn: async () => {
-      const params = {
-        userId: userFilter === "all" ? undefined : userFilter,
-        startDate: startDate || undefined,
-        endDate: endDate || undefined,
-        pageNumber,
-        pageSize,
-      };
+      try {
+        const params = {
+          userId: userFilter === "all" ? undefined : userFilter,
+          startDate: startDate || undefined,
+          endDate: endDate || undefined,
+          pageNumber,
+          pageSize,
+        };
 
-      const response = await apiClient.auditLogs.getAll(params);
-      return response.data.value as AuditLog[];
+        const response = await apiClient.auditLogs.getAll(params);
+        return response.data.value as AuditLog[];
+      } catch (error) {
+        console.error("Failed to fetch audit logs:", error);
+        return [];
+      }
     },
   });
+
+  const auditLogs = useMemo(() => auditLogsResponse || [], [auditLogsResponse]);
 
   // Fetch users for filter dropdown
-  const { data: users = [] } = useQuery({
+  const { data: usersResponse } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
-      const response = await apiClient.users.getAll();
-      return response.data.value as UserType[];
+      try {
+        const response = await apiClient.users.getAll();
+        console.log("Users API response:", response.data);
+        return response.data.value as UserType[];
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+        return [];
+      }
     },
   });
+
+  const users = useMemo(() => {
+    console.log("usersResponse:", usersResponse);
+    if (!usersResponse || !Array.isArray(usersResponse)) {
+      console.warn("Users response is not an array:", usersResponse);
+      return [];
+    }
+    return usersResponse;
+  }, [usersResponse]);
 
   // Filter audit logs based on search term and status
   const filteredAuditLogs = useMemo(() => {
@@ -586,11 +608,12 @@ const AuditLogsPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Users</SelectItem>
-                  {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.firstName} {user.lastName}
-                    </SelectItem>
-                  ))}
+                  {Array.isArray(users) &&
+                    users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.firstName} {user.lastName}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>

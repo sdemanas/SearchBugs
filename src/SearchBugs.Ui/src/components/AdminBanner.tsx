@@ -108,7 +108,7 @@ export const AdminBanner: React.FC<AdminBannerProps> = ({
   };
 
   return (
-    <Card className="mb-4 bg-gradient-to-r from-slate-50 to-blue-50 border-slate-300 mt-4">
+    <Card className="mb-4 bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-950 border-slate-300 dark:border-slate-700 mt-4">
       <CardContent className="py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
@@ -119,13 +119,13 @@ export const AdminBanner: React.FC<AdminBannerProps> = ({
                 5 - secretClickCount
               } more times for secret access`}
             >
-              <Crown className="h-5 w-5 text-slate-700 mr-3 hover:text-blue-600 transition-colors" />
+              <Crown className="h-5 w-5 text-slate-700 dark:text-slate-300 mr-3 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" />
             </div>
             <div>
-              <span className="text-slate-800 font-medium">
+              <span className="text-slate-800 dark:text-slate-200 font-medium">
                 Administrator Panel
               </span>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
                 You have administrative privileges. Use them responsibly.
               </p>
             </div>
@@ -138,7 +138,7 @@ export const AdminBanner: React.FC<AdminBannerProps> = ({
                   variant="outline"
                   size="sm"
                   onClick={() => setShowQuickActions(!showQuickActions)}
-                  className="border-slate-400 text-slate-700 hover:bg-slate-100"
+                  className="border-slate-400 dark:border-slate-500 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
                 >
                   <UserCog className="h-4 w-4 mr-1" />
                   Quick Impersonate
@@ -148,7 +148,7 @@ export const AdminBanner: React.FC<AdminBannerProps> = ({
                   variant="outline"
                   size="sm"
                   onClick={() => (window.location.href = "/users")}
-                  className="border-slate-400 text-slate-700 hover:bg-slate-100"
+                  className="border-slate-400 dark:border-slate-500 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
                 >
                   <Users className="h-4 w-4 mr-1" />
                   Manage Users
@@ -158,7 +158,7 @@ export const AdminBanner: React.FC<AdminBannerProps> = ({
                   variant="outline"
                   size="sm"
                   onClick={() => (window.location.href = "/settings")}
-                  className="border-slate-400 text-slate-700 hover:bg-slate-100"
+                  className="border-slate-400 dark:border-slate-500 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
                 >
                   <Settings className="h-4 w-4 mr-1" />
                   System Settings
@@ -169,7 +169,7 @@ export const AdminBanner: React.FC<AdminBannerProps> = ({
                     variant="outline"
                     size="sm"
                     onClick={() => setShowAuditLogs(false)}
-                    className="border-red-400 text-red-700 hover:bg-red-50"
+                    className="border-red-400 dark:border-red-500 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50"
                   >
                     <EyeOff className="h-4 w-4 mr-1" />
                     Hide Audit
@@ -179,21 +179,21 @@ export const AdminBanner: React.FC<AdminBannerProps> = ({
             ) : (
               <div className="flex items-center gap-2">
                 <div className="relative">
-                  <Search className="absolute left-2 top-2 h-4 w-4 text-slate-500" />
+                  <Search className="absolute left-2 top-2 h-4 w-4 text-slate-500 dark:text-slate-400" />
                   <Input
                     placeholder="Search users to impersonate..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-8 w-64 border-slate-400 focus:ring-blue-500"
+                    className="pl-8 w-64 border-slate-400 dark:border-slate-500 focus:ring-blue-500 dark:focus:ring-blue-400"
                   />
 
                   {/* Quick search results */}
                   {searchResults && searchResults.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-300 rounded-md shadow-lg z-50 max-h-40 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md shadow-lg z-50 max-h-40 overflow-y-auto">
                       {searchResults.map((user: User) => (
                         <div
                           key={user.id}
-                          className="px-3 py-2 hover:bg-blue-50 cursor-pointer flex items-center justify-between"
+                          className="px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-950/30 cursor-pointer flex items-center justify-between"
                           onClick={() =>
                             handleQuickImpersonate(
                               user.id,
@@ -202,14 +202,14 @@ export const AdminBanner: React.FC<AdminBannerProps> = ({
                           }
                         >
                           <div>
-                            <div className="font-medium text-sm">
+                            <div className="font-medium text-sm text-slate-900 dark:text-slate-100">
                               {user.firstName} {user.lastName}
                             </div>
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
                               {user.email}
                             </div>
                           </div>
-                          <UserCog className="h-4 w-4 text-blue-600" />
+                          <UserCog className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                         </div>
                       ))}
                     </div>
@@ -223,7 +223,7 @@ export const AdminBanner: React.FC<AdminBannerProps> = ({
                     setShowQuickActions(false);
                     setSearchTerm("");
                   }}
-                  className="text-slate-700"
+                  className="text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
                 >
                   Cancel
                 </Button>
@@ -234,11 +234,11 @@ export const AdminBanner: React.FC<AdminBannerProps> = ({
 
         {/* Hidden Audit Logs Panel */}
         {showAuditLogs && (
-          <div className="mt-4 pt-4 border-t border-slate-300">
+          <div className="mt-4 pt-4 border-t border-slate-300 dark:border-slate-600">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center">
-                <Shield className="h-4 w-4 text-orange-600 mr-2" />
-                <span className="text-sm font-medium text-slate-800">
+                <Shield className="h-4 w-4 text-orange-600 dark:text-orange-400 mr-2" />
+                <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
                   Recent System Activity (Secret View)
                 </span>
               </div>
@@ -246,20 +246,20 @@ export const AdminBanner: React.FC<AdminBannerProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => window.open("/audit-logs", "_blank")}
-                className="text-xs text-blue-600 hover:text-blue-800"
+                className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
               >
                 <Activity className="h-3 w-3 mr-1" />
                 View Full Logs
               </Button>
             </div>
 
-            <div className="bg-slate-100 rounded-md p-3 max-h-48 overflow-y-auto">
+            <div className="bg-slate-100 dark:bg-slate-800 rounded-md p-3 max-h-48 overflow-y-auto">
               {auditLogs && auditLogs.length > 0 ? (
                 <div className="space-y-2">
                   {auditLogs.slice(0, 5).map((log: AuditLog) => (
                     <div
                       key={log.id}
-                      className="flex items-center justify-between text-xs bg-white rounded px-2 py-1"
+                      className="flex items-center justify-between text-xs bg-white dark:bg-slate-700 rounded px-2 py-1"
                     >
                       <div className="flex items-center gap-2">
                         <Badge
@@ -268,14 +268,14 @@ export const AdminBanner: React.FC<AdminBannerProps> = ({
                         >
                           {log.isSuccess ? "✓" : "✗"}
                         </Badge>
-                        <span className="font-mono text-slate-700 truncate max-w-40">
+                        <span className="font-mono text-slate-700 dark:text-slate-300 truncate max-w-40">
                           {log.requestName}
                         </span>
-                        <span className="text-slate-500">
+                        <span className="text-slate-500 dark:text-slate-400">
                           by {log.userName || "System"}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 text-slate-500">
+                      <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
                         <Clock className="h-3 w-3" />
                         <span>
                           {format(new Date(log.createdOnUtc), "HH:mm:ss")}
@@ -285,7 +285,7 @@ export const AdminBanner: React.FC<AdminBannerProps> = ({
                   ))}
                 </div>
               ) : (
-                <div className="text-center text-slate-500 text-xs">
+                <div className="text-center text-slate-500 dark:text-slate-400 text-xs">
                   <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   No recent activity found
                 </div>
@@ -295,9 +295,9 @@ export const AdminBanner: React.FC<AdminBannerProps> = ({
         )}
 
         {/* Warning message */}
-        <div className="flex items-center mt-3 pt-3 border-t border-slate-300">
-          <AlertTriangle className="h-4 w-4 text-amber-500 mr-2" />
-          <span className="text-xs text-amber-700">
+        <div className="flex items-center mt-3 pt-3 border-t border-slate-300 dark:border-slate-600">
+          <AlertTriangle className="h-4 w-4 text-amber-500 dark:text-amber-400 mr-2" />
+          <span className="text-xs text-amber-700 dark:text-amber-300">
             Admin actions are logged and monitored. Impersonation should only be
             used for legitimate support purposes.
           </span>

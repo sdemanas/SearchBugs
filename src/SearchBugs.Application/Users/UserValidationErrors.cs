@@ -12,4 +12,6 @@ internal static class UserValidationErrors
     internal static Error LastNameMaxLength => new("User.LastNameMaxLength", "The user's last name must not exceed 50 characters.");
     internal static Error InvalidRole => new("User.InvalidRole", "The specified role is not valid.");
     internal static Error InvalidCurrentPassword => new("User.InvalidCurrentPassword", "The current password is incorrect.");
+    internal static Error InvalidPasswordResetToken => new("User.InvalidPasswordResetToken", "The password reset token is invalid or has expired.");
+    internal static Error EmailIsRequired => new("User.EmailIsRequired", "Email is required.");
 }

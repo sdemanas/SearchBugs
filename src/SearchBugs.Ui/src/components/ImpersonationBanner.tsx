@@ -21,15 +21,15 @@ export const ImpersonationBanner: React.FC = () => {
   };
 
   return (
-    <Card className="mb-4 bg-orange-50 border-orange-200">
+    <Card className="mb-4 bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800 mt-4">
       <CardContent className="py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <User className="h-4 w-4 text-orange-600 mr-2" />
-            <span className="text-orange-800">
+            <User className="h-4 w-4 text-orange-600 dark:text-orange-400 mr-2" />
+            <span className="text-orange-800 dark:text-orange-200">
               You are impersonating <strong>{user.email}</strong>
               {user.originalUserEmail && (
-                <span className="text-sm text-orange-600 ml-2">
+                <span className="text-sm text-orange-600 dark:text-orange-300 ml-2">
                   (originally logged in as {user.originalUserEmail})
                 </span>
               )}
@@ -39,7 +39,7 @@ export const ImpersonationBanner: React.FC = () => {
             variant="outline"
             size="sm"
             onClick={handleStopImpersonate}
-            className="ml-4 border-orange-300 text-orange-700 hover:bg-orange-100"
+            className="ml-4 border-orange-300 dark:border-orange-700 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/50"
           >
             <LogOut className="h-4 w-4 mr-1" />
             Stop Impersonating

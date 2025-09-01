@@ -59,6 +59,7 @@ public static class DependencyInjection
             });
         services.AddTransient<IJwtProvider, JwtProvider>();
         services.AddScoped<IPasswordHashingService, PasswordHashingService>();
+        services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IDataEncryptionService, DataEncryptionService>();
         services.AddScoped<IGitHttpService, GitHttpService>();
         services.AddScoped<IGitRepositoryService, GitRepositoryService>();

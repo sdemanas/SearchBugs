@@ -11,6 +11,8 @@ public class User : Entity<UserId>, IAuditable
     public Name Name { get; private set; } = null!;
     public Email Email { get; private set; } = null!;
     public string Password { get; private set; } = string.Empty;
+    public string? PasswordResetToken { get; private set; }
+    public DateTime? PasswordResetTokenExpiry { get; private set; }
     public IReadOnlyCollection<Role> Roles => _roles.ToList().AsReadOnly();
     private readonly HashSet<Role> _roles = new();
     public Profile? Profile { get; private set; }
@@ -49,6 +51,28 @@ public class User : Entity<UserId>, IAuditable
     public void ChangePassword(string password)
     {
         Password = password;
+    }
+
+    public void SetPasswordResetToken(string token, DateTime expiry)
+    {
+        PasswordResetToken = token;
+        PasswordResetTokenExpiry = expiry;
+        ModifiedOnUtc = SystemTime.UtcNow;
+    }
+
+    public void ClearPasswordResetToken()
+    {
+        PasswordResetToken = null;
+        PasswordResetTokenExpiry = null;
+        ModifiedOnUtc = SystemTime.UtcNow;
+    }
+
+    public bool IsPasswordResetTokenValid(string token)
+    {
+        return !string.IsNullOrEmpty(PasswordResetToken) &&
+               PasswordResetToken == token &&
+               PasswordResetTokenExpiry.HasValue &&
+               PasswordResetTokenExpiry.Value > SystemTime.UtcNow;
     }
 
     public void AddRole(Role role)
