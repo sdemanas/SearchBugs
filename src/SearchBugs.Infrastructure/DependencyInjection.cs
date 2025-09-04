@@ -7,6 +7,7 @@ using SearchBugs.Domain.Git;
 using SearchBugs.Domain.Services;
 using SearchBugs.Domain.Users;
 using SearchBugs.Infrastructure.Authentication;
+using SearchBugs.Infrastructure.Extensions;
 using SearchBugs.Infrastructure.Options;
 using SearchBugs.Infrastructure.Services;
 using System.IdentityModel.Tokens.Jwt;
@@ -34,6 +35,7 @@ public static class DependencyInjection
         // Configure options BEFORE adding authentication
         services.ConfigureOptions<JwtOptionsSetup>();
         services.ConfigureOptions<GitOptionsSetup>();
+        services.ConfigureOptions<PermissionCacheOptionsSetup>();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -66,8 +68,11 @@ public static class DependencyInjection
 
         services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
-        services.AddScoped<IPermissionService, PermissionService>();
 
+        // Configure permission caching
+        services.AddMemoryPermissionCache();
+        services.AddCachedPermissionService();
+        services.AddScoped<IPermissionCacheManager, PermissionCacheManager>();
 
     }
 }

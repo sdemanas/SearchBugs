@@ -14,7 +14,7 @@ public static class AuditLogEndpoints
             .WithOpenApi();
 
         auditLogs.MapGet("", GetAuditLogs)
-            .WithName(nameof(GetAuditLogs))
+            .WithName("GetAuditLogs")
             .WithDescription("Get audit logs with optional filtering")
             .RequireAuthorization("ListAllUsers"); // Using basic user management permission for audit logs
     }

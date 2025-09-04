@@ -5,8 +5,14 @@ import {
 } from "@microsoft/signalr";
 import { apiBaseUrl } from "../lib/constants";
 
-// Extract base URL without /api/ path
+// Extract base URL without /api/ path for WebSocket connection
 const getSignalRBaseUrl = () => {
+  // Check for environment variable first
+  if (import.meta.env.VITE_WS_URL) {
+    return import.meta.env.VITE_WS_URL;
+  }
+
+  // Fall back to deriving from API base URL
   return apiBaseUrl.replace("/api/", "");
 };
 

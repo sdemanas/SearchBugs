@@ -46,7 +46,7 @@ public static class AdminEndpoints
         admin.MapGet("users/login-statistics", GetUserLoginStatistics).WithName(nameof(GetUserLoginStatistics)).RequireAuthorization("ListAllUsers");
 
         // Security and Audit Management
-        admin.MapGet("audit-logs", GetAuditLogs).WithName(nameof(GetAuditLogs)).RequireAuthorization("ListAllUsers");
+        admin.MapGet("audit-logs", GetAuditLogs).WithName("GetAdminAuditLogs").RequireAuthorization("ListAllUsers");
         admin.MapGet("audit-logs/export", ExportAuditLogs).WithName(nameof(ExportAuditLogs)).RequireAuthorization("ListAllUsers");
         admin.MapGet("security/failed-logins", GetFailedLoginAttempts).WithName(nameof(GetFailedLoginAttempts)).RequireAuthorization("ListAllUsers");
         admin.MapPost("security/lock-account", LockUserAccount).WithName(nameof(LockUserAccount)).RequireAuthorization("UpdateUser");

@@ -46,7 +46,7 @@ public static class AnalyticsEndpoints
 
         // User analytics
         analytics.MapGet("users/productivity", GetUserProductivity).WithName(nameof(GetUserProductivity)).RequireAuthorization("ListAllUsers");
-        analytics.MapGet("users/{userId:guid}/activity", GetUserActivity).WithName(nameof(GetUserActivity)).RequireAuthorization("ViewUserDetails");
+        analytics.MapGet("users/{userId:guid}/activity", GetUserActivity).WithName("GetUserActivityAnalytics").RequireAuthorization("ViewUserDetails");
         analytics.MapGet("users/workload", GetUserWorkload).WithName(nameof(GetUserWorkload)).RequireAuthorization("ListAllUsers");
 
         // Time tracking analytics

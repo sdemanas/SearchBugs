@@ -41,16 +41,16 @@ public static class RepoEndpoints
             }).ExcludeFromDescription();
 
         var repo = app.MapGroup("api/repo");
-        repo.MapGet("", GetRepositories).WithName(nameof(GetRepositories)).RequireAuthorization("ListAllRepositories");
-        repo.MapGet("{url}/{path}", GetRepositoryDetails).WithName(nameof(GetRepositoryDetails)).RequireAuthorization("ViewRepositoryDetails");
-        repo.MapPost("", CreateRepository).WithName(nameof(CreateRepository)).RequireAuthorization("CreateRepository");
-        repo.MapDelete("{url}", DeleteRepository).WithName(nameof(DeleteRepository)).RequireAuthorization("DeleteRepository");
-        repo.MapGet("{url}/commit/{commitSha}", GetCommitDiff).WithName(nameof(GetCommitDiff)).RequireAuthorization("ViewRepositoryDetails");
-        repo.MapPost("{url}/commit/{commitSha}", CommitChanges).WithName(nameof(CommitChanges)).RequireAuthorization("UpdateRepository");
-        repo.MapGet("{url}/tree/{commitSha}", GetTree).WithName(nameof(GetTree)).RequireAuthorization("ViewRepositoryDetails");
-        repo.MapGet("{url}/file/{commitSha}/{**filePath}", GetFileContent).WithName(nameof(GetFileContent)).RequireAuthorization("ViewRepositoryDetails");
-        repo.MapPost("{url}/clone", CloneRepository).WithName(nameof(CloneRepository)).RequireAuthorization("CreateRepository");
-        repo.MapGet("{url}/branches", GetBranches).WithName(nameof(GetBranches)).RequireAuthorization("ViewRepositoryDetails");
+        repo.MapGet("", GetRepositories).WithName("GetGitRepositories").RequireAuthorization("ListAllRepositories");
+        repo.MapGet("{url}/{path}", GetRepositoryDetails).WithName("GetGitRepositoryDetails").RequireAuthorization("ViewRepositoryDetails");
+        repo.MapPost("", CreateRepository).WithName("CreateGitRepository").RequireAuthorization("CreateRepository");
+        repo.MapDelete("{url}", DeleteRepository).WithName("DeleteGitRepository").RequireAuthorization("DeleteRepository");
+        repo.MapGet("{url}/commit/{commitSha}", GetCommitDiff).WithName("GetGitCommitDiff").RequireAuthorization("ViewRepositoryDetails");
+        repo.MapPost("{url}/commit/{commitSha}", CommitChanges).WithName("CommitGitChanges").RequireAuthorization("UpdateRepository");
+        repo.MapGet("{url}/tree/{commitSha}", GetTree).WithName("GetGitTree").RequireAuthorization("ViewRepositoryDetails");
+        repo.MapGet("{url}/file/{commitSha}/{**filePath}", GetFileContent).WithName("GetGitFileContent").RequireAuthorization("ViewRepositoryDetails");
+        repo.MapPost("{url}/clone", CloneRepository).WithName("CloneGitRepository").RequireAuthorization("CreateRepository");
+        repo.MapGet("{url}/branches", GetBranches).WithName("GetGitBranches").RequireAuthorization("ViewRepositoryDetails");
     }
 
     public static async Task<IResult> GetCommitDiff(string url, string commitSha, ISender sender)

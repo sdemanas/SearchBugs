@@ -52,17 +52,8 @@ public abstract partial class Program
         });
         builder.Services.AddScoped<INotificationService, NotificationService>();
 
-        // Add CORS
-        builder.Services.AddCors(options =>
-        {
-            options.AddPolicy("AllowAll", policy =>
-            {
-                policy.WithOrigins("http://localhost:5173", "https://searchbugs.com")
-                      .AllowAnyMethod()
-                      .AllowAnyHeader()
-                      .AllowCredentials();
-            });
-        });
+        // Add CORS with configuration
+        builder.Services.AddCorsPolicy(builder.Configuration);
 
         var app = builder.Build();
 
@@ -77,8 +68,8 @@ public abstract partial class Program
             });
         }
 
-        // Enable CORS first
-        app.UseCors("AllowAll");
+        // Enable CORS first - before authentication
+        app.UseCorsPolicy(app.Environment);
 
         // Add authentication and authorization middleware after CORS
         app.UseAuthentication();
@@ -105,7 +96,8 @@ public abstract partial class Program
         app.MapAdminEndpoints();
 
         // Map SignalR hub with CORS
-        app.MapHub<NotificationHub>("/hubs/notifications");
+        app.MapHub<NotificationHub>("/hubs/notifications")
+           .RequireCors(app.Environment.IsDevelopment() ? "DevelopmentCorsPolicy" : "ApiCorsPolicy");
 
         // app.UseHttpsRedirection();
         app.Run();

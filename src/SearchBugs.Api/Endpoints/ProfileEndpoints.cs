@@ -38,7 +38,7 @@ public static class ProfileEndpoints
             .WithDescription("Get current user's profile information");
 
         profile.MapGet("/activity", GetUserActivity)
-            .WithName(nameof(GetUserActivity))
+            .WithName("GetCurrentUserActivity")
             .WithDescription("Get current user's activity from audit logs");
 
         profile.MapPut("/", UpdateCurrentUserProfile)
