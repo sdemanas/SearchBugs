@@ -1,0 +1,57 @@
+# azure-pipelines-pr.yml
+pr:
+  branches:
+    include:
+      - develop
+      - main
+
+variables:
+  buildConfiguration: 'Release'
+  dotNetFramework: 'net9.0'
+  dotNetVersion: '9.0.x'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: UseDotNet@2
+  displayName: 'Use .NET $(dotNetVersion)'
+  inputs:
+    packageType: 'sdk'
+    version: '$(dotNetVersion)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Restore packages'
+  inputs:
+    command: 'restore'
+    projects: '**/*.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Build application'
+  inputs:
+    command: 'build'
+    projects: '**/*.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-restore'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Run tests'
+  inputs:
+    command: 'test'
+    projects: '**/*Tests*.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --logger trx --results-directory $(Agent.TempDirectory)'
+  continueOnError: true
+
+- task: PublishTestResults@2
+  displayName: 'Publish test results'
+  inputs:
+    testResultsFormat: 'VSTest'
+    testResultsFiles: '**/*.trx'
+    searchFolder: '$(Agent.TempDirectory)'
+  condition: always()
+
+- task: PublishCodeCoverageResults@2
+  displayName: 'Publish code coverage'
+  inputs:
+    summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+    codecoverageTool: 'Cobertura'
+  condition: always()
