@@ -346,7 +346,7 @@ export const useApiClient = () => {
   const useRepositories = (projectId?: string) => {
     return useQuery<Repository[]>({
       queryKey: ["repositories", projectId],
-      queryFn: () => apiClient.repositories.getAll().then((res) => res.data),
+      queryFn: () => apiClient.repositories.getAll().then(extractData),
     });
   };
 
@@ -354,7 +354,7 @@ export const useApiClient = () => {
     return useQuery({
       queryKey: ["repositories", url, path],
       queryFn: () =>
-        apiClient.repositories.getDetails(url, path).then((res) => res.data),
+        apiClient.repositories.getDetails(url, path).then(extractData),
     });
   };
 
@@ -367,7 +367,7 @@ export const useApiClient = () => {
       mutationFn: (data) =>
         apiClient.repositories
           .create({ description: "", ...data })
-          .then((res) => res.data),
+          .then(extractData),
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ["repositories"],
@@ -390,7 +390,7 @@ export const useApiClient = () => {
   const useDeleteRepository = () => {
     return useMutation<void, Error, string>({
       mutationFn: (url) =>
-        apiClient.repositories.delete(url).then((res) => res.data),
+        apiClient.repositories.delete(url).then(extractData),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["repositories"] });
         toast({

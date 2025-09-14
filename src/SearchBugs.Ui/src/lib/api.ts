@@ -554,9 +554,8 @@ export const apiClient = {
         role,
       }),
     removeRole: (userId: string, role: string) =>
-      api.post<ApiResponse<void>>(`/users/${userId}/remove-role`, {
-        userId,
-        role,
+      api.delete<ApiResponse<void>>(`/users/${userId}/remove-role`, {
+        data: { userId, role },
       }),
     changePassword: (
       userId: string,
@@ -603,16 +602,16 @@ export const apiClient = {
 
   // Repositories
   repositories: {
-    getAll: () => api.get<Repository[]>("/repo"),
+    getAll: () => api.get<ApiResponse<Repository[]>>("/repo"),
     getDetails: (url: string, path: string) =>
-      api.get(`/repo/${encodeURIComponent(url)}/${path}`),
+      api.get<ApiResponse<any>>(`/repo/${encodeURIComponent(url)}/${path}`),
     create: (data: {
       name: string;
       description: string;
       url: string;
       projectId: string;
-    }) => api.post<Repository>("/repo", data),
-    delete: (url: string) => api.delete(`/repo/${encodeURIComponent(url)}`),
+    }) => api.post<ApiResponse<Repository>>("/repo", data),
+    delete: (url: string) => api.delete<ApiResponse<void>>(`/repo/${encodeURIComponent(url)}`),
     getCommitDiff: (url: string, commitSha: string) =>
       api.get(`/repo/${encodeURIComponent(url)}/commit/${commitSha}`),
     commitChanges: (
