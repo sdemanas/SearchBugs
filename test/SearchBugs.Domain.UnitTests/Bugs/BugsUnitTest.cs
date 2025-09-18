@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using SearchBugs.Domain.Bugs;
 using SearchBugs.Domain.UnitTests.Data.Bugs;
 

@@ -1,4 +1,4 @@
-﻿namespace SearchBugs.Infrastructure.Services;
+namespace SearchBugs.Infrastructure.Services;
 
 public record FileBlame
 {

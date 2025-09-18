@@ -1,4 +1,4 @@
-﻿namespace SearchBugs.Application.Git.GetGitRepo;
+namespace SearchBugs.Application.Git.GetGitRepo;
 
 record class GetGitRepoQueryResult(
     Guid Id,

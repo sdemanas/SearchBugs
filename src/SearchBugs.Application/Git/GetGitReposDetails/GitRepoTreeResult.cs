@@ -1,4 +1,4 @@
-﻿namespace SearchBugs.Application.Git.GetGitReposDetails;
+namespace SearchBugs.Application.Git.GetGitReposDetails;
 
 public record GitRepoItem(
         string Id,

@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using LibGit2Sharp;
 using SearchBugs.Domain.Git;
 using SearchBugs.Infrastructure.Options;

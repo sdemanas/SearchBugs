@@ -1,4 +1,4 @@
-﻿using Shared.Primitives;
+using Shared.Primitives;
 
 namespace SearchBugs.Domain.Users;
 

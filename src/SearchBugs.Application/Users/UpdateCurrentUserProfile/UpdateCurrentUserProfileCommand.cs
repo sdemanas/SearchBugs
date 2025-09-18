@@ -1,4 +1,3 @@
-using SearchBugs.Application.Common.Attributes;
 using Shared.Messaging;
 
 namespace SearchBugs.Application.Users.UpdateCurrentUserProfile;

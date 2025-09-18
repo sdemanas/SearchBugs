@@ -1,7 +1,5 @@
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
 using SearchBugs.Infrastructure.Options;
-using Xunit;
 
 namespace SearchBugs.Infrastructure.UnitTests.Services;
 

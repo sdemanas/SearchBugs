@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SearchBugs.Domain.Git;
 using SearchBugs.Domain.Repositories;
 using Shared.Results;

@@ -1,16 +1,15 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using SearchBugs.Application.Common.Interfaces;
-using SearchBugs.Application.Notifications;
-using SearchBugs.Application.Notifications.GetUserNotifications;
-using SearchBugs.Application.Notifications.GetUnreadNotifications;
-using SearchBugs.Application.Notifications.GetUnreadCount;
-using SearchBugs.Application.Notifications.MarkAsRead;
-using SearchBugs.Application.Notifications.MarkAllAsRead;
-using SearchBugs.Application.Notifications.DeleteNotification;
-using SearchBugs.Application.Notifications.ClearAllNotifications;
-using SearchBugs.Application.Notifications.SendNotification;
 using SearchBugs.Api.Extensions;
+using SearchBugs.Application.Common.Interfaces;
+using SearchBugs.Application.Notifications.ClearAllNotifications;
+using SearchBugs.Application.Notifications.DeleteNotification;
+using SearchBugs.Application.Notifications.GetUnreadCount;
+using SearchBugs.Application.Notifications.GetUnreadNotifications;
+using SearchBugs.Application.Notifications.GetUserNotifications;
+using SearchBugs.Application.Notifications.MarkAllAsRead;
+using SearchBugs.Application.Notifications.MarkAsRead;
+using SearchBugs.Application.Notifications.SendNotification;
 
 namespace SearchBugs.Api.Endpoints;
 

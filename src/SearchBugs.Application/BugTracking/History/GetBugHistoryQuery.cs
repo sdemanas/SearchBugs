@@ -30,7 +30,7 @@ public class GetBugHistoryQueryHandler : IQueryHandler<GetBugHistoryQuery, IEnum
             .Select(entry => HistoryEntryDto.FromHistoryEntry(entry))
             .OrderByDescending(x => x.ChangedAtUtc)
             .ToList();
-        
+
         return Result.Success(historyEntries.AsEnumerable());
     }
 }

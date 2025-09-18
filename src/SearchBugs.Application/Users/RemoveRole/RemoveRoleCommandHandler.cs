@@ -1,7 +1,7 @@
 using MediatR;
-using SearchBugs.Domain.Users;
-using SearchBugs.Domain.Roles;
 using SearchBugs.Domain;
+using SearchBugs.Domain.Roles;
+using SearchBugs.Domain.Users;
 using Shared.Results;
 
 namespace SearchBugs.Application.Users.RemoveRole;

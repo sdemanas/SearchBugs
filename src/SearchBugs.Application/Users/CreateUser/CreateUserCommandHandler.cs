@@ -1,9 +1,9 @@
 using MediatR;
 using SearchBugs.Application.Users.Common;
+using SearchBugs.Domain;
 using SearchBugs.Domain.Roles;
 using SearchBugs.Domain.Services;
 using SearchBugs.Domain.Users;
-using SearchBugs.Domain;
 using Shared.Results;
 
 namespace SearchBugs.Application.Users.CreateUser;

@@ -1,8 +1,8 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using SearchBugs.Domain.Users;
 using Shared.Primitives;
 using Shared.Results;
-using System.Linq.Expressions;
 
 namespace SearchBugs.Persistence.Repositories;
 

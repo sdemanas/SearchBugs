@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -10,8 +12,6 @@ using SearchBugs.Infrastructure.Authentication;
 using SearchBugs.Infrastructure.Extensions;
 using SearchBugs.Infrastructure.Options;
 using SearchBugs.Infrastructure.Services;
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 
 namespace SearchBugs.Infrastructure;
 

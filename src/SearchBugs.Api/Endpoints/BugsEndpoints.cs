@@ -1,5 +1,6 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SearchBugs.Api.Extensions;
 using SearchBugs.Application.BugTracking.Attachments;
 using SearchBugs.Application.BugTracking.Comments;
 using SearchBugs.Application.BugTracking.Create;
@@ -10,11 +11,6 @@ using SearchBugs.Application.BugTracking.GetBugs;
 using SearchBugs.Application.BugTracking.History;
 using SearchBugs.Application.BugTracking.TimeTracking;
 using SearchBugs.Application.BugTracking.Update;
-using SearchBugs.Domain.Bugs;
-using SearchBugs.Domain.Projects;
-using SearchBugs.Domain.Users;
-using SearchBugs.Api.Extensions;
-using Shared.Results;
 
 namespace SearchBugs.Api.Endpoints;
 

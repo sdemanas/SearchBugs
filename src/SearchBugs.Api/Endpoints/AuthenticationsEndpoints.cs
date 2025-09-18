@@ -1,14 +1,13 @@
-﻿
+
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SearchBugs.Api.Extensions;
 using SearchBugs.Application.Authentications.Impersonate;
 using SearchBugs.Application.Authentications.Login;
 using SearchBugs.Application.Authentications.Register;
 using SearchBugs.Application.Authentications.StopImpersonate;
 using SearchBugs.Application.Users.ForgotPassword;
 using SearchBugs.Application.Users.ResetPassword;
-using Shared.Results;
-using SearchBugs.Api.Extensions;
 
 namespace SearchBugs.Api.Endpoints;
 

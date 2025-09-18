@@ -1,4 +1,4 @@
-﻿namespace SearchBugs.Persistence.Constants;
+namespace SearchBugs.Persistence.Constants;
 
 internal static class Schemas
 {

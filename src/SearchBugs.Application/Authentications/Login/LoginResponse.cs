@@ -1,4 +1,4 @@
-﻿using SearchBugs.Application.Common.Attributes;
+using SearchBugs.Application.Common.Attributes;
 
 namespace SearchBugs.Application.Authentications.Login;
 

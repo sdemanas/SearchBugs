@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Shared.Messaging;
-using System.Net.Http;
 
 namespace SearchBugs.Application.Git.GitHttpServer;
 

@@ -1,4 +1,4 @@
-﻿using SearchBugs.Domain;
+using SearchBugs.Domain;
 using SearchBugs.Domain.Users;
 using Shared.Messaging;
 using Shared.Results;

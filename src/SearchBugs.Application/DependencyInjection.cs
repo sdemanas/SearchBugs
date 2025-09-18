@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using SearchBugs.Application.Common.Behaviors;
 using Shared.Behaviors;

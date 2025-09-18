@@ -1,4 +1,4 @@
-﻿using Shared.Messaging;
+using Shared.Messaging;
 
 namespace SearchBugs.Application.Users.UpdateUser;
 

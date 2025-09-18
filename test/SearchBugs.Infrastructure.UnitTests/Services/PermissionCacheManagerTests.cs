@@ -1,5 +1,4 @@
 using SearchBugs.Infrastructure.Services;
-using Xunit;
 
 namespace SearchBugs.Infrastructure.UnitTests.Services;
 

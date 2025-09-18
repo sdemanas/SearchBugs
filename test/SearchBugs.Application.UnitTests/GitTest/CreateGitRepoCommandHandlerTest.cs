@@ -1,5 +1,4 @@
-﻿using Moq;
-using SearchBugs.Application.Git;
+using Moq;
 using SearchBugs.Application.Git.CreateGitRepo;
 using SearchBugs.Domain;
 using SearchBugs.Domain.Git;

@@ -1,19 +1,17 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Http;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SearchBugs.Api.Extensions;
+using SearchBugs.Application.Git.CloneRepository;
 using SearchBugs.Application.Git.CommitChanges;
 using SearchBugs.Application.Git.CreateGitRepo;
 using SearchBugs.Application.Git.DeleteGitRepo;
+using SearchBugs.Application.Git.GetBranches;
 using SearchBugs.Application.Git.GetCommitDiff;
+using SearchBugs.Application.Git.GetFileContents;
 using SearchBugs.Application.Git.GetGitRepo;
 using SearchBugs.Application.Git.GetGitReposDetails;
 using SearchBugs.Application.Git.GetListTree;
 using SearchBugs.Application.Git.GitHttpServer;
-using SearchBugs.Application.Git.GetFileContents;
-using SearchBugs.Application.Git.GetBranches;
-using SearchBugs.Application.Git.CloneRepository;
-using SearchBugs.Api.Extensions;
-using Shared.Results;
 
 
 namespace SearchBugs.Api.Endpoints;

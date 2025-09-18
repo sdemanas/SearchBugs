@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using SearchBugs.Application.Authentications;
 using SearchBugs.Application.Authentications.Register;
 using SearchBugs.Domain;

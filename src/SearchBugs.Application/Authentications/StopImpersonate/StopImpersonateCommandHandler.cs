@@ -1,9 +1,8 @@
 using SearchBugs.Application.Common.Interfaces;
 using SearchBugs.Domain.Users;
+using Shared.Errors;
 using Shared.Messaging;
 using Shared.Results;
-using Shared.Primitives;
-using Shared.Errors;
 
 namespace SearchBugs.Application.Authentications.StopImpersonate;
 

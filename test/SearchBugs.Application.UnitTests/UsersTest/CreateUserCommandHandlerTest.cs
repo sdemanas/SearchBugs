@@ -2,10 +2,8 @@ using Moq;
 using SearchBugs.Application.Users;
 using SearchBugs.Application.Users.CreateUser;
 using SearchBugs.Domain;
-using SearchBugs.Domain.Roles;
 using SearchBugs.Domain.Services;
 using SearchBugs.Domain.Users;
-using Shared.Results;
 
 namespace SearchBugs.Application.UnitTests.UsersTest;
 

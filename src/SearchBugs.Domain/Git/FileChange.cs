@@ -1,4 +1,4 @@
-﻿namespace SearchBugs.Domain.Git;
+namespace SearchBugs.Domain.Git;
 
 public class FileChange
 {

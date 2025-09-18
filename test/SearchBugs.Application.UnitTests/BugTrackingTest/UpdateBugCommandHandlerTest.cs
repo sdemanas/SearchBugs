@@ -1,7 +1,6 @@
 using Moq;
 using SearchBugs.Application.BugTracking;
 using SearchBugs.Application.BugTracking.Update;
-using SearchBugs.Application.BugTracking.GetBugById;
 using SearchBugs.Application.Common.Interfaces;
 using SearchBugs.Domain;
 using SearchBugs.Domain.Bugs;

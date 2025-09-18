@@ -1,8 +1,8 @@
+using System.Net;
+using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SearchBugs.Domain.Services;
-using System.Net;
-using System.Net.Mail;
 
 namespace SearchBugs.Infrastructure.Services;
 

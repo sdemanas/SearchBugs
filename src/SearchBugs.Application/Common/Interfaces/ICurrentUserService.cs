@@ -1,5 +1,4 @@
 using SearchBugs.Domain.Users;
-using Shared.Primitives;
 
 namespace SearchBugs.Application.Common.Interfaces;
 

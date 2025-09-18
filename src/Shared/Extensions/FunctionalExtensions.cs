@@ -1,4 +1,4 @@
-﻿namespace Shared.Extensions;
+namespace Shared.Extensions;
 
 /// <summary>
 /// Contains extension methods for supporting some functional patterns.

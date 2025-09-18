@@ -1,4 +1,4 @@
-﻿
+
 using SearchBugs.Application.Common.Attributes;
 using Shared.Messaging;
 

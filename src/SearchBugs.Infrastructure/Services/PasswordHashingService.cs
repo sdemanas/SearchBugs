@@ -1,4 +1,4 @@
-﻿using SearchBugs.Domain.Services;
+using SearchBugs.Domain.Services;
 
 namespace SearchBugs.Infrastructure.Services;
 

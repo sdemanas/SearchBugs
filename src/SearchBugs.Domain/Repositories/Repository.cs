@@ -1,4 +1,4 @@
-﻿using SearchBugs.Domain.Projects;
+using SearchBugs.Domain.Projects;
 using Shared.Primitives;
 using Shared.Time;
 

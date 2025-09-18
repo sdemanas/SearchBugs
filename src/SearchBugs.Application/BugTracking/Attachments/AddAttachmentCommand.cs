@@ -1,13 +1,12 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using SearchBugs.Application.Common.Interfaces;
+using SearchBugs.Domain;
 using SearchBugs.Domain.Bugs;
 using Shared.Errors;
+using Shared.Extensions;
 using Shared.Messaging;
 using Shared.Results;
-using FluentValidation;
-using SearchBugs.Domain;
-using Shared.Extensions;
-using Shared.Exceptions;
 
 namespace SearchBugs.Application.BugTracking.Attachments;
 
@@ -85,4 +84,4 @@ internal sealed class AddAttachmentCommandValidator : AbstractValidator<AddAttac
             .Must(fileName => !string.IsNullOrEmpty(Path.GetExtension(fileName)))
             .WithError(BugValidationErrors.NoExtension);
     }
-} 
+}

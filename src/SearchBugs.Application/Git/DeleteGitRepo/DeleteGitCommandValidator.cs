@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Shared.Extensions;
 
 namespace SearchBugs.Application.Git.DeleteGitRepo;

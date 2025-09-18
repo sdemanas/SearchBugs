@@ -1,4 +1,4 @@
-﻿using Bogus;
+using Bogus;
 using SearchBugs.Domain.Bugs;
 using SearchBugs.Domain.Projects;
 using SearchBugs.Domain.Users;

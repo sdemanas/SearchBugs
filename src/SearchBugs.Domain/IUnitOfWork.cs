@@ -1,4 +1,4 @@
-﻿namespace SearchBugs.Domain;
+namespace SearchBugs.Domain;
 
 /// <summary>
 /// Represents unit of work.

@@ -1,4 +1,4 @@
-﻿using Bogus;
+using Bogus;
 using SearchBugs.Application.Git.CreateGitRepo;
 
 namespace SearchBugs.Application.UnitTests.GitTest;

@@ -1,4 +1,4 @@
-﻿namespace SearchBugs.Domain.Services;
+namespace SearchBugs.Domain.Services;
 
 public interface IDataEncryptionService
 {

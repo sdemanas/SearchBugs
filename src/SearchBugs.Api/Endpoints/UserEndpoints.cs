@@ -1,5 +1,6 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SearchBugs.Api.Extensions;
 using SearchBugs.Application.Users.AssignRole;
 using SearchBugs.Application.Users.AssignRoleToUser;
 using SearchBugs.Application.Users.ChangePassword;
@@ -11,7 +12,6 @@ using SearchBugs.Application.Users.GetUsers;
 using SearchBugs.Application.Users.RemoveRole;
 using SearchBugs.Application.Users.RemoveRoleFromUser;
 using SearchBugs.Application.Users.UpdateUser;
-using SearchBugs.Api.Extensions;
 
 namespace SearchBugs.Api.Endpoints;
 

@@ -1,7 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using SearchBugs.Application.AuditLogs.GetAuditLogs;
 using SearchBugs.Api.Extensions;
+using SearchBugs.Application.AuditLogs.GetAuditLogs;
 
 namespace SearchBugs.Api.Endpoints;
 

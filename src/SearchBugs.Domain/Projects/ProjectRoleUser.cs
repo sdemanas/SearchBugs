@@ -1,4 +1,4 @@
-﻿using SearchBugs.Domain.Users;
+using SearchBugs.Domain.Users;
 
 namespace SearchBugs.Domain.Projects;
 

@@ -1,6 +1,6 @@
-﻿using Shared.Primitives;
-using Shared.Results;
 using System.Linq.Expressions;
+using Shared.Primitives;
+using Shared.Results;
 
 namespace SearchBugs.Domain;
 

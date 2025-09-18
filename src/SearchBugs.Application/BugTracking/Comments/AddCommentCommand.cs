@@ -1,10 +1,10 @@
+using FluentValidation;
 using SearchBugs.Application.Common.Interfaces;
+using SearchBugs.Domain;
 using SearchBugs.Domain.Bugs;
 using Shared.Errors;
 using Shared.Messaging;
 using Shared.Results;
-using FluentValidation;
-using SearchBugs.Domain;
 
 namespace SearchBugs.Application.BugTracking.Comments;
 

@@ -1,4 +1,4 @@
-﻿namespace Shared.Primitives;
+namespace Shared.Primitives;
 
 /// <summary>
 /// Represents the auditable interface.

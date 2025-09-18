@@ -1,4 +1,4 @@
-﻿namespace Shared.Data;
+namespace Shared.Data;
 
 /// <summary>
 /// Represents the SQL query executor.

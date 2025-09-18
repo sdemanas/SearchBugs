@@ -1,4 +1,4 @@
-﻿using Bogus;
+using Bogus;
 using SearchBugs.Domain.Users;
 
 namespace SearchBugs.Domain.UnitTests.Data.Users;

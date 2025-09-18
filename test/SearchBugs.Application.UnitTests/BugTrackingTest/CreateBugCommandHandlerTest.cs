@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using SearchBugs.Application.BugTracking;
 using SearchBugs.Application.BugTracking.Create;
 using SearchBugs.Application.BugTracking.GetBugs;

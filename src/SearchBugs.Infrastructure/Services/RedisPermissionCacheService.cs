@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using SearchBugs.Infrastructure.Authentication;
-using System.Text.Json;
 
 namespace SearchBugs.Infrastructure.Services;
 

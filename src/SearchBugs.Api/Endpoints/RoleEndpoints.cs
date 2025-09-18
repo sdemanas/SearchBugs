@@ -1,11 +1,10 @@
 using MediatR;
+using SearchBugs.Api.Extensions;
 using SearchBugs.Application.Roles.AssignPermissionToRole;
 using SearchBugs.Application.Roles.GetPermissions;
-using SearchBugs.Application.Roles.GetRoleWithPermissions;
 using SearchBugs.Application.Roles.GetRoles;
+using SearchBugs.Application.Roles.GetRoleWithPermissions;
 using SearchBugs.Application.Roles.RemovePermissionFromRole;
-using SearchBugs.Api.Extensions;
-using Shared.Results;
 
 namespace SearchBugs.Api.Endpoints;
 

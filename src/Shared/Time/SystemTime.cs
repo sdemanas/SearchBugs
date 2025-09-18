@@ -1,4 +1,4 @@
-﻿namespace Shared.Time;
+namespace Shared.Time;
 
 public sealed class SystemTime : ISystemTime
 {

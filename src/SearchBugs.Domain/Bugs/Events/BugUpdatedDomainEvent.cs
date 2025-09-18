@@ -1,4 +1,3 @@
-using SearchBugs.Domain.Bugs;
 using SearchBugs.Domain.Users;
 using Shared.Primitives;
 

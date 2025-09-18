@@ -1,5 +1,3 @@
-using SearchBugs.Infrastructure.Services;
-
 namespace SearchBugs.Infrastructure.Services;
 
 /// <summary>

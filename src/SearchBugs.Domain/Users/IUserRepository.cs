@@ -1,4 +1,4 @@
-﻿using SearchBugs.Domain.Roles;
+using SearchBugs.Domain.Roles;
 using Shared.Results;
 
 namespace SearchBugs.Domain.Users;

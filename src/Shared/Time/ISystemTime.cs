@@ -1,4 +1,4 @@
-﻿namespace Shared.Time;
+namespace Shared.Time;
 
 /// <summary>
 /// Represents the system time interface.

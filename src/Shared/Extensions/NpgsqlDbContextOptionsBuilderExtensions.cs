@@ -1,4 +1,4 @@
-﻿using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
 using Shared.Constants;
 
 namespace Shared.Extensions;

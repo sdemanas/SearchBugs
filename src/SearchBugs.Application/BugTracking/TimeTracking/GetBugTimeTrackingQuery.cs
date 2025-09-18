@@ -2,7 +2,6 @@ using SearchBugs.Domain.Bugs;
 using Shared.Errors;
 using Shared.Messaging;
 using Shared.Results;
-using Shared.Time;
 
 namespace SearchBugs.Application.BugTracking.TimeTracking;
 
@@ -28,13 +27,13 @@ public class GetBugTimeTrackingQueryHandler : IQueryHandler<GetBugTimeTrackingQu
         }
 
         var bug = bugResult.Value;
-        var timeEntries = bug.TimeTracking.Select(entry => 
+        var timeEntries = bug.TimeTracking.Select(entry =>
         {
-            var duration = entry.TimeSpent.HasValue 
-                ? entry.TimeSpent.Value - entry.LoggedAt 
+            var duration = entry.TimeSpent.HasValue
+                ? entry.TimeSpent.Value - entry.LoggedAt
                 : TimeSpan.Zero;
             return TimeEntryDto.FromTimeEntry(entry, duration);
         });
         return Result.Success(timeEntries);
     }
-} 
+}

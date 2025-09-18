@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 
 namespace Shared.Data;
 

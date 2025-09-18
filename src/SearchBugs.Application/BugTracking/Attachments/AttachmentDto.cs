@@ -19,4 +19,4 @@ public record AttachmentDto(
         attachment.BugId.Value,
         attachment.CreatedOnUtc,
         attachment.ModifiedOnUtc);
-} 
+}

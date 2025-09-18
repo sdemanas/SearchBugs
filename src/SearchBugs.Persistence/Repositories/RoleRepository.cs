@@ -1,4 +1,4 @@
-﻿
+
 using Microsoft.EntityFrameworkCore;
 using SearchBugs.Domain.Roles;
 using Shared.Errors;

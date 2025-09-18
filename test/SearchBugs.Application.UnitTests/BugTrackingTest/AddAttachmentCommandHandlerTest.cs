@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Moq;
 using SearchBugs.Application.BugTracking.Attachments;
 using SearchBugs.Application.Common.Interfaces;
@@ -7,7 +8,6 @@ using SearchBugs.Domain.Projects;
 using SearchBugs.Domain.Users;
 using Shared.Errors;
 using Shared.Results;
-using Microsoft.AspNetCore.Http;
 
 namespace SearchBugs.Application.UnitTests.BugTrackingTest;
 

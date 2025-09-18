@@ -1,4 +1,3 @@
-using SearchBugs.Infrastructure.Authentication;
 using SearchBugs.Infrastructure.Services;
 
 namespace SearchBugs.Infrastructure.Authentication;

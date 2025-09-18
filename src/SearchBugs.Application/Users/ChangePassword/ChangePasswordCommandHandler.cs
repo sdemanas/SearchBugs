@@ -1,7 +1,7 @@
 using MediatR;
+using SearchBugs.Domain;
 using SearchBugs.Domain.Services;
 using SearchBugs.Domain.Users;
-using SearchBugs.Domain;
 using Shared.Results;
 
 namespace SearchBugs.Application.Users.ChangePassword;

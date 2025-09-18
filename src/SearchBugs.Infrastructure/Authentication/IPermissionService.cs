@@ -1,4 +1,4 @@
-﻿namespace SearchBugs.Infrastructure.Authentication;
+namespace SearchBugs.Infrastructure.Authentication;
 
 public interface IPermissionService
 {

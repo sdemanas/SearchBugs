@@ -1,4 +1,4 @@
-﻿namespace SearchBugs.Application.Projects;
+namespace SearchBugs.Application.Projects;
 
 public static class ProjectPermission
 {

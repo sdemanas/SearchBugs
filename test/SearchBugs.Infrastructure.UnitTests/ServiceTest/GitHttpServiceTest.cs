@@ -1,10 +1,10 @@
-﻿using FluentAssertions;
+using System.Security.Claims;
+using FluentAssertions;
 using LibGit2Sharp;
 using Microsoft.AspNetCore.Http;
 using SearchBugs.Infrastructure.Options;
 using SearchBugs.Infrastructure.Services;
 using SearchBugs.Infrastructure.UnitTests.Data;
-using System.Security.Claims;
 
 namespace SearchBugs.Infrastructure.UnitTests.ServiceTest;
 

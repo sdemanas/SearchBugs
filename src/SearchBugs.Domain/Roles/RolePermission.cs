@@ -1,4 +1,4 @@
-﻿namespace SearchBugs.Domain.Roles;
+namespace SearchBugs.Domain.Roles;
 
 public sealed class RolePermission
 {

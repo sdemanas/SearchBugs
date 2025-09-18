@@ -1,4 +1,4 @@
-﻿namespace SearchBugs.Domain.Users;
+namespace SearchBugs.Domain.Users;
 
 public interface IJwtProvider
 {
