@@ -1,10 +1,6 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using SearchBugs.Domain.Git;
 using SearchBugs.Domain.Services;
 using SearchBugs.Domain.Users;

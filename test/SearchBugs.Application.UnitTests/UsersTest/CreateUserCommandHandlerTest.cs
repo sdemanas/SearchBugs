@@ -2,8 +2,10 @@ using Moq;
 using SearchBugs.Application.Users;
 using SearchBugs.Application.Users.CreateUser;
 using SearchBugs.Domain;
+using SearchBugs.Domain.Roles;
 using SearchBugs.Domain.Services;
 using SearchBugs.Domain.Users;
+using Shared.Results;
 
 namespace SearchBugs.Application.UnitTests.UsersTest;
 
@@ -92,6 +94,13 @@ public class CreateUserCommandHandlerTest
 
         _passwordHashingService.Setup(x => x.HashPassword("password123"))
             .Returns(hashedPassword);
+
+        _userRepository.Setup(x => x.GetRoleByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((int roleId, CancellationToken ct) =>
+            {
+                return Result.Success(Role.FromId(roleId)!);
+            });
+        
 
         // Act
         var result = await _sut.Handle(command, CancellationToken.None);

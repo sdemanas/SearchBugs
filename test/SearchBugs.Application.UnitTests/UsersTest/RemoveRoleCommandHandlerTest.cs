@@ -82,6 +82,8 @@ public class RemoveRoleCommandHandlerTest
 
         _userRepository.Setup(x => x.GetByIdAsync(new UserId(userId), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(user));
+        _userRepository.Setup(x => x.GetRoleByIdAsync(Role.Admin.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success(Role.Admin));
 
         // Act
         var result = await _sut.Handle(command, CancellationToken.None);
@@ -109,6 +111,9 @@ public class RemoveRoleCommandHandlerTest
 
         _userRepository.Setup(x => x.GetByIdAsync(new UserId(userId), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(user));
+
+        _userRepository.Setup(x => x.GetRoleByIdAsync(Role.Developer.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success(Role.Developer));
 
         // Act
         var result = await _sut.Handle(command, CancellationToken.None);
@@ -139,6 +144,9 @@ public class RemoveRoleCommandHandlerTest
 
         _userRepository.Setup(x => x.GetByIdAsync(new UserId(userId), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(user));
+
+        _userRepository.Setup(x => x.GetRoleByIdAsync(Role.Developer.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success(Role.Developer));
 
         // Act
         var result = await _sut.Handle(command, CancellationToken.None);
