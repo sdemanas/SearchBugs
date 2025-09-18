@@ -36,29 +36,10 @@ public static class DependencyInjection
         services.ConfigureOptions<JwtOptionsSetup>();
         services.ConfigureOptions<GitOptionsSetup>();
         services.ConfigureOptions<PermissionCacheOptionsSetup>();
+        services.ConfigureOptions<JwtBearerOptionsSetup>();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                // Get the JWT options from the service provider
-                var serviceProvider = services.BuildServiceProvider();
-                var jwtOptions = serviceProvider.GetRequiredService<IOptions<JwtOptions>>().Value;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = jwtOptions.Issuer,
-                    ValidateAudience = true,
-                    ValidAudience = jwtOptions.Audience,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
-                    NameClaimType = JwtRegisteredClaimNames.Sub,
-                    RoleClaimType = "role",
-                    ClockSkew = TimeSpan.Zero
-                };
-
-                options.MapInboundClaims = false;
-            });
+            .AddJwtBearer();
         services.AddTransient<IJwtProvider, JwtProvider>();
         services.AddScoped<IPasswordHashingService, PasswordHashingService>();
         services.AddScoped<IEmailService, EmailService>();

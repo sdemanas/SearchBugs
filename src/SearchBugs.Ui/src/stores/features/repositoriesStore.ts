@@ -73,10 +73,10 @@ export const useRepositoriesStore = create<RepositoryState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await apiClient.repositories.getAll();
-      // Handle direct array response
-      const repositories: Repository[] = Array.isArray(response.data)
-        ? response.data
-        : [];
+      const repositories: Repository[] =
+        (response as any)?.data?.isSuccess && Array.isArray((response as any).data.value)
+          ? (response as any).data.value
+          : [];
       set({ repositories, isLoading: false });
     } catch (error) {
       set({
@@ -112,7 +112,7 @@ export const useRepositoriesStore = create<RepositoryState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await apiClient.repositories.create(data);
-      const newRepository = response.data as Repository;
+      const newRepository = (response as any)?.data?.value as Repository;
       set((state) => ({
         repositories: [...state.repositories, newRepository],
         isLoading: false,

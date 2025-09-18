@@ -29,22 +29,12 @@ To get started with contributing, make sure you have a basic understanding of th
 
 If you're unfamiliar with any of these technologies, there are plenty of resources available online to get up to speed.
 
-## How to Contribute
+### Project Prerequisites
 
-### Reporting Bugs
-
-If you encounter a bug, please open an issue on GitHub. Include as much detail as possible, such as:
-
-- Steps to reproduce the bug.
-- Expected behavior.
-- Actual behavior.
-- Any relevant screenshots or error messages.
-
-### Suggesting Features
-
-We welcome suggestions for new features! Please check the existing issues and discussions to see if your idea has already been mentioned. If not, feel free to open a new issue with a detailed description of the feature and any benefits it would bring to the project.
-
-### Code Contributions
+- NET SDK: 9.0+
+- Node.js: 18+ (LTS recommended) or 20+
+- Package manager: pnpm 8.x (lockfile is v6)
+- Optional: Docker Desktop 
 
 #### Development Setup
 
@@ -69,15 +59,42 @@ We welcome suggestions for new features! Please check the existing issues and di
    Ensure you have [Node.js](https://nodejs.org/) and npm installed.
 
    ```bash
+   cd src
    cd SearchBugs.Ui
-   npm install
-   npm start
+   corepack enable
+   corepack prepare pnpm@8.x.x --activate #(substitute 8.x.x with relevant version)
+   pnpm install --frozen-lockfile
+   pnpm dev
    ```
 
 4. **Run tests:**
 
    - Backend tests: `dotnet test`
    - Frontend tests: `npm test`
+
+5. **Docs**
+
+   - API docs (Scalar): http://localhost:5000/scalar 
+   
+   #(substitute port no with the one on your machine)
+
+
+## How to Contribute
+
+### Reporting Bugs
+
+If you encounter a bug, please open an issue on GitHub. Include as much detail as possible, such as:
+
+- Steps to reproduce the bug.
+- Expected behavior.
+- Actual behavior.
+- Any relevant screenshots or error messages.
+
+### Suggesting Features
+
+We welcome suggestions for new features! Please check the existing issues and discussions to see if your idea has already been mentioned. If not, feel free to open a new issue with a detailed description of the feature and any benefits it would bring to the project.
+
+### Code Contributions
 
 #### Submitting Changes
 
