@@ -88,7 +88,7 @@ public class AddCustomFieldCommandHandlerTest
         Assert.Equal(fieldName, result.Value.Name);
         Assert.Equal(fieldValue, result.Value.Value);
         Assert.Equal("text", result.Value.FieldType);
-        _unitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _unitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 
     [Fact]
@@ -128,7 +128,7 @@ public class AddCustomFieldCommandHandlerTest
         Assert.True(result.IsSuccess);
         _bugRepository.Verify(x => x.GetByIdAsync(new BugId(bugId), It.IsAny<CancellationToken>()), Times.Once);
         _projectRepository.Verify(x => x.GetByIdAsync(projectId, It.IsAny<CancellationToken>()), Times.Once);
-        _unitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _unitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 
     [Fact]

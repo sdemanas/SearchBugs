@@ -100,7 +100,7 @@ public class CreateUserCommandHandlerTest
             {
                 return Result.Success(Role.FromId(roleId)!);
             });
-        
+
 
         // Act
         var result = await _sut.Handle(command, CancellationToken.None);

@@ -108,7 +108,7 @@ public class AddCommentCommandHandlerTest
         // Assert
         Assert.True(result.IsSuccess);
         _bugRepository.Verify(x => x.GetByIdAsync(new BugId(bugId), It.IsAny<CancellationToken>()), Times.Once);
-        _currentUserService.Verify(x => x.UserId, Times.Once);
+        _currentUserService.Verify(x => x.UserId, Times.Exactly(2));
         _unitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
