@@ -4,16 +4,21 @@ Thank you for considering contributing to SearchsBugs! Your help is essential fo
 
 ## Table of Contents
 
-- [Code of Conduct](#code-of-conduct)
-- [Getting Started](#getting-started)
-- [How to Contribute](#how-to-contribute)
-  - [Reporting Bugs](#reporting-bugs)
-  - [Suggesting Features](#suggesting-features)
-  - [Code Contributions](#code-contributions)
-    - [Development Setup](#development-setup)
-    - [Submitting Changes](#submitting-changes)
-- [Style Guide](#style-guide)
-- [License](#license)
+- [Contributing to SearchsBugs](#contributing-to-searchsbugs)
+  - [Table of Contents](#table-of-contents)
+  - [Code of Conduct](#code-of-conduct)
+  - [Getting Started](#getting-started)
+    - [Project Prerequisites](#project-prerequisites)
+      - [Development Setup](#development-setup)
+  - [How to Contribute](#how-to-contribute)
+    - [Reporting Bugs](#reporting-bugs)
+    - [Suggesting Features](#suggesting-features)
+    - [Code Contributions](#code-contributions)
+      - [Submitting Changes](#submitting-changes)
+  - [Style Guide](#style-guide)
+    - [C# (.NET)](#c-net)
+    - [JavaScript/React](#javascriptreact)
+  - [License](#license)
 
 ## Code of Conduct
 
@@ -59,10 +64,12 @@ If you're unfamiliar with any of these technologies, there are plenty of resourc
    Ensure you have [Node.js](https://nodejs.org/) and npm installed.
 
    ```bash
+   npm install -g pnpm
+   ```
+
+   ```bash
    cd src
    cd SearchBugs.Ui
-   corepack enable
-   corepack prepare pnpm@8.x.x --activate #(substitute 8.x.x with relevant version)
    pnpm install --frozen-lockfile
    pnpm dev
    ```
