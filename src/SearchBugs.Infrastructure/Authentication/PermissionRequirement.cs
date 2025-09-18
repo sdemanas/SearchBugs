@@ -1,4 +1,4 @@
-﻿
+
 using Microsoft.AspNetCore.Authorization;
 
 namespace SearchBugs.Infrastructure.Authentication;

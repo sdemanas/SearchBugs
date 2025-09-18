@@ -1,12 +1,12 @@
-using Shared.Messaging;
-using SearchBugs.Application.Common.Interfaces;
 using FluentValidation;
+using SearchBugs.Application.Common.Interfaces;
+using SearchBugs.Domain;
 using SearchBugs.Domain.Bugs;
+using SearchBugs.Domain.Projects;
 using Shared.Errors;
 using Shared.Extensions;
+using Shared.Messaging;
 using Shared.Results;
-using SearchBugs.Domain;
-using SearchBugs.Domain.Projects;
 
 namespace SearchBugs.Application.BugTracking.CustomFields;
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using SearchBugs.Infrastructure.Options;
 
 namespace SearchBugs.Infrastructure.UnitTests.Data;

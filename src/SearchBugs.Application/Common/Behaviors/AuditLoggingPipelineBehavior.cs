@@ -121,7 +121,8 @@ public sealed class AuditLoggingPipelineBehavior<TRequest, TResponse> : IPipelin
 
     private static string GetIpAddress(HttpContext? httpContext)
     {
-        if (httpContext == null) return "Unknown";
+        if (httpContext == null)
+            return "Unknown";
 
         var ipAddress = httpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault();
         if (string.IsNullOrEmpty(ipAddress))
@@ -138,7 +139,8 @@ public sealed class AuditLoggingPipelineBehavior<TRequest, TResponse> : IPipelin
 
     private static string GetUserAgent(HttpContext? httpContext)
     {
-        if (httpContext == null) return "Unknown";
+        if (httpContext == null)
+            return "Unknown";
 
         return httpContext.Request.Headers["User-Agent"].ToString() ?? "Unknown";
     }
@@ -175,7 +177,8 @@ public sealed class AuditLoggingPipelineBehavior<TRequest, TResponse> : IPipelin
     /// </summary>
     private static bool IsQuery<T>(T request)
     {
-        if (request == null) return false;
+        if (request == null)
+            return false;
 
         var requestType = request.GetType();
         var interfaces = requestType.GetInterfaces();
@@ -188,7 +191,8 @@ public sealed class AuditLoggingPipelineBehavior<TRequest, TResponse> : IPipelin
     /// </summary>
     private static object RedactSensitiveProperties<T>(T obj)
     {
-        if (obj == null) return obj!;
+        if (obj == null)
+            return obj!;
 
         var type = obj.GetType();
 

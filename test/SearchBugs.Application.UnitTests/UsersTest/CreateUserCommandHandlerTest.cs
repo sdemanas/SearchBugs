@@ -95,6 +95,13 @@ public class CreateUserCommandHandlerTest
         _passwordHashingService.Setup(x => x.HashPassword("password123"))
             .Returns(hashedPassword);
 
+        _userRepository.Setup(x => x.GetRoleByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((int roleId, CancellationToken ct) =>
+            {
+                return Result.Success(Role.FromId(roleId)!);
+            });
+
+
         // Act
         var result = await _sut.Handle(command, CancellationToken.None);
 

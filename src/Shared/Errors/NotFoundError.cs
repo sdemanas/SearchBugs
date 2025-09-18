@@ -1,4 +1,4 @@
-﻿namespace Shared.Errors;
+namespace Shared.Errors;
 
 /// <summary>
 /// Represents the not found error.

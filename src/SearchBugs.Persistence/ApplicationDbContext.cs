@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using SearchBugs.Domain;
 using SearchBugs.Domain.AuditLogs;

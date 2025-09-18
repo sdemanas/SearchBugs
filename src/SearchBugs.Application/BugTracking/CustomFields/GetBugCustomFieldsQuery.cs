@@ -1,7 +1,6 @@
-using Shared.Messaging;
-using SearchBugs.Application.Common.Interfaces;
 using SearchBugs.Domain.Bugs;
 using Shared.Errors;
+using Shared.Messaging;
 using Shared.Results;
 
 namespace SearchBugs.Application.BugTracking.CustomFields;
@@ -33,4 +32,4 @@ public class GetBugCustomFieldsQueryHandler : IQueryHandler<GetBugCustomFieldsQu
 
         return Result.Success(customFields);
     }
-} 
+}

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SearchBugs.Application.Users.Common;
 using SearchBugs.Domain;
 using Shared.Messaging;

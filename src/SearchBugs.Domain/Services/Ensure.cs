@@ -1,4 +1,4 @@
-﻿using Shared.Errors;
+using Shared.Errors;
 
 namespace SearchBugs.Domain.Services;
 

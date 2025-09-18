@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SearchBugs.Domain.Bugs;
+using Microsoft.EntityFrameworkCore;
 using SearchBugs.Domain.Roles;
 using SearchBugs.Domain.Users;
 

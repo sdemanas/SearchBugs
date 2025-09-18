@@ -1,8 +1,7 @@
-﻿using SearchBugs.Domain;
+using SearchBugs.Domain;
 using SearchBugs.Domain.Git;
 using SearchBugs.Domain.Projects;
 using SearchBugs.Domain.Repositories;
-using Shared.Errors;
 using Shared.Messaging;
 using Shared.Results;
 

@@ -1,6 +1,6 @@
-﻿using SearchBugs.Domain.Services;
 using System.Security.Cryptography;
 using System.Text;
+using SearchBugs.Domain.Services;
 
 namespace SearchBugs.Infrastructure.Services;
 

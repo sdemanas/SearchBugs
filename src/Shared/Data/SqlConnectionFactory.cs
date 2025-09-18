@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Options;
+using System.Data;
+using Microsoft.Extensions.Options;
 using Npgsql;
 using Shared.Options;
-using System.Data;
 
 namespace Shared.Data;
 

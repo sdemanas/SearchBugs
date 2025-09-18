@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Shared.Primitives;
 
 namespace Shared.Messaging;

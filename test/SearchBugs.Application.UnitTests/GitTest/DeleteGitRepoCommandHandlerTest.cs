@@ -1,5 +1,4 @@
 using Moq;
-using SearchBugs.Application.Git;
 using SearchBugs.Application.Git.DeleteGitRepo;
 using SearchBugs.Domain;
 using SearchBugs.Domain.Git;

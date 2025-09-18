@@ -1,5 +1,5 @@
-﻿using Shared.Errors;
 using System.Text.Json.Serialization;
+using Shared.Errors;
 
 namespace Shared.Results;
 

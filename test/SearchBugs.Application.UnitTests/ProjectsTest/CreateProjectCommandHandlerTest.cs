@@ -2,7 +2,6 @@ using Moq;
 using SearchBugs.Application.Projects.CreateProject;
 using SearchBugs.Domain;
 using SearchBugs.Domain.Projects;
-using Shared.Results;
 
 namespace SearchBugs.Application.UnitTests.ProjectsTest;
 

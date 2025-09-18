@@ -1,6 +1,6 @@
 using MediatR;
-using SearchBugs.Domain.Users;
 using SearchBugs.Domain;
+using SearchBugs.Domain.Users;
 using Shared.Results;
 
 namespace SearchBugs.Application.Users.DeleteUser;

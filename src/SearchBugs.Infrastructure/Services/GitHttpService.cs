@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+using System.Diagnostics;
+using System.IO.Pipelines;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using SearchBugs.Domain.Git;
 using SearchBugs.Infrastructure.Options;
-using System.Buffers;
-using System.Diagnostics;
-using System.IO.Pipelines;
-using System.Text;
 namespace SearchBugs.Infrastructure.Services;
 
 internal class GitHttpService : IGitHttpService

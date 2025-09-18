@@ -1,6 +1,6 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.SignalR;
 using SearchBugs.Application.Common.Interfaces;
-using System.Security.Claims;
 
 namespace SearchBugs.Api.Hubs;
 

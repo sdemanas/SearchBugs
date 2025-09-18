@@ -1,4 +1,4 @@
-﻿
+
 using SearchBugs.Application.BugTracking.GetBugs;
 using SearchBugs.Domain;
 using SearchBugs.Domain.Bugs;

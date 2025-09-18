@@ -1,5 +1,4 @@
 using FluentValidation;
-using SearchBugs.Application.BugTracking;
 using SearchBugs.Application.BugTracking.GetBugById;
 using SearchBugs.Application.Common.Interfaces;
 using SearchBugs.Domain;

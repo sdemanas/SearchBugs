@@ -1,4 +1,4 @@
-﻿namespace SearchBugs.Application.BugTracking.GetBugs;
+namespace SearchBugs.Application.BugTracking.GetBugs;
 
 public sealed record BugsResponse(
         Guid Id,

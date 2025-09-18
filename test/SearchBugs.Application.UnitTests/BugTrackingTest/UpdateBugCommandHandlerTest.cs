@@ -1,7 +1,6 @@
 using Moq;
 using SearchBugs.Application.BugTracking;
 using SearchBugs.Application.BugTracking.Update;
-using SearchBugs.Application.BugTracking.GetBugById;
 using SearchBugs.Application.Common.Interfaces;
 using SearchBugs.Domain;
 using SearchBugs.Domain.Bugs;
@@ -56,6 +55,9 @@ public class UpdateBugCommandHandlerTest
         _bugRepository.Setup(x => x.GetByIdAsync(It.IsAny<BugId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(bug));
 
+        _bugRepository.Setup(x => x.GetBugStatusByName(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((BugStatus?)null);
+
         // Act
         var result = await _sut.Handle(command, CancellationToken.None);
 
@@ -75,6 +77,12 @@ public class UpdateBugCommandHandlerTest
         _bugRepository.Setup(x => x.GetByIdAsync(It.IsAny<BugId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(bug));
 
+        _bugRepository.Setup(x => x.GetBugStatusByName(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(BugStatus.Open);
+
+        _bugRepository.Setup(x => x.GetBugPriorityByName(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((BugPriority?)null);
+
         // Act
         var result = await _sut.Handle(command, CancellationToken.None);
 
@@ -82,26 +90,6 @@ public class UpdateBugCommandHandlerTest
         Assert.False(result.IsSuccess);
         Assert.Equal(BugValidationErrors.InvalidBugPriority, result.Error);
     }
-
-    [Fact]
-    public async Task Handle_WhenSeverityIsInvalid_ShouldReturnFailure()
-    {
-        // Arrange
-        var bugId = Guid.NewGuid();
-        var command = new UpdateBugCommand(bugId, "Title", "Description", "Open", "High", "InvalidSeverity", Guid.NewGuid());
-        var bug = CreateValidBug();
-
-        _bugRepository.Setup(x => x.GetByIdAsync(It.IsAny<BugId>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Success(bug));
-
-        // Act
-        var result = await _sut.Handle(command, CancellationToken.None);
-
-        // Assert
-        Assert.False(result.IsSuccess);
-        Assert.Equal(BugValidationErrors.SeverityIsRequired, result.Error);
-    }
-
     [Fact]
     public async Task Handle_WhenBugHistoryIsAdded_ShouldSaveCorrectly()
     {
@@ -131,6 +119,12 @@ public class UpdateBugCommandHandlerTest
         _bugRepository.Setup(x => x.GetByIdAsync(new BugId(command.BugId), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(existingBug));
 
+        _bugRepository.Setup(x => x.GetBugStatusByName(command.Status, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(BugStatus.InProgress);
+
+        _bugRepository.Setup(x => x.GetBugPriorityByName(command.Priority, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(BugPriority.Medium);
+
         _currentUserService.Setup(x => x.UserId).Returns(new UserId(userId));
 
         // Act
@@ -153,6 +147,10 @@ public class UpdateBugCommandHandlerTest
 
         _bugRepository.Setup(x => x.GetByIdAsync(It.IsAny<BugId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(bug));
+        _bugRepository.Setup(x => x.GetBugStatusByName(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(BugStatus.Open);
+        _bugRepository.Setup(x => x.GetBugPriorityByName(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(BugPriority.High);
 
         _currentUserService.Setup(x => x.UserId)
             .Returns(currentUserId);

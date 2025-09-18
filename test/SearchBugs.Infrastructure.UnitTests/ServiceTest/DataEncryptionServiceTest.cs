@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using SearchBugs.Infrastructure.Services;
 
 namespace SearchBugs.Infrastructure.UnitTests.ServiceTest;

@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using SearchBugs.Infrastructure.Options;
 
 namespace SearchBugs.Infrastructure.Options;
 

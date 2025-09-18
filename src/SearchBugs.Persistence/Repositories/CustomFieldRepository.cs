@@ -1,5 +1,4 @@
 using SearchBugs.Domain.Bugs;
-using SearchBugs.Persistence.Repositories;
 
 namespace SearchBugs.Persistence.Repositories;
 

@@ -1,9 +1,9 @@
 using MediatR;
 using SearchBugs.Application.Common.Interfaces;
-using SearchBugs.Domain.Users;
 using SearchBugs.Domain;
-using Shared.Results;
+using SearchBugs.Domain.Users;
 using Shared.Errors;
+using Shared.Results;
 
 namespace SearchBugs.Application.Users.UpdateCurrentUserProfile;
 

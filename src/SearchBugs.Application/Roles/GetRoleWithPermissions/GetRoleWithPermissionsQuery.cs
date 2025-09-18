@@ -1,5 +1,4 @@
 using MediatR;
-using SearchBugs.Application.Roles.GetRoles;
 using Shared.Results;
 
 namespace SearchBugs.Application.Roles.GetRoleWithPermissions;

@@ -1,9 +1,9 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SearchBugs.Api.Extensions;
 using SearchBugs.Application.Projects.CreateProject;
 using SearchBugs.Application.Projects.GetProject;
 using SearchBugs.Application.Projects.GetProjects;
-using SearchBugs.Api.Extensions;
 
 namespace SearchBugs.Api.Endpoints;
 

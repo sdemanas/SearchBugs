@@ -1,4 +1,3 @@
-using SearchBugs.Application.Common.Interfaces;
 using SearchBugs.Domain.Bugs;
 using Shared.Errors;
 using Shared.Messaging;

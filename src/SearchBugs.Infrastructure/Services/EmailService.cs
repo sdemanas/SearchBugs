@@ -1,8 +1,8 @@
+using System.Net;
+using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SearchBugs.Domain.Services;
-using System.Net;
-using System.Net.Mail;
 
 namespace SearchBugs.Infrastructure.Services;
 
@@ -116,7 +116,7 @@ internal sealed class EmailService : IEmailService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send welcome email to {Email}", toEmail);
+            _logger.LogError(ex, "Failed to send welcome email."); // Redact private data from logs.
         }
     }
 }

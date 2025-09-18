@@ -1,4 +1,4 @@
-﻿namespace SearchBugs.Application.Projects.GetProjects;
+namespace SearchBugs.Application.Projects.GetProjects;
 
 public record GetProjectsResponse(
     Guid Id,

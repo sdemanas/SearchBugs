@@ -1,6 +1,4 @@
 using SearchBugs.Application.Common.Interfaces;
-using SearchBugs.Domain.Notifications;
-using SearchBugs.Domain.Services;
 using Shared.Messaging;
 using Shared.Results;
 

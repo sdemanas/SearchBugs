@@ -1,4 +1,4 @@
-﻿using SearchBugs.Domain.Roles;
+using SearchBugs.Domain.Roles;
 using SearchBugs.Domain.Users.Events;
 using Shared.Primitives;
 using Shared.Results;

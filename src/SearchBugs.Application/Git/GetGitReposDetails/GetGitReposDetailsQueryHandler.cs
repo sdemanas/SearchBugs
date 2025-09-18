@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using SearchBugs.Domain.Git;
 using Shared.Messaging;
 using Shared.Results;

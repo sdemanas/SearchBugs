@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using Scalar.AspNetCore;
 using SearchBugs.Api.Endpoints;
 using SearchBugs.Api.Extensions;
@@ -8,7 +9,6 @@ using SearchBugs.Application;
 using SearchBugs.Application.Common.Interfaces;
 using SearchBugs.Infrastructure;
 using SearchBugs.Persistence;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace SearchBugs.Api;
 

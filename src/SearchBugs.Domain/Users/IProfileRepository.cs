@@ -1,4 +1,3 @@
-using SearchBugs.Domain.Users;
 using Shared.Results;
 
 namespace SearchBugs.Domain.Users;

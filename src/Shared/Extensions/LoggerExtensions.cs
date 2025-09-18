@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Shared.Errors;
 using Shared.Extensions;
 using Shared.Primitives;

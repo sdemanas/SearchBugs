@@ -1,4 +1,4 @@
-﻿using SearchBugs.Application.Users.Common;
+using SearchBugs.Application.Users.Common;
 
 namespace SearchBugs.Application.Users.GetUserDetail;
 

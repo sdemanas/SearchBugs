@@ -1,4 +1,4 @@
-﻿using LibGit2Sharp;
+using LibGit2Sharp;
 using Microsoft.Extensions.Options;
 using SearchBugs.Domain.Git;
 using SearchBugs.Infrastructure.Options;
@@ -20,11 +20,13 @@ internal sealed partial class GitRepositoryService : IGitRepositoryService
     public Result<IEnumerable<GitTreeItem>> ListTree(string commitSha, string repoPath)
     {
         var _repoPath = Path.Combine(_basePath, repoPath);
-        if (!Directory.Exists(_repoPath)) return Result.Failure<IEnumerable<GitTreeItem>>(GitErrors.RepositoryNotFound);
+        if (!Directory.Exists(_repoPath))
+            return Result.Failure<IEnumerable<GitTreeItem>>(GitErrors.RepositoryNotFound);
         using (var repo = new Repository(_repoPath))
         {
             var commit = repo.Lookup<Commit>(commitSha) ?? repo.Head.Tip;
-            if (commit == null) return Result.Failure<IEnumerable<GitTreeItem>>(GitErrors.InvalidCommitPath);
+            if (commit == null)
+                return Result.Failure<IEnumerable<GitTreeItem>>(GitErrors.InvalidCommitPath);
             var tree = commit.Tree;
 
             return tree.Select(entry => new GitTreeItem
@@ -42,10 +44,12 @@ internal sealed partial class GitRepositoryService : IGitRepositoryService
         using (var repo = new Repository(_repoPath))
         {
             var commit = repo.Lookup<Commit>(commitSha);
-            if (commit == null) return Result.Failure<string>(GitErrors.InvalidCommitPath);
+            if (commit == null)
+                return Result.Failure<string>(GitErrors.InvalidCommitPath);
 
             var blob = commit[filePath]?.Target as Blob;
-            if (blob == null) return Result.Failure<string>(GitErrors.FileNotFound);
+            if (blob == null)
+                return Result.Failure<string>(GitErrors.FileNotFound);
 
             return blob.GetContentText();
         }
@@ -74,7 +78,8 @@ internal sealed partial class GitRepositoryService : IGitRepositoryService
         using (var repo = new Repository(_repoPath))
         {
             var commit = repo.Lookup<Commit>(commitSha);
-            if (commit == null) return Result.Failure<IEnumerable<FileDiff>>(GitErrors.InvalidCommitPath);
+            if (commit == null)
+                return Result.Failure<IEnumerable<FileDiff>>(GitErrors.InvalidCommitPath);
 
             var diffs = new List<FileDiff>();
 
@@ -123,7 +128,8 @@ internal sealed partial class GitRepositoryService : IGitRepositoryService
             var sourceBranch = repo.Branches[sourceBranchName];
             var targetBranch = repo.Branches[targetBranchName];
 
-            if (sourceBranch == null || targetBranch == null) return Result.Failure<MergeResult>(GitErrors.BranchNotFound);
+            if (sourceBranch == null || targetBranch == null)
+                return Result.Failure<MergeResult>(GitErrors.BranchNotFound);
 
             // Merge
             var merger = new Signature(mergerName, mergerEmail, DateTimeOffset.Now);
@@ -145,7 +151,8 @@ internal sealed partial class GitRepositoryService : IGitRepositoryService
             var baseCommit = repo.Lookup<Commit>(baseCommitSha);
             var compareCommit = repo.Lookup<Commit>(compareCommitSha);
 
-            if (baseCommit == null || compareCommit == null) return Result.Failure<IEnumerable<FileDiff>>(GitErrors.CommitNotFound);
+            if (baseCommit == null || compareCommit == null)
+                return Result.Failure<IEnumerable<FileDiff>>(GitErrors.CommitNotFound);
 
             var patch = repo.Diff.Compare<Patch>(baseCommit.Tree, compareCommit.Tree);
 
@@ -165,7 +172,8 @@ internal sealed partial class GitRepositoryService : IGitRepositoryService
         using (var repo = new Repository(_repoPath))
         {
             var branch = repo.Branches[branchName];
-            if (branch == null) return Result.Failure(GitErrors.BranchNotFound);
+            if (branch == null)
+                return Result.Failure(GitErrors.BranchNotFound);
 
             Commands.Checkout(repo, branch);
         }
@@ -195,7 +203,8 @@ internal sealed partial class GitRepositoryService : IGitRepositoryService
     public Result<IEnumerable<string>> GetBranches(string repoPath)
     {
         var _repoPath = Path.Combine(_basePath, repoPath);
-        if (!Directory.Exists(_repoPath)) return Result.Failure<IEnumerable<string>>(GitErrors.RepositoryNotFound);
+        if (!Directory.Exists(_repoPath))
+            return Result.Failure<IEnumerable<string>>(GitErrors.RepositoryNotFound);
 
         using (var repo = new Repository(_repoPath))
         {

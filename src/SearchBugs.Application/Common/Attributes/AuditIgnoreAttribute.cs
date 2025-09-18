@@ -1,5 +1,3 @@
-using System;
-
 namespace SearchBugs.Application.Common.Attributes;
 
 /// <summary>

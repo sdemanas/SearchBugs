@@ -1,4 +1,4 @@
-﻿namespace Shared.Options;
+namespace Shared.Options;
 
 /// <summary>
 /// Represents the connection string.

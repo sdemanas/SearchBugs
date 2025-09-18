@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using SearchBugs.Domain.Git;
 using Shared.Errors;
 using Shared.Messaging;
 using Shared.Results;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace SearchBugs.Application.Git.GitHttpServer;
 

@@ -1,6 +1,5 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using SearchBugs.Api.Extensions;
 
 namespace SearchBugs.Api.Endpoints;
 

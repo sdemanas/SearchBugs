@@ -1,9 +1,7 @@
-using SearchBugs.Application.Common.Interfaces;
 using SearchBugs.Domain.Bugs;
 using Shared.Errors;
 using Shared.Messaging;
 using Shared.Results;
-using System.Linq;
 
 namespace SearchBugs.Application.BugTracking.Comments;
 
@@ -32,4 +30,4 @@ public class GetBugCommentsQueryHandler : IQueryHandler<GetBugCommentsQuery, IEn
         var comments = bug.Comments.Select(comment => CommentDto.FromComment(comment));
         return Result.Success(comments);
     }
-} 
+}

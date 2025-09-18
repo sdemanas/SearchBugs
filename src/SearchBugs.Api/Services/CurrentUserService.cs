@@ -1,9 +1,7 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
 using SearchBugs.Application.Common.Interfaces;
 using SearchBugs.Domain.Users;
-using Shared.Primitives;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace SearchBugs.Api.Services;
 

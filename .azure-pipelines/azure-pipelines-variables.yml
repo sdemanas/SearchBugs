@@ -1,0 +1,26 @@
+# azure-pipelines-variables.yml
+# This file contains variable definitions for the CI/CD pipeline
+# You can include this in your main pipeline or set these as pipeline variables in Azure DevOps
+
+variables:
+  # Build Configuration
+  buildConfiguration: 'Release'
+  dotNetFramework: 'net9.0'
+  dotNetVersion: '9.0.x'
+  
+  # Azure Service Connection
+  # Set this in Azure DevOps pipeline variables or variable groups
+  azureServiceConnection: 'your-azure-service-connection-name'
+  
+  # Web App Names for different environments
+  # Replace these with your actual Azure Web App names
+  webAppNameDev: 'your-app-name-dev'
+  webAppNameQA: 'your-app-name-qa'
+  webAppNameUAT: 'your-app-name-uat'
+  webAppNameProd: 'your-app-name-prod'
+  
+  # Resource Group Names (optional, if needed)
+  resourceGroupDev: 'rg-your-app-dev'
+  resourceGroupQA: 'rg-your-app-qa'
+  resourceGroupUAT: 'rg-your-app-uat'
+  resourceGroupProd: 'rg-your-app-prod'

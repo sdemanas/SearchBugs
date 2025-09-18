@@ -1,5 +1,4 @@
 using Shared.Messaging;
-using Shared.Results;
 
 namespace SearchBugs.Application.Projects.GetProject;
 

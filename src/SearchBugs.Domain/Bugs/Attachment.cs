@@ -1,4 +1,4 @@
-﻿using Shared.Primitives;
+using Shared.Primitives;
 using Shared.Time;
 
 namespace SearchBugs.Domain.Bugs;

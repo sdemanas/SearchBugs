@@ -1,9 +1,9 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SearchBugs.Api.Extensions;
 using SearchBugs.Application.Users.GetCurrentUserProfile;
 using SearchBugs.Application.Users.GetUserActivity;
 using SearchBugs.Application.Users.UpdateCurrentUserProfile;
-using SearchBugs.Api.Extensions;
 
 namespace SearchBugs.Api.Endpoints;
 

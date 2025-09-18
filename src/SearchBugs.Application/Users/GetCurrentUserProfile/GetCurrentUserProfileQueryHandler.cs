@@ -1,8 +1,8 @@
 using MediatR;
 using SearchBugs.Application.Common.Interfaces;
 using SearchBugs.Domain.AuditLogs;
-using SearchBugs.Domain.Users;
 using SearchBugs.Domain.Repositories;
+using SearchBugs.Domain.Users;
 using Shared.Results;
 
 namespace SearchBugs.Application.Users.GetCurrentUserProfile;

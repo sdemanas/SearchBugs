@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-
 namespace SearchBugs.Api.Extensions;
 
 public static class ResultExtensions

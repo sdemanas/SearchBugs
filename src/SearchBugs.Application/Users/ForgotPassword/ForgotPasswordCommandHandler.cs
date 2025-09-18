@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using SearchBugs.Domain;
@@ -5,7 +6,6 @@ using SearchBugs.Domain.Services;
 using SearchBugs.Domain.Users;
 using Shared.Results;
 using Shared.Time;
-using System.Security.Cryptography;
 
 namespace SearchBugs.Application.Users.ForgotPassword;
 

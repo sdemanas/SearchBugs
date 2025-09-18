@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using SearchBugs.Domain;
 using SearchBugs.Domain.Roles;
 using SearchBugs.Domain.Users;
-using Shared.Results;
 using Shared.Errors;
+using Shared.Results;
 
 namespace SearchBugs.Application.Users.RemoveRoleFromUser;
 

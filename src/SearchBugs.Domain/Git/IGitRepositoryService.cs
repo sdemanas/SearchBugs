@@ -1,4 +1,4 @@
-﻿using SearchBugs.Infrastructure.Services;
+using SearchBugs.Infrastructure.Services;
 using Shared.Results;
 
 namespace SearchBugs.Domain.Git;

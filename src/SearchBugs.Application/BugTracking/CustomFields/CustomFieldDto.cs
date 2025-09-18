@@ -15,4 +15,4 @@ public record CustomFieldDto(
         customField.FieldType,
         value,
         customField.ProjectId.Value);
-} 
+}

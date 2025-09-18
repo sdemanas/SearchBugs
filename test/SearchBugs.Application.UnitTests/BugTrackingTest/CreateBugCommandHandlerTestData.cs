@@ -1,4 +1,4 @@
-﻿using Bogus;
+using Bogus;
 using SearchBugs.Application.BugTracking.Create;
 using SearchBugs.Domain.Bugs;
 namespace SearchBugs.Application.UnitTests.BugTrackingTest;

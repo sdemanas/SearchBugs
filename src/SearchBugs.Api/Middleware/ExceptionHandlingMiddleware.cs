@@ -1,8 +1,5 @@
-﻿using FluentValidation;
-using Microsoft.AspNetCore.Mvc;
 using Shared.Errors;
 using Shared.Results;
-using Shared.Exceptions;
 
 namespace SearchBugs.Api.Middleware;
 

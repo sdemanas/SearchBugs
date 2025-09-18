@@ -1,4 +1,4 @@
-﻿using SearchBugs.Domain;
+using SearchBugs.Domain;
 using SearchBugs.Domain.Roles;
 using SearchBugs.Domain.Services;
 using SearchBugs.Domain.Users;
